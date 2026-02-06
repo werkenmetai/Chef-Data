@@ -1,0 +1,206 @@
+---
+/**
+ * AdminHeader Component
+ *
+ * Reusable header for all admin pages with Google-style app launcher.
+ * Provides consistent navigation across admin sections.
+ */
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  backHref?: string;
+  backLabel?: string;
+  actions?: {
+    href?: string;
+    label: string;
+    variant?: 'primary' | 'secondary';
+    onClick?: string;
+  }[];
+}
+
+const { title, subtitle, backHref = '/admin', backLabel = 'Admin Home', actions = [] } = Astro.props;
+---
+
+<header class="flex justify-between items-center mb-8">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">{title}</h1>
+    {subtitle && <p class="text-gray-600">{subtitle}</p>}
+  </div>
+  <div class="flex items-center gap-3">
+    {/* App Launcher - Google Style */}
+    <div class="relative" id="appLauncherContainer">
+      <button
+        type="button"
+        id="appLauncherBtn"
+        class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+        aria-label="Admin secties"
+        title="Admin secties"
+      >
+        <svg class="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="5" cy="5" r="2" />
+          <circle cx="12" cy="5" r="2" />
+          <circle cx="19" cy="5" r="2" />
+          <circle cx="5" cy="12" r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="19" cy="12" r="2" />
+          <circle cx="5" cy="19" r="2" />
+          <circle cx="12" cy="19" r="2" />
+          <circle cx="19" cy="19" r="2" />
+        </svg>
+      </button>
+
+      {/* Dropdown */}
+      <div
+        id="appLauncherDropdown"
+        class="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 hidden z-50"
+      >
+        <div class="grid grid-cols-3 gap-2">
+          <a href="/admin/demo" class="flex flex-col items-center p-3 rounded-xl hover:bg-orange-50 transition-colors group">
+            <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span class="text-xs text-gray-700 text-center">Demo</span>
+          </a>
+
+          <a href="/admin/support" class="flex flex-col items-center p-3 rounded-xl hover:bg-purple-50 transition-colors group">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span class="text-xs text-gray-700 text-center">AI Support</span>
+          </a>
+
+          <a href="/admin/support/conversations" class="flex flex-col items-center p-3 rounded-xl hover:bg-green-50 transition-colors group">
+            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <span class="text-xs text-gray-700 text-center">Gesprekken</span>
+          </a>
+
+          <a href="/admin/feedback" class="flex flex-col items-center p-3 rounded-xl hover:bg-yellow-50 transition-colors group">
+            <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+            </div>
+            <span class="text-xs text-gray-700 text-center">Feedback</span>
+          </a>
+
+          <a href="/admin/emails" class="flex flex-col items-center p-3 rounded-xl hover:bg-blue-50 transition-colors group">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span class="text-xs text-gray-700 text-center">Emails</span>
+          </a>
+
+          <a href="/admin/outreach" class="flex flex-col items-center p-3 rounded-xl hover:bg-pink-50 transition-colors group">
+            <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+              </svg>
+            </div>
+            <span class="text-xs text-gray-700 text-center">Outreach</span>
+          </a>
+
+          <a href="/admin/settings" class="flex flex-col items-center p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+            <div class="w-12 h-12 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <span class="text-xs text-gray-700 text-center">Instellingen</span>
+          </a>
+
+          <a href="/admin" class="flex flex-col items-center p-3 rounded-xl hover:bg-teal-50 transition-colors group">
+            <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <span class="text-xs text-gray-700 text-center">Dashboard</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {/* Custom Actions */}
+    {actions.map((action) => (
+      action.href ? (
+        <a
+          href={action.href}
+          class={`px-4 py-2 font-medium rounded-lg transition-colors ${
+            action.variant === 'primary'
+              ? 'bg-exact-blue text-white hover:bg-exact-dark'
+              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          {action.label}
+        </a>
+      ) : (
+        <button
+          type="button"
+          onclick={action.onClick}
+          class={`px-4 py-2 font-medium rounded-lg transition-colors ${
+            action.variant === 'primary'
+              ? 'bg-exact-blue text-white hover:bg-exact-dark'
+              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          {action.label}
+        </button>
+      )
+    ))}
+
+    {/* Back Link */}
+    <a
+      href={backHref}
+      class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
+    >
+      <span>&larr;</span> {backLabel}
+    </a>
+  </div>
+</header>
+
+<script>
+  // App Launcher Dropdown
+  const launcherBtn = document.getElementById('appLauncherBtn');
+  const launcherDropdown = document.getElementById('appLauncherDropdown');
+  const launcherContainer = document.getElementById('appLauncherContainer');
+
+  function toggleDropdown() {
+    launcherDropdown?.classList.toggle('hidden');
+  }
+
+  function closeDropdown() {
+    launcherDropdown?.classList.add('hidden');
+  }
+
+  launcherBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDropdown();
+  });
+
+  // Close on click outside
+  document.addEventListener('click', (e) => {
+    if (launcherContainer && !launcherContainer.contains(e.target as Node)) {
+      closeDropdown();
+    }
+  });
+
+  // Close on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeDropdown();
+    }
+  });
+</script>

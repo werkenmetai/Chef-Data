@@ -1,0 +1,240 @@
+---
+import Layout from '../../layouts/Layout.astro';
+// AdminAppLauncher now in Layout.astro header
+import { Database } from '../../lib/database';
+
+const env = Astro.locals.runtime?.env;
+const db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+// Admin email check
+const adminEmails = (env.ADMIN_EMAILS || '')
+  .split(',')
+  .map((e: string) => e.trim().toLowerCase())
+  .filter((e: string) => e.length > 0);
+const sessionId = Astro.cookies.get('session_id')?.value;
+
+let isAdmin = false;
+let error: string | null = null;
+
+if (sessionId) {
+  const sessionResult = await db.validateSession(sessionId);
+  if (sessionResult) {
+    const userEmail = sessionResult.user.email.toLowerCase();
+    isAdmin = adminEmails.length > 0 && adminEmails.includes(userEmail);
+    if (!isAdmin) {
+      error = 'Je hebt geen toegang tot deze pagina.';
+    }
+  } else {
+    error = 'Niet ingelogd.';
+  }
+} else {
+  error = 'Niet ingelogd.';
+}
+
+const demoKeys = [
+  {
+    key: 'exa_demo',
+    company: 'Bakkerij De Gouden Croissant B.V.',
+    industry: 'Bakkerij',
+    city: 'Amsterdam',
+    revenue: '€1.5M/jaar',
+    division: 999999,
+    color: 'amber',
+  },
+  {
+    key: 'exa_demo_it',
+    company: 'TechVision Consultancy B.V.',
+    industry: 'IT Services',
+    city: 'Utrecht',
+    revenue: '€2.8M/jaar',
+    division: 888888,
+    color: 'blue',
+  },
+  {
+    key: 'exa_demo_advocaat',
+    company: 'Van der Berg & Partners Advocaten',
+    industry: 'Juridisch',
+    city: 'Den Haag',
+    revenue: '€3.2M/jaar',
+    division: 777777,
+    color: 'purple',
+  },
+  {
+    key: 'exa_demo_aannemer',
+    company: 'Bouwbedrijf De Fundatie B.V.',
+    industry: 'Bouw',
+    city: 'Rotterdam',
+    revenue: '€4.5M/jaar',
+    division: 666666,
+    color: 'green',
+  },
+];
+
+const mcpEndpoint = 'https://api.praatmetjeboekhouding.nl';
+---
+
+<Layout title="Demo Mode - Admin">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    {error && !isAdmin ? (
+      <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+        <h1 class="text-2xl font-bold text-red-900 mb-4">Toegang Geweigerd</h1>
+        <p class="text-red-700">{error}</p>
+        <a href="/dashboard" class="inline-block mt-4 text-red-600 hover:underline">
+          ← Terug naar Dashboard
+        </a>
+      </div>
+    ) : (
+      <>
+        {/* Header with App Launcher */}
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Demo Mode</h1>
+            <p class="text-gray-600">Multi-industry demo configuratie voor App Store demonstraties</p>
+          </div>
+          <a href="/admin" class="text-gray-600 hover:text-gray-900 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+            &larr; Admin Home
+          </a>
+        </div>
+
+        {/* Info Banner */}
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6 mb-8">
+          <h2 class="text-lg font-semibold text-blue-900 mb-2">Hoe werkt Demo Mode?</h2>
+          <ul class="text-blue-800 space-y-1 text-sm">
+            <li>• Demo API keys beginnen met <code class="bg-blue-100 px-1 rounded">exa_demo</code></li>
+            <li>• Geen echte Exact Online koppeling nodig - werkt volledig standalone</li>
+            <li>• Alle 47 MCP tools geven realistische nep data terug</li>
+            <li>• Ideaal voor App Store review, sales demos en documentatie</li>
+          </ul>
+        </div>
+
+        {/* Claude Desktop Demo URL - NEW */}
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-xl p-6 mb-8">
+          <h2 class="text-lg font-semibold text-green-900 mb-2">🚀 Claude Desktop - Direct Demo (geen OAuth!)</h2>
+          <p class="text-green-800 text-sm mb-4">
+            Nieuw endpoint dat OAuth volledig skipt. Werkt direct in Claude Desktop als Custom Connector.
+          </p>
+          <div class="bg-white/50 rounded-lg p-4">
+            <p class="text-xs text-green-700 mb-2 font-medium">Demo URL (kopieer naar Claude Desktop):</p>
+            <code class="block text-sm bg-green-100 p-3 rounded font-mono text-green-900 break-all">
+              {mcpEndpoint}/demo/exa_demo
+            </code>
+          </div>
+          <p class="text-xs text-green-700 mt-3">
+            <strong>Stappen:</strong> Settings → Connectors → Add custom connector → Plak URL → Klik Add → Direct verbonden!
+          </p>
+        </div>
+
+        {/* Demo Keys Grid */}
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Beschikbare Demo Bedrijven</h2>
+        <div class="grid md:grid-cols-2 gap-4 mb-8">
+          {demoKeys.map((demo) => (
+            <div class={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:border-${demo.color}-300 transition-colors`}>
+              <div class="flex items-start justify-between mb-4">
+                <div>
+                  <h3 class="font-semibold text-gray-900">{demo.company}</h3>
+                  <p class="text-sm text-gray-500">{demo.city} • {demo.industry}</p>
+                </div>
+                <span class={`text-xs font-medium px-2 py-1 rounded-full bg-${demo.color}-100 text-${demo.color}-800`}>
+                  {demo.revenue}
+                </span>
+              </div>
+
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">API Key:</span>
+                  <code class="bg-gray-100 px-2 py-0.5 rounded font-mono text-xs">{demo.key}</code>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">Division:</span>
+                  <span class="font-medium">{demo.division}</span>
+                </div>
+              </div>
+
+              <div class="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">Claude Desktop (geen OAuth):</p>
+                  <code class="block text-xs bg-green-50 p-2 rounded break-all text-green-800">
+                    {mcpEndpoint}/demo/{demo.key}
+                  </code>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">MCP Endpoint (met OAuth):</p>
+                  <code class="block text-xs bg-gray-50 p-2 rounded break-all">
+                    {mcpEndpoint}/mcp/{demo.key}
+                  </code>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Test */}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Snelle Test</h2>
+          <p class="text-gray-600 text-sm mb-4">
+            Kopieer dit curl commando om te testen of demo mode werkt (gebruikt nieuwe /demo endpoint):
+          </p>
+          <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+            <pre class="text-green-400 text-sm font-mono whitespace-pre-wrap">curl -s -X POST "{mcpEndpoint}/demo/exa_demo" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_divisions","arguments":{}}}`}'</pre>
+          </div>
+          <p class="text-xs text-gray-500 mt-3">
+            Verwacht resultaat: JSON met "Bakkerij De Gouden Croissant B.V." en division code 999999
+          </p>
+        </div>
+
+        {/* Supported Tools */}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Ondersteunde Tools (47)</h2>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+            {[
+              'list_divisions', 'get_relations', 'search_relations',
+              'get_sales_invoices', 'get_purchase_invoices', 'get_outstanding_invoices',
+              'get_bank_transactions', 'get_gl_accounts', 'get_trial_balance',
+              'get_cashflow_forecast', 'get_profit_loss', 'get_revenue',
+              'get_aging_analysis', 'get_vat_summary', 'get_budget_comparison',
+              'get_aging_receivables', 'get_aging_payables', 'get_journal_entries',
+              'search_transactions', 'get_transactions', 'get_sales_orders',
+              'get_purchase_orders', 'get_quotations', 'get_items',
+              'get_stock_positions', 'get_projects', 'get_time_transactions',
+              'get_project_invoices', 'get_wip_overview', 'get_currencies',
+              'get_currency_rates', 'get_cost_centers', 'get_cost_center_report',
+              'get_fixed_assets', 'get_depreciation_schedule', 'get_document_attachments',
+              'get_opportunities', 'get_sales_funnel', 'get_sales_contracts',
+              'get_purchase_contracts', 'get_recurring_revenue', 'get_sales_prices',
+              'get_purchase_prices', 'get_margin_analysis', 'get_customer_360',
+              'get_financial_snapshot'
+            ].map((tool) => (
+              <code class="bg-gray-50 px-2 py-1 rounded text-xs text-gray-700">{tool}</code>
+            ))}
+          </div>
+        </div>
+
+        {/* Usage Tips */}
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+          <h2 class="text-lg font-semibold text-amber-900 mb-4">Tips voor Demo's</h2>
+          <div class="space-y-3 text-sm text-amber-800">
+            <div class="flex items-start">
+              <span class="font-bold mr-2">1.</span>
+              <p><strong>Kies de juiste industry:</strong> Gebruik de demo key die past bij je publiek (IT-bedrijf voor tech prospects, bakkerij voor MKB)</p>
+            </div>
+            <div class="flex items-start">
+              <span class="font-bold mr-2">2.</span>
+              <p><strong>ChatGPT/Claude setup:</strong> Configureer de MCP server met het endpoint + demo key. Geen OAuth flow nodig.</p>
+            </div>
+            <div class="flex items-start">
+              <span class="font-bold mr-2">3.</span>
+              <p><strong>Realistische vragen:</strong> "Welke facturen staan open?", "Wat is mijn omzet dit kwartaal?", "Toon de top 5 klanten"</p>
+            </div>
+            <div class="flex items-start">
+              <span class="font-bold mr-2">4.</span>
+              <p><strong>Data is dynamisch:</strong> Datums en bedragen passen zich aan naar de huidige datum voor realistische responses</p>
+            </div>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+</Layout>

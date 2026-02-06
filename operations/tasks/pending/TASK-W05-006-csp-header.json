@@ -1,0 +1,27 @@
+{
+  "id": "TASK-W05-006",
+  "title": "Implementeer Content-Security-Policy header",
+  "description": "Voeg een Content-Security-Policy (CSP) header toe aan alle responses voor defense-in-depth tegen XSS. Dit is een P2 security item uit de security audit.",
+  "priority": 2,
+  "priorityLabel": "P2-important",
+  "assignedAgent": "backend-dev",
+  "supportingAgents": ["security-expert"],
+  "dependsOn": [],
+  "createdAt": "2026-01-28T16:00:00Z",
+  "createdBy": "orchestrator",
+  "acceptanceCriteria": [
+    "CSP header toegevoegd aan MCP server responses",
+    "CSP header toegevoegd aan auth-portal responses",
+    "CSP policy blokkeert inline scripts waar mogelijk",
+    "CSP policy staat eigen domein en trusted CDNs toe",
+    "Geen functionele regressies door CSP"
+  ],
+  "context": {
+    "relevantFiles": [
+      "apps/mcp-server/src/index.ts",
+      "apps/auth-portal/astro.config.mjs"
+    ],
+    "securityAuditRef": "operations/audits/SECURITY-AUDIT-2026-W05.md",
+    "additionalNotes": "Start met report-only mode om issues te detecteren voordat enforced wordt"
+  }
+}

@@ -1,0 +1,264 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import AdminHeader from '../../../components/AdminHeader.astro';
+import { Database, type SupportConversation, type SupportStats } from '../../../lib/database';
+
+const env = Astro.locals.runtime?.env;
+let db: Database | null = null;
+let isAdmin = false;
+let stats: SupportStats | null = null;
+let recentConversations: (SupportConversation & { user?: { email: string; name: string | null } })[] = [];
+let settings: Record<string, string> = {};
+
+try {
+  if (env?.DB) {
+    db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+    const sessionId = Astro.cookies.get('session_id')?.value;
+    if (sessionId) {
+      const session = await db.validateSession(sessionId);
+      if (session) {
+        const adminEmails = (env.ADMIN_EMAILS || '')
+          .split(',')
+          .map((e: string) => e.trim().toLowerCase())
+          .filter((e: string) => e.length > 0);
+
+        isAdmin = adminEmails.includes(session.user.email.toLowerCase());
+
+        if (isAdmin) {
+          stats = await db.getSupportStats();
+          settings = await db.getAllSystemSettings();
+
+          const result = await db.getAllConversations({ limit: 10 });
+          recentConversations = await Promise.all(
+            result.conversations.map(async (conv) => {
+              const user = await db!.findUserById(conv.user_id);
+              return {
+                ...conv,
+                user: user ? { email: user.email, name: user.name } : undefined,
+              };
+            })
+          );
+        }
+      }
+    }
+  }
+} catch (e) {
+  console.error('Admin support error:', e);
+}
+
+const statusColors: Record<string, { bg: string; text: string; label: string }> = {
+  open: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Open' },
+  waiting_user: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Wacht op user' },
+  waiting_support: { bg: 'bg-red-100', text: 'text-red-800', label: 'Wacht op support' },
+  resolved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Opgelost' },
+  closed: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Gesloten' },
+};
+
+const priorityColors: Record<string, string> = {
+  urgent: 'text-red-600',
+  high: 'text-orange-600',
+  normal: 'text-gray-600',
+  low: 'text-gray-400',
+};
+---
+
+<Layout title="Support Dashboard">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    {!isAdmin ? (
+      <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+        <h1 class="text-2xl font-bold text-red-900 mb-4">Toegang Geweigerd</h1>
+        <p class="text-red-700">Je hebt geen toegang tot deze pagina.</p>
+        <a href="/dashboard" class="inline-block mt-4 text-red-600 hover:underline">
+          ← Terug naar Dashboard
+        </a>
+      </div>
+    ) : (
+      <>
+        <!-- Header with App Launcher -->
+        <AdminHeader
+          title="Support Dashboard"
+          subtitle="Beheer support gesprekken en kennis"
+          actions={[{ href: '/admin/support/settings', label: 'Settings' }]}
+        />
+
+        <!-- System Status -->
+        {settings.support_paused === 'true' && (
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center">
+              <span class="text-2xl mr-3">⏸️</span>
+              <div>
+                <p class="font-medium text-amber-900">Support is gepauzeerd</p>
+                <p class="text-sm text-amber-700">{settings.support_pause_message}</p>
+              </div>
+              <a
+                href="/admin/support/settings"
+                class="ml-auto px-3 py-1 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors text-sm"
+              >
+                Instellingen
+              </a>
+            </div>
+          </div>
+        )}
+
+        <!-- Stats Cards -->
+        {stats && (
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase">Open</h3>
+              <p class="text-2xl font-bold text-blue-600 mt-1">{stats.openConversations}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase">Wacht User</h3>
+              <p class="text-2xl font-bold text-yellow-600 mt-1">{stats.waitingOnUser}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase">Wacht Support</h3>
+              <p class="text-2xl font-bold text-red-600 mt-1">{stats.waitingOnSupport}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase">Vandaag Opgelost</h3>
+              <p class="text-2xl font-bold text-green-600 mt-1">{stats.resolvedToday}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase">Totaal</h3>
+              <p class="text-2xl font-bold text-gray-900 mt-1">{stats.totalConversations}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase">Gem. Rating</h3>
+              <p class="text-2xl font-bold text-purple-600 mt-1">
+                {stats.averageRating ? stats.averageRating.toFixed(1) : '-'}
+              </p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase">AI Opgelost</h3>
+              <p class="text-2xl font-bold text-indigo-600 mt-1">
+                {stats.aiResolutionRate ? `${Math.round(stats.aiResolutionRate * 100)}%` : '-'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div class="grid md:grid-cols-3 gap-8">
+          <!-- Recent Conversations -->
+          <div class="md:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">Recente Gesprekken</h2>
+                <a
+                  href="/admin/support/conversations"
+                  class="text-sm text-exact-blue hover:underline"
+                >
+                  Alle bekijken →
+                </a>
+              </div>
+
+              {recentConversations.length > 0 ? (
+                <div class="space-y-3">
+                  {recentConversations.map(conv => {
+                    const status = statusColors[conv.status] || statusColors.open;
+                    return (
+                      <a
+                        href={`/admin/support/conversations/${conv.id}`}
+                        class="block p-4 rounded-lg border border-gray-100 hover:border-exact-blue hover:bg-exact-light transition-colors"
+                      >
+                        <div class="flex items-center justify-between mb-2">
+                          <div class="flex items-center gap-2">
+                            <span class={`w-2 h-2 rounded-full ${conv.priority === 'urgent' ? 'bg-red-500' : conv.priority === 'high' ? 'bg-orange-500' : 'bg-gray-300'}`}></span>
+                            <span class={`px-2 py-0.5 text-xs font-medium rounded ${status.bg} ${status.text}`}>
+                              {status.label}
+                            </span>
+                            {conv.handled_by === 'ai' && (
+                              <span class="px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded">AI</span>
+                            )}
+                          </div>
+                          <span class="text-xs text-gray-400">
+                            {new Date(conv.updated_at).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <h3 class="font-medium text-gray-900">{conv.subject}</h3>
+                        <p class="text-sm text-gray-500 mt-1">
+                          {conv.user?.email || 'Unknown'} • #{conv.id.slice(0, 8)}
+                        </p>
+                      </a>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p class="text-gray-500">Geen gesprekken</p>
+              )}
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">Beheer</h2>
+              <div class="space-y-2">
+                <a
+                  href="/admin/support/automation"
+                  class="flex items-center p-3 rounded-lg hover:bg-purple-50 transition-colors border border-purple-100"
+                >
+                  <span class="text-xl mr-3">🤖</span>
+                  <span class="text-purple-700 font-medium">Automation Dashboard</span>
+                </a>
+                <a
+                  href="/admin/support/conversations"
+                  class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <span class="text-xl mr-3">💬</span>
+                  <span class="text-gray-700">Alle gesprekken</span>
+                </a>
+                <a
+                  href="/admin/support/articles"
+                  class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <span class="text-xl mr-3">📚</span>
+                  <span class="text-gray-700">Artikelen</span>
+                </a>
+                <a
+                  href="/admin/support/patterns"
+                  class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <span class="text-xl mr-3">⚡</span>
+                  <span class="text-gray-700">AI Patterns</span>
+                </a>
+                <a
+                  href="/admin/support/lessons"
+                  class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <span class="text-xl mr-3">📝</span>
+                  <span class="text-gray-700">Lessons Learned</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-xl border border-gray-200 p-6">
+              <h3 class="font-semibold text-gray-900 mb-3">Snelle Acties</h3>
+              <div class="space-y-2">
+                <a
+                  href="/admin/support/conversations?status=waiting_support"
+                  class="block px-3 py-2 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors text-sm"
+                >
+                  Bekijk wachtende gesprekken ({stats?.waitingOnSupport || 0})
+                </a>
+                <a
+                  href="/admin/support/articles/new"
+                  class="block px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors text-sm"
+                >
+                  + Nieuw artikel
+                </a>
+                <a
+                  href="/admin/support/patterns/new"
+                  class="block px-3 py-2 bg-purple-50 text-purple-700 rounded hover:bg-purple-100 transition-colors text-sm"
+                >
+                  + Nieuw pattern
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+</Layout>

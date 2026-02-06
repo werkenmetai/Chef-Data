@@ -1,0 +1,340 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Database, type KnowledgeArticle, type SupportConversation } from '../../lib/database';
+
+const env = Astro.locals.runtime?.env;
+let db: Database | null = null;
+let isAuthenticated = false;
+let user: { id: string; email: string; name: string | null } | null = null;
+let conversations: SupportConversation[] = [];
+let featuredArticles: KnowledgeArticle[] = [];
+let supportStatus = { available: true, paused: false, pauseMessage: '' };
+
+try {
+  if (env?.DB) {
+    db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+    // Check support status
+    const settings = await db.getAllSystemSettings();
+    supportStatus = {
+      available: settings.support_enabled !== 'false' && settings.support_paused !== 'true',
+      paused: settings.support_paused === 'true',
+      pauseMessage: settings.support_pause_message || 'Het support systeem is tijdelijk niet beschikbaar.',
+    };
+
+    // Check session
+    const sessionId = Astro.cookies.get('session_id')?.value;
+    if (sessionId) {
+      const session = await db.validateSession(sessionId);
+      if (session) {
+        isAuthenticated = true;
+        user = { id: session.user.id, email: session.user.email, name: session.user.name };
+
+        // Get user's open conversations
+        conversations = await db.getUserConversations(session.user.id);
+        conversations = conversations.filter(c => c.status !== 'closed' && c.status !== 'resolved').slice(0, 5);
+      }
+    }
+
+    // Get featured articles
+    featuredArticles = await db.getFeaturedArticles();
+  }
+} catch (e) {
+  console.error('Support page error:', e);
+}
+
+const categories = [
+  { id: 'connection', label: 'Verbinding', icon: '🔌' },
+  { id: 'billing', label: 'Facturatie', icon: '💳' },
+  { id: 'bug', label: 'Technisch', icon: '🐛' },
+  { id: 'feature', label: 'Feature', icon: '💡' },
+  { id: 'account', label: 'Account', icon: '👤' },
+  { id: 'other', label: 'Overig', icon: '❓' },
+];
+
+const statusColors: Record<string, { bg: string; text: string; label: string }> = {
+  open: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Open' },
+  waiting_user: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Wacht op jou' },
+  waiting_support: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Wacht op support' },
+  resolved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Opgelost' },
+  closed: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Gesloten' },
+};
+---
+
+<Layout title="Hulp & Support">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Hulp & Support</h1>
+      <p class="text-gray-600">Vind antwoorden of start een gesprek met ons support team</p>
+    </div>
+
+    <!-- Pause Message -->
+    {supportStatus.paused && (
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
+        <div class="flex items-start">
+          <span class="text-2xl mr-4">⏸️</span>
+          <div>
+            <h2 class="text-lg font-semibold text-amber-900 mb-1">Support Tijdelijk Niet Beschikbaar</h2>
+            <p class="text-amber-700">{supportStatus.pauseMessage}</p>
+            <p class="text-amber-600 text-sm mt-2">Je kunt nog steeds de help artikelen bekijken.</p>
+          </div>
+        </div>
+      </div>
+    )}
+
+    <!-- Search -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <div class="relative">
+        <input
+          type="text"
+          id="articleSearch"
+          placeholder="Zoek in help artikelen..."
+          class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none text-lg"
+        />
+        <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <div id="searchResults" class="mt-4 hidden">
+        <div class="border-t border-gray-100 pt-4">
+          <p class="text-sm text-gray-500 mb-2">Zoekresultaten:</p>
+          <div id="searchResultsList" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="md:col-span-2 space-y-8">
+        <!-- Featured Articles -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span class="mr-2">📚</span>
+            Populaire Artikelen
+          </h2>
+          {featuredArticles.length > 0 ? (
+            <div class="space-y-3">
+              {featuredArticles.map(article => (
+                <a
+                  href={`/support/articles/${article.slug}`}
+                  class="block p-4 rounded-lg border border-gray-100 hover:border-exact-blue hover:bg-exact-light transition-colors group"
+                >
+                  <h3 class="font-medium text-gray-900 group-hover:text-exact-blue">
+                    {article.title_nl}
+                  </h3>
+                  <p class="text-sm text-gray-500 mt-1">
+                    {article.category} • {article.view_count} views
+                  </p>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p class="text-gray-500">Nog geen artikelen beschikbaar.</p>
+          )}
+          <a
+            href="/support/articles"
+            class="inline-block mt-4 text-exact-blue hover:underline text-sm"
+          >
+            Alle artikelen bekijken →
+          </a>
+        </div>
+
+        <!-- Categories -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span class="mr-2">📂</span>
+            Categorieën
+          </h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {categories.map(cat => (
+              <a
+                href={`/support/articles?category=${cat.id}`}
+                class="flex items-center p-3 rounded-lg border border-gray-100 hover:border-exact-blue hover:bg-exact-light transition-colors"
+              >
+                <span class="text-xl mr-2">{cat.icon}</span>
+                <span class="text-gray-700">{cat.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- My Conversations -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <span class="mr-2">💬</span>
+            Mijn Gesprekken
+          </h2>
+
+          {!isAuthenticated ? (
+            <div class="text-center py-4">
+              <p class="text-gray-500 text-sm mb-3">Log in om je gesprekken te bekijken</p>
+              <a
+                href="/connect"
+                class="inline-block px-4 py-2 bg-exact-blue text-white rounded-lg hover:bg-exact-dark transition-colors text-sm"
+              >
+                Inloggen
+              </a>
+            </div>
+          ) : conversations.length > 0 ? (
+            <div class="space-y-3">
+              {conversations.map(conv => {
+                const status = statusColors[conv.status] || statusColors.open;
+                return (
+                  <a
+                    href={`/support/conversations/${conv.id}`}
+                    class="block p-3 rounded-lg border border-gray-100 hover:border-exact-blue transition-colors"
+                  >
+                    <div class="flex items-center justify-between mb-1">
+                      <span class={`px-2 py-0.5 text-xs font-medium rounded ${status.bg} ${status.text}`}>
+                        {status.label}
+                      </span>
+                      <span class="text-xs text-gray-400">
+                        {new Date(conv.updated_at).toLocaleDateString('nl-NL')}
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-900 font-medium truncate">{conv.subject}</p>
+                  </a>
+                );
+              })}
+              <a
+                href="/support/conversations"
+                class="block text-center text-exact-blue hover:underline text-sm"
+              >
+                Alle gesprekken →
+              </a>
+            </div>
+          ) : (
+            <p class="text-gray-500 text-sm">Geen open gesprekken</p>
+          )}
+
+          {isAuthenticated && supportStatus.available && (
+            <a
+              href="/support/new"
+              class="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 bg-exact-blue text-white rounded-lg hover:bg-exact-dark transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Nieuw gesprek
+            </a>
+          )}
+
+          {isAuthenticated && !supportStatus.available && (
+            <p class="mt-4 text-sm text-gray-500 text-center">
+              Nieuwe gesprekken tijdelijk niet mogelijk
+            </p>
+          )}
+        </div>
+
+        <!-- Quick Help -->
+        <div class="bg-gray-50 rounded-xl border border-gray-200 p-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Snelle Links</h3>
+          <ul class="space-y-2 text-sm">
+            <li>
+              <a href="/setup" class="text-exact-blue hover:underline">
+                Setup instructies →
+              </a>
+            </li>
+            <li>
+              <a href="/faq" class="text-exact-blue hover:underline">
+                Veelgestelde vragen →
+              </a>
+            </li>
+            <li>
+              <a href="/dashboard" class="text-exact-blue hover:underline">
+                Dashboard →
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div class="bg-gray-50 rounded-xl border border-gray-200 p-6">
+          <h3 class="font-semibold text-gray-900 mb-2">Direct contact</h3>
+          <p class="text-sm text-gray-600 mb-3">
+            Liever direct mailen?
+          </p>
+          <a
+            href="mailto:support@praatmetjeboekhouding.nl"
+            class="text-exact-blue hover:underline text-sm"
+          >
+            support@praatmetjeboekhouding.nl
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // SEC-001: XSS Prevention - escape HTML entities
+    function escapeHtml(unsafe: string | null | undefined): string {
+      if (unsafe === null || unsafe === undefined) return '';
+      return String(unsafe)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Article search functionality
+    const searchInput = document.getElementById('articleSearch') as HTMLInputElement;
+    const searchResults = document.getElementById('searchResults');
+    const searchResultsList = document.getElementById('searchResultsList');
+
+    let searchTimeout: ReturnType<typeof setTimeout>;
+
+    searchInput?.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      const query = searchInput.value.trim();
+
+      if (query.length < 2) {
+        searchResults?.classList.add('hidden');
+        return;
+      }
+
+      searchTimeout = setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/support/articles?q=${encodeURIComponent(query)}`);
+          const data = await response.json() as { articles?: Array<{ slug: string; title_nl: string; category: string }> };
+
+          if (data.articles && data.articles.length > 0) {
+            // SEC-001: Build DOM elements safely instead of innerHTML with user data
+            searchResultsList!.innerHTML = '';
+            data.articles.slice(0, 5).forEach((article) => {
+              const link = document.createElement('a');
+              link.href = `/support/articles/${encodeURIComponent(article.slug)}`;
+              link.className = 'block p-3 rounded-lg border border-gray-100 hover:border-exact-blue hover:bg-exact-light transition-colors';
+
+              const title = document.createElement('p');
+              title.className = 'font-medium text-gray-900';
+              title.textContent = article.title_nl;
+
+              const category = document.createElement('p');
+              category.className = 'text-sm text-gray-500';
+              category.textContent = article.category;
+
+              link.appendChild(title);
+              link.appendChild(category);
+              searchResultsList!.appendChild(link);
+            });
+            searchResults?.classList.remove('hidden');
+          } else {
+            const noResults = document.createElement('p');
+            noResults.className = 'text-gray-500 text-sm';
+            noResults.textContent = 'Geen resultaten gevonden';
+            searchResultsList!.innerHTML = '';
+            searchResultsList!.appendChild(noResults);
+            searchResults?.classList.remove('hidden');
+          }
+        } catch (error) {
+          console.error('Search error:', error);
+        }
+      }, 300);
+    });
+  </script>
+</Layout>

@@ -1,0 +1,120 @@
+---
+/**
+ * PrivacyDisclaimer Component
+ *
+ * Reusable privacy disclaimer component with three size variants.
+ * Used throughout the app to inform users about AI provider responsibilities.
+ *
+ * @prop size - "short" | "medium" | "full" - determines the amount of content shown
+ * @prop showLink - boolean - whether to show link to full privacy guide
+ */
+
+interface Props {
+  size?: 'short' | 'medium' | 'full';
+  showLink?: boolean;
+}
+
+const { size = 'medium', showLink = true } = Astro.props;
+---
+
+{size === 'short' && (
+  <p class="text-sm text-gray-600">
+    Jouw data, jouw AI-keuze, jouw verantwoordelijkheid.
+    {showLink && (
+      <a href="/docs/ai-privacy" class="text-exact-blue hover:underline ml-1">
+        Meer info
+      </a>
+    )}
+  </p>
+)}
+
+{size === 'medium' && (
+  <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+    <h4 class="font-medium text-amber-900 mb-2">Over privacy en AI-providers</h4>
+    <p class="text-amber-800 text-sm">
+      Praat met je Boekhouding stuurt je Exact Online data door naar de
+      AI-assistent die jij configureert (Claude, ChatGPT, Copilot, etc.).
+      Wij slaan geen boekhouddata op en hebben geen invloed op hoe de
+      AI-provider je data verwerkt.
+    </p>
+    <p class="text-amber-800 text-sm mt-2">
+      <strong>Jouw verantwoordelijkheid:</strong> Check de privacy-instellingen
+      van je gekozen AI-provider, met name instellingen voor model training
+      en data retentie.
+    </p>
+    {showLink && (
+      <a href="/docs/ai-privacy" class="text-amber-900 text-sm font-medium hover:underline mt-2 inline-block">
+        Bekijk onze privacy gids per provider →
+      </a>
+    )}
+  </div>
+)}
+
+{size === 'full' && (
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <h3 class="font-semibold text-gray-900 mb-4">Hoe werkt de privacy bij Praat met je Boekhouding?</h3>
+
+    <div class="space-y-4">
+      <div>
+        <h4 class="font-medium text-gray-900 mb-2">Onze rol</h4>
+        <p class="text-gray-600 text-sm mb-2">
+          Wij fungeren als een "doorgeefluik" voor je Exact Online data:
+        </p>
+        <ol class="text-gray-600 text-sm list-decimal list-inside space-y-1 ml-2">
+          <li>Je vraagt iets via je AI-assistent</li>
+          <li>De AI roept onze API aan</li>
+          <li>Wij halen de relevante data op bij Exact Online</li>
+          <li>Wij sturen deze data terug naar je AI-assistent</li>
+          <li>De AI formuleert een antwoord</li>
+        </ol>
+        <div class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p class="text-green-800 text-sm">
+            <strong>Wij slaan geen boekhouddata op.</strong> Data wordt in real-time doorgestuurd
+            en niet bewaard op onze servers.
+          </p>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 pt-4">
+        <h4 class="font-medium text-gray-900 mb-2">Jouw rol</h4>
+        <p class="text-gray-600 text-sm mb-2">
+          Je bent zelf verantwoordelijk voor:
+        </p>
+        <ul class="text-gray-600 text-sm list-disc list-inside space-y-1 ml-2">
+          <li><strong>Keuze AI-provider:</strong> Of je Claude, ChatGPT, Copilot of iets anders gebruikt is jouw keuze</li>
+          <li><strong>Privacy-instellingen:</strong> Elke AI-provider heeft eigen instellingen voor zaken als model training, data retentie en logging</li>
+          <li><strong>Compliance:</strong> Als je verwerkersovereenkomsten hebt met je eigen klanten, moet je zelf beoordelen of je gekozen AI-provider daaraan voldoet</li>
+        </ul>
+      </div>
+
+      <div class="border-t border-gray-100 pt-4">
+        <h4 class="font-medium text-gray-900 mb-2">Wat wij adviseren</h4>
+        <ul class="text-gray-600 text-sm list-decimal list-inside space-y-1 ml-2">
+          <li><strong>Gebruik zakelijke accounts:</strong> Claude Team/Enterprise, OpenAI API/Business, of GitHub Copilot Business bieden betere privacy defaults dan consumer accounts</li>
+          <li><strong>Check training opt-out:</strong> Zorg dat je data niet gebruikt wordt voor model training (bij Claude API is dit standaard uit, bij ChatGPT moet je dit handmatig uitzetten)</li>
+          <li><strong>Lees de privacy policy:</strong> We weten dat niemand dit doet, maar voor zakelijke boekhouddata is het wel verstandig</li>
+        </ul>
+      </div>
+
+      {showLink && (
+        <div class="border-t border-gray-100 pt-4">
+          <p class="text-sm font-medium text-gray-700 mb-2">Concrete stappen per provider:</p>
+          <div class="flex flex-wrap gap-2">
+            <a href="/docs/ai-privacy#claude" class="inline-flex items-center px-3 py-1.5 text-sm bg-purple-50 hover:bg-purple-100 rounded-md text-purple-700 transition-colors">
+              Claude →
+            </a>
+            <a href="/docs/ai-privacy#chatgpt" class="inline-flex items-center px-3 py-1.5 text-sm bg-green-50 hover:bg-green-100 rounded-md text-green-700 transition-colors">
+              ChatGPT →
+            </a>
+            <a href="/docs/ai-privacy#copilot" class="inline-flex items-center px-3 py-1.5 text-sm bg-blue-50 hover:bg-blue-100 rounded-md text-blue-700 transition-colors">
+              Copilot →
+            </a>
+            <a href="/docs/ai-privacy#lokaal" class="inline-flex items-center px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700 transition-colors">
+              Lokaal →
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)}

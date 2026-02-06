@@ -1,0 +1,55 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HomePage from '../components/HomePage.astro';
+import { t } from '../lib/i18n';
+
+const seoDescription = "Stel vragen aan je Exact Online boekhouding in gewoon Nederlands. Werkt met ChatGPT, Claude en Copilot. 'Wat is mijn omzet?' of 'Welke facturen staan open?' Binnen 5 minuten ingesteld.";
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Wat is Praat met je Boekhouding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Praat met je Boekhouding verbindt je Exact Online administratie met AI-assistenten zoals ChatGPT, Claude en Copilot. Je stelt vragen aan je boekhouding in gewoon Nederlands en krijgt direct antwoord."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is mijn boekhouddata veilig?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ja. Wij slaan geen financiële gegevens op. Alle verzoeken gaan direct naar Exact Online met jouw toestemming. Je kunt de toegang op elk moment intrekken."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Welke AI-assistenten werken hiermee?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ChatGPT (Plus, Team of Enterprise), Claude en GitHub Copilot. Wij begeleiden je stap voor stap bij het instellen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Wat kost Praat met je Boekhouding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Je begint gratis met ~60 vragen per maand. Starter kost €9/maand (~250 vragen), Pro €25/maand (~800 vragen)."
+      }
+    }
+  ]
+};
+---
+
+<Layout
+  title="Exact Online koppelen met ChatGPT, Claude & AI"
+  description={seoDescription}
+  lang="nl"
+  jsonLd={faqJsonLd}
+>
+  <HomePage lang="nl" />
+</Layout>

@@ -1,0 +1,33 @@
+{
+  "name": "exact-online-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server for Exact Online - AI-first finance data access",
+  "author": "werkenmetai",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "pnpm --filter @exact-mcp/shared run build",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "db:validate": "npx tsx scripts/validate-schema.ts",
+    "db:validate:dry": "npx tsx scripts/validate-schema.ts --dry-run --verbose",
+    "db:check": "./scripts/check-migrations.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^20.11.0",
+    "prettier": "^3.2.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.3.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

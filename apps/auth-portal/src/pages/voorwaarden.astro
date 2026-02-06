@@ -1,0 +1,412 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { TOS_VERSION, TOS_EFFECTIVE_DATE, COMPANY_NAME, COMPANY_ADDRESS, COMPANY_KVK, COMPANY_BTW, COMPANY_EMAIL, WEBSITE_URL } from '../lib/constants';
+---
+
+<Layout title="Algemene Voorwaarden" description="Algemene Voorwaarden voor Praat met je Boekhouding - Chef Data B.V.">
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Algemene Voorwaarden</h1>
+    <p class="text-gray-500 mb-2">Praat met je Boekhouding</p>
+    <p class="text-gray-500 mb-8">
+      <strong>{COMPANY_NAME}</strong> - Versie {TOS_VERSION} - {new Date(TOS_EFFECTIVE_DATE).toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })}
+    </p>
+
+    <div class="prose prose-gray max-w-none">
+      <!-- Artikel 1 -->
+      <section class="mb-10" id="definities">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 1 - Definities</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <p class="text-gray-600 mb-4">In deze algemene voorwaarden wordt verstaan onder:</p>
+          <dl class="space-y-3 text-gray-600">
+            <div>
+              <dt class="font-semibold">1.1 Dienst</dt>
+              <dd class="ml-4">de "Praat met je Boekhouding" software-as-a-service van Chef Data, bestaande uit een API/MCP-server die Exact Online boekhouddata toegankelijk maakt voor AI-assistenten.</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">1.2 Chef Data of wij</dt>
+              <dd class="ml-4">Chef Data B.V., gevestigd te Hilversum, KvK-nummer {COMPANY_KVK}.</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">1.3 Klant of u</dt>
+              <dd class="ml-4">de rechtspersoon of natuurlijke persoon handelend in uitoefening van beroep of bedrijf die een Overeenkomst met Chef Data aangaat.</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">1.4 Overeenkomst</dt>
+              <dd class="ml-4">de overeenkomst tussen Chef Data en Klant voor het gebruik van de Dienst.</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">1.5 Boekhouddata</dt>
+              <dd class="ml-4">alle gegevens die via de Exact Online API worden opgehaald, waaronder maar niet beperkt tot facturen, relaties, transacties, grootboekrekeningen en administratieve gegevens.</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">1.6 AI-assistent</dt>
+              <dd class="ml-4">software van derden (zoals Claude, ChatGPT, Copilot) waarmee Klant interacteert en die via de Dienst Boekhouddata kan opvragen.</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">1.7 Persoonsgegevens</dt>
+              <dd class="ml-4">alle informatie over een geïdentificeerde of identificeerbare natuurlijke persoon, zoals gedefinieerd in de AVG.</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- Artikel 2 -->
+      <section class="mb-10" id="toepasselijkheid">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 2 - Toepasselijkheid</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>2.1</strong> Deze algemene voorwaarden zijn van toepassing op alle aanbiedingen, offertes, overeenkomsten en leveringen van de Dienst.</li>
+            <li><strong>2.2</strong> Afwijkingen van deze voorwaarden zijn slechts geldig indien schriftelijk overeengekomen.</li>
+            <li><strong>2.3</strong> De toepasselijkheid van eventuele inkoop- of andere voorwaarden van Klant wordt uitdrukkelijk van de hand gewezen.</li>
+            <li><strong>2.4</strong> <span class="font-semibold">B2B-dienstverlening:</span> De Dienst is uitsluitend bestemd voor zakelijk gebruik. Door de Dienst te gebruiken verklaart Klant te handelen in de uitoefening van beroep of bedrijf.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 3 -->
+      <section class="mb-10" id="totstandkoming">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 3 - Totstandkoming Overeenkomst</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>3.1</strong> De Overeenkomst komt tot stand op het moment dat Klant:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>een account aanmaakt op praatmetjeboekhouding.nl;</li>
+                <li>de Exact Online OAuth-koppeling autoriseert; en</li>
+                <li>deze algemene voorwaarden accepteert.</li>
+              </ul>
+            </li>
+            <li><strong>3.2</strong> Chef Data behoudt zich het recht voor registraties zonder opgaaf van redenen te weigeren.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 4 -->
+      <section class="mb-10" id="dienst">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 4 - De Dienst</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>4.1 Omschrijving:</strong> De Dienst stelt Klant in staat om via een API of MCP-protocol Boekhouddata uit Exact Online op te halen en deze te gebruiken in combinatie met AI-assistenten.</li>
+            <li><strong>4.2 Pass-through:</strong> De Dienst fungeert als doorgeefluik. Boekhouddata wordt opgehaald bij Exact Online en direct doorgestuurd naar de AI-assistent die Klant gebruikt. <span class="font-semibold">Chef Data slaat geen Boekhouddata op.</span></li>
+            <li><strong>4.3 Beschikbaarheid:</strong> Chef Data streeft naar een beschikbaarheid van 99% op maandbasis, exclusief:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>gepland onderhoud (aangekondigd minimaal 24 uur vooraf);</li>
+                <li>storingen bij Exact Online of de AI-provider;</li>
+                <li>overmacht situaties.</li>
+              </ul>
+            </li>
+            <li><strong>4.4 Geen SLA-garanties:</strong> Tenzij schriftelijk anders overeengekomen in een apart Service Level Agreement, gelden geen gegarandeerde uptime percentages en zijn geen credits of compensatie verschuldigd bij storingen.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 4A -->
+      <section class="mb-10" id="support-communicatie">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 4A - Support Communicatie</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>4A.1</strong> Wij bieden support via email en het in-app berichtensysteem. Berichten worden opgeslagen voor de duur van de klantrelatie plus 3 jaar daarna.</li>
+            <li><strong>4A.2</strong> Support emails worden verwerkt via Resend, Inc. (Ierland). Zie onze <a href="/privacy" class="text-exact-blue hover:underline">Privacy Policy</a> voor details over gegevensverwerking.</li>
+            <li><strong>4A.3</strong> U kunt email notificaties voor support antwoorden aan- of uitzetten in uw dashboard instellingen.</li>
+            <li><strong>4A.4</strong> Wij behouden ons het recht voor om spam of misbruik van het support systeem te weren.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 5 -->
+      <section class="mb-10" id="gebruik">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 5 - Gebruik van de Dienst</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>5.1</strong> Klant is verantwoordelijk voor:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>het geheim houden van API-sleutels en inloggegevens;</li>
+                <li>alle activiteiten die plaatsvinden via zijn account;</li>
+                <li>naleving van de voorwaarden van Exact Online;</li>
+                <li>naleving van de voorwaarden van de gebruikte AI-provider;</li>
+                <li>de keuze van AI-provider en de configuratie daarvan.</li>
+              </ul>
+            </li>
+            <li><strong>5.2 Acceptable Use:</strong> Klant zal de Dienst niet gebruiken voor:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>illegale activiteiten of activiteiten in strijd met wet- of regelgeving;</li>
+                <li>het verwerken van gegevens waarvoor Klant geen rechtmatige grondslag heeft;</li>
+                <li>het omzeilen van beveiligingsmaatregelen;</li>
+                <li>het belasten van de infrastructuur door excessief of geautomatiseerd gebruik;</li>
+                <li>reverse engineering, decompilatie of afgeleide werken;</li>
+                <li>wederverkoop of sublicentiëring zonder schriftelijke toestemming.</li>
+              </ul>
+            </li>
+            <li><strong>5.3</strong> Bij overtreding van artikel 5.2 kan Chef Data de toegang per direct opschorten zonder dat enige restitutie verschuldigd is.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 6 - AI Disclaimer (belangrijkste sectie) -->
+      <section class="mb-10" id="ai-output">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 6 - AI-assistenten en Output</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-4 text-gray-600">
+            <li><strong>6.1 Klant kiest de AI-provider:</strong> De Dienst is compatibel met diverse AI-assistenten. Klant is vrij in de keuze van AI-provider en is zelf verantwoordelijk voor:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>het aangaan van een overeenkomst met die AI-provider;</li>
+                <li>naleving van de voorwaarden van die AI-provider;</li>
+                <li>eventuele kosten van die AI-provider.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>6.2 GEEN FINANCIEEL, FISCAAL OF JURIDISCH ADVIES:</strong>
+              <div class="bg-amber-50 border border-amber-300 rounded-lg p-4 mt-3">
+                <p class="font-bold text-amber-900 mb-2">BELANGRIJKE DISCLAIMER</p>
+                <p class="text-amber-800 mb-3">
+                  De AI-assistenten waarmee de Dienst wordt gebruikt kunnen informatie genereren die onjuist, onvolledig of misleidend is. De output van AI-assistenten:
+                </p>
+                <ul class="list-disc list-inside text-amber-800 space-y-1">
+                  <li>vormt <strong>GEEN</strong> financieel, fiscaal, juridisch of ander professioneel advies;</li>
+                  <li>vervangt <strong>NIET</strong> het oordeel van een gekwalificeerde professional;</li>
+                  <li>dient <strong>ALTIJD</strong> door Klant te worden gecontroleerd en geverifieerd.</li>
+                </ul>
+                <p class="text-amber-800 mt-3 font-semibold">
+                  Chef Data is op geen enkele wijze aansprakelijk voor beslissingen genomen op basis van AI-output.
+                </p>
+              </div>
+            </li>
+            <li><strong>6.3 AI-hallucinaties:</strong> AI-systemen kunnen informatie genereren die niet in de Boekhouddata voorkomt ("hallucinaties"). Klant erkent dit risico en zal AI-output nooit zonder verificatie gebruiken voor besluitvorming.</li>
+            <li><strong>6.4 Intellectueel eigendom AI-output:</strong>
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>Chef Data maakt geen aanspraak op de output gegenereerd door AI-assistenten.</li>
+                <li>Het intellectueel eigendom op AI-output wordt beheerst door de voorwaarden van de betreffende AI-provider.</li>
+                <li>Klant vrijwaart Chef Data voor claims van derden met betrekking tot AI-output.</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 7 -->
+      <section class="mb-10" id="privacy">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 7 - Persoonsgegevens en Privacy</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>7.1</strong> Voor zover Chef Data bij het leveren van de Dienst Persoonsgegevens verwerkt ten behoeve van Klant, is de <a href="/verwerkersovereenkomst" class="text-exact-blue hover:underline">Verwerkersovereenkomst</a> (bijlage bij deze voorwaarden) van toepassing.</li>
+            <li><strong>7.2</strong> Klant garandeert dat:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>Klant een geldige rechtsgrondslag heeft voor de verwerking van Persoonsgegevens die via de Dienst worden verwerkt;</li>
+                <li>betrokkenen adequaat zijn geïnformeerd over de verwerking;</li>
+                <li>Klant bevoegd is deze gegevens aan Chef Data te verstrekken.</li>
+              </ul>
+            </li>
+            <li><strong>7.3</strong> De verwerking van Persoonsgegevens is nader uitgewerkt in ons <a href="/privacy" class="text-exact-blue hover:underline">Privacybeleid</a>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 8 -->
+      <section class="mb-10" id="tarieven">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 8 - Tarieven en Betaling</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>8.1</strong> De actuele tarieven zijn gepubliceerd op de <a href="/pricing" class="text-exact-blue hover:underline">website</a> of zijn schriftelijk overeengekomen.</li>
+            <li><strong>8.2</strong> Alle genoemde bedragen zijn exclusief BTW, tenzij anders vermeld.</li>
+            <li><strong>8.3</strong> Betaling geschiedt via Stripe. Klant machtigt Chef Data om periodiek verschuldigde bedragen te incasseren.</li>
+            <li><strong>8.4</strong> Bij niet-tijdige betaling:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>is Klant van rechtswege in verzuim;</li>
+                <li>is Klant wettelijke handelsrente verschuldigd;</li>
+                <li>kan Chef Data de Dienst opschorten na een betalingsherinnering.</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 9 - Aansprakelijkheid -->
+      <section class="mb-10" id="aansprakelijkheid">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 9 - Aansprakelijkheid</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-4 text-gray-600">
+            <li><strong>9.1 Beperking:</strong> De totale aansprakelijkheid van Chef Data jegens Klant is beperkt tot:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>het bedrag dat door de aansprakelijkheidsverzekering wordt uitgekeerd, of indien geen uitkering plaatsvindt:</li>
+                <li>het bedrag dat Klant in de 12 maanden voorafgaand aan de schadeveroorzakende gebeurtenis aan Chef Data heeft betaald, met een maximum van €5.000.</li>
+              </ul>
+            </li>
+            <li><strong>9.2 Uitsluitingen:</strong> Chef Data is nimmer aansprakelijk voor:
+              <div class="bg-gray-50 rounded-lg p-4 mt-2">
+                <ul class="list-disc list-inside space-y-2">
+                  <li><strong>indirecte schade</strong>, waaronder gevolgschade, gederfde winst, gemiste besparingen, verlies van goodwill, bedrijfsschade, of schade door bedrijfsstagnatie;</li>
+                  <li><strong>schade door onjuiste of onvolledige AI-output</strong>, inclusief maar niet beperkt tot hallucinaties, verkeerde berekeningen, of misleidende informatie;</li>
+                  <li><strong>schade door beslissingen</strong> die Klant of derden nemen op basis van informatie verkregen via de Dienst;</li>
+                  <li><strong>schade door storingen</strong> bij Exact Online, AI-providers, of andere diensten van derden;</li>
+                  <li><strong>schade door ongeautoriseerde toegang</strong> indien Klant API-sleutels of inloggegevens niet adequaat heeft beschermd;</li>
+                  <li><strong>schade door wijzigingen</strong> in de Exact Online API of AI-provider APIs.</li>
+                </ul>
+              </div>
+            </li>
+            <li><strong>9.3 Vrijwaring:</strong> Klant vrijwaart Chef Data voor alle aanspraken van derden die verband houden met:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>het gebruik van de Dienst door Klant;</li>
+                <li>schending van deze voorwaarden door Klant;</li>
+                <li>inbreuk op rechten van derden;</li>
+                <li>beslissingen genomen op basis van AI-output.</li>
+              </ul>
+            </li>
+            <li><strong>9.4</strong> De beperkingen in dit artikel gelden niet voor schade veroorzaakt door opzet of bewuste roekeloosheid van de bedrijfsleiding van Chef Data.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 10 -->
+      <section class="mb-10" id="beeindiging">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 10 - Duur en Beëindiging</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>10.1</strong> De Overeenkomst wordt aangegaan voor onbepaalde tijd, tenzij schriftelijk anders overeengekomen.</li>
+            <li><strong>10.2</strong> Beide partijen kunnen de Overeenkomst opzeggen met inachtneming van een opzegtermijn van één (1) maand.</li>
+            <li><strong>10.3</strong> Chef Data kan de Overeenkomst met onmiddellijke ingang beëindigen indien:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>Klant in strijd handelt met deze voorwaarden;</li>
+                <li>Klant failliet wordt verklaard of surseance van betaling aanvraagt;</li>
+                <li>Chef Data de Dienst geheel staakt.</li>
+              </ul>
+            </li>
+            <li><strong>10.4 Na beëindiging:</strong>
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>vervalt direct het recht om de Dienst te gebruiken;</li>
+                <li>worden OAuth-tokens ingetrokken;</li>
+                <li>worden accountgegevens binnen 30 dagen verwijderd, tenzij bewaring wettelijk verplicht is;</li>
+                <li>is geen restitutie van vooruitbetaalde bedragen verschuldigd bij beëindiging door Chef Data wegens overtreding door Klant.</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 11 -->
+      <section class="mb-10" id="wijzigingen">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 11 - Wijzigingen</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>11.1</strong> Chef Data kan deze voorwaarden wijzigen. Wijzigingen worden minimaal 30 dagen vooraf aangekondigd via e-mail of in de Dienst.</li>
+            <li><strong>11.2</strong> Indien Klant niet akkoord gaat met gewijzigde voorwaarden, kan Klant de Overeenkomst opzeggen vóór inwerkingtreding van de wijzigingen.</li>
+            <li><strong>11.3</strong> Voortgezet gebruik van de Dienst na inwerkingtreding geldt als acceptatie van de gewijzigde voorwaarden.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 12 -->
+      <section class="mb-10" id="overmacht">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 12 - Overmacht</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>12.1</strong> Chef Data is niet gehouden tot nakoming van enige verplichting indien dit wordt verhinderd door overmacht.</li>
+            <li><strong>12.2</strong> Onder overmacht wordt verstaan: storingen bij Exact Online, storingen bij AI-providers, storingen bij hosting/cloudproviders, cyberaanvallen, overheidsmaatregelen, natuurrampen, pandemieën, en andere omstandigheden buiten de invloedssfeer van Chef Data.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 13 -->
+      <section class="mb-10" id="intellectueel-eigendom">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 13 - Intellectueel Eigendom</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>13.1</strong> Alle intellectuele eigendomsrechten op de Dienst, inclusief maar niet beperkt tot software, documentatie, en know-how, berusten bij Chef Data.</li>
+            <li><strong>13.2</strong> Klant verkrijgt uitsluitend een beperkt, niet-exclusief, niet-overdraagbaar gebruiksrecht voor de duur van de Overeenkomst.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 14 -->
+      <section class="mb-10" id="vertrouwelijkheid">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 14 - Vertrouwelijkheid</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>14.1</strong> Partijen zullen vertrouwelijke informatie van de andere partij geheim houden en alleen gebruiken voor de uitvoering van de Overeenkomst.</li>
+            <li><strong>14.2</strong> Deze verplichting geldt niet voor informatie die:
+              <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>algemeen bekend is of wordt;</li>
+                <li>al in bezit was van de ontvangende partij;</li>
+                <li>onafhankelijk is ontwikkeld;</li>
+                <li>van een derde is verkregen zonder geheimhoudingsverplichting;</li>
+                <li>moet worden verstrekt op grond van wet of rechterlijk bevel.</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 15 -->
+      <section class="mb-10" id="recht-geschillen">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 15 - Toepasselijk Recht en Geschillen</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>15.1</strong> Op de Overeenkomst is uitsluitend <strong>Nederlands recht</strong> van toepassing.</li>
+            <li><strong>15.2</strong> Het Weens Koopverdrag (CISG) is uitdrukkelijk uitgesloten.</li>
+            <li><strong>15.3</strong> Geschillen worden uitsluitend voorgelegd aan de <strong>bevoegde rechter te Amsterdam</strong>, tenzij dwingend recht anders voorschrijft.</li>
+            <li><strong>15.4</strong> Alvorens een geschil voor te leggen aan de rechter, zullen partijen gedurende minimaal 30 dagen trachten het geschil in onderling overleg op te lossen.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Artikel 16 -->
+      <section class="mb-10" id="slotbepalingen">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Artikel 16 - Slotbepalingen</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <ul class="space-y-3 text-gray-600">
+            <li><strong>16.1</strong> Indien een bepaling van deze voorwaarden nietig of vernietigbaar is, laat dit de geldigheid van de overige bepalingen onverlet.</li>
+            <li><strong>16.2</strong> In geval van nietigheid of vernietiging wordt de betreffende bepaling vervangen door een geldige bepaling die de bedoeling van partijen zoveel mogelijk benadert.</li>
+            <li><strong>16.3</strong> De Nederlandstalige versie van deze voorwaarden is bindend. Vertalingen zijn uitsluitend ter informatie.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Contact Info -->
+      <section class="mb-10">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <p class="text-gray-600 mb-4"><strong>{COMPANY_NAME}</strong></p>
+          <div class="text-gray-600">
+            <p>{COMPANY_ADDRESS}</p>
+            <p>KvK: {COMPANY_KVK} | BTW: {COMPANY_BTW}</p>
+            <p>
+              <a href="mailto:{COMPANY_EMAIL}" class="text-exact-blue hover:underline">{COMPANY_EMAIL}</a> |
+              <a href="https://{WEBSITE_URL}" class="text-exact-blue hover:underline">{WEBSITE_URL}</a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Back to home -->
+    <div class="mt-12 pt-8 border-t border-gray-200 flex justify-between items-center">
+      <a href="/" class="text-exact-blue hover:underline">&larr; Terug naar home</a>
+      <button onclick="window.print()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Afdrukken / PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Print-friendly styles -->
+  <style>
+    @media print {
+      nav, footer, .skip-link, button, a[href="/"] {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+      }
+      .max-w-4xl {
+        max-width: 100% !important;
+      }
+      .bg-white, .bg-gray-50, .bg-amber-50 {
+        background: white !important;
+        box-shadow: none !important;
+        border: 1px solid #e5e7eb !important;
+      }
+      section {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</Layout>

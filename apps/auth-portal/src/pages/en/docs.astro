@@ -1,0 +1,271 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Documentation" description="Complete documentation for Chat with your Books - configuration, tools and best practices" lang="en">
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Documentation</h1>
+
+    <!-- AI Disclaimer Banner -->
+    <section class="mb-12">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 text-amber-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h3 class="font-semibold text-amber-900 mb-2">Important: Always verify AI output</h3>
+            <p class="text-amber-800 text-sm">
+              AI assistants like Claude, ChatGPT and Copilot can make mistakes when interpreting data.
+              <strong>Always verify answers</strong> against your original Exact Online data before making decisions.
+              We only provide the data connection - not the AI advice.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Quick Start</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <ol class="space-y-4">
+          <li class="flex">
+            <span class="flex-shrink-0 w-8 h-8 bg-exact-blue text-white rounded-full flex items-center justify-center font-bold mr-3">1</span>
+            <div>
+              <h3 class="font-semibold text-gray-900">Connect your Exact Online account</h3>
+              <p class="text-gray-600">Go to <a href="/en/connect" class="text-exact-blue hover:underline">Connect</a> and log in with your Exact Online credentials.</p>
+            </div>
+          </li>
+          <li class="flex">
+            <span class="flex-shrink-0 w-8 h-8 bg-exact-blue text-white rounded-full flex items-center justify-center font-bold mr-3">2</span>
+            <div>
+              <h3 class="font-semibold text-gray-900">Configure your AI assistant</h3>
+              <p class="text-gray-600">Add the MCP server to your Claude, ChatGPT or Copilot configuration (see <a href="/en/setup" class="text-exact-blue hover:underline">Setup</a>).</p>
+            </div>
+          </li>
+          <li class="flex">
+            <span class="flex-shrink-0 w-8 h-8 bg-exact-blue text-white rounded-full flex items-center justify-center font-bold mr-3">3</span>
+            <div>
+              <h3 class="font-semibold text-gray-900">Ask questions about your accounting</h3>
+              <p class="text-gray-600">Ask about invoices, relations, bank transactions and more - in plain English.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Configuration -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Configuration</h2>
+
+      <div class="space-y-6">
+        <!-- Claude Desktop -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">Claude Desktop / Claude Code</h3>
+          <p class="text-gray-600 mb-4">
+            Add the MCP server to your configuration file:
+          </p>
+          <div class="text-sm text-gray-500 mb-2">
+            <strong>macOS:</strong> <code class="bg-gray-100 px-2 py-1 rounded">~/Library/Application Support/Claude/claude_desktop_config.json</code>
+          </div>
+          <div class="text-sm text-gray-500 mb-4">
+            <strong>Windows:</strong> <code class="bg-gray-100 px-2 py-1 rounded">%APPDATA%\Claude\claude_desktop_config.json</code>
+          </div>
+          <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto relative">
+            <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600">
+              Copy
+            </button>
+            <pre class="text-sm text-gray-100"><code id="config-claude">{'{'}
+  "mcpServers": {'{'}
+    "exact-online": {'{'}
+      "url": "https://api.praatmetjeboekhouding.nl/mcp",
+      "headers": {'{'}
+        "Authorization": "Bearer YOUR_API_KEY"
+      {'}'}
+    {'}'}
+  {'}'}
+{'}'}</code></pre>
+          </div>
+          <p class="text-sm text-gray-500 mt-3">
+            Replace <code class="bg-yellow-100 px-1 rounded text-yellow-800">YOUR_API_KEY</code> with the key from your <a href="/en/dashboard" class="text-exact-blue hover:underline">dashboard</a>.
+          </p>
+        </div>
+
+        <!-- ChatGPT / Other -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">ChatGPT, Copilot & Other AIs</h3>
+          <p class="text-gray-600 mb-4">
+            For AI assistants that support MCP via remote URLs, use this endpoint:
+          </p>
+          <div class="bg-gray-100 rounded-lg p-4">
+            <code class="text-gray-800">https://api.praatmetjeboekhouding.nl/mcp</code>
+          </div>
+          <p class="text-gray-600 mt-4 text-sm">
+            Add your API key as a Bearer token in the Authorization header.
+            See your AI assistant's documentation for specific configuration instructions.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Available Tools -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Available Tools</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+              <th class="text-left px-6 py-3 text-sm font-semibold text-gray-900">Tool</th>
+              <th class="text-left px-6 py-3 text-sm font-semibold text-gray-900">Description</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">list_divisions</code></td>
+              <td class="px-6 py-4 text-gray-600">Show all available administrations</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_relations</code></td>
+              <td class="px-6 py-4 text-gray-600">Get customers and suppliers</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">search_relations</code></td>
+              <td class="px-6 py-4 text-gray-600">Search relations by name, code or registration number</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_sales_invoices</code></td>
+              <td class="px-6 py-4 text-gray-600">Get sales invoices with filters</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_purchase_invoices</code></td>
+              <td class="px-6 py-4 text-gray-600">Get purchase invoices</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_outstanding_invoices</code></td>
+              <td class="px-6 py-4 text-gray-600">Show outstanding invoices</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_bank_transactions</code></td>
+              <td class="px-6 py-4 text-gray-600">Get bank transactions</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_gl_accounts</code></td>
+              <td class="px-6 py-4 text-gray-600">Show general ledger accounts</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_trial_balance</code></td>
+              <td class="px-6 py-4 text-gray-600">Get trial balance</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_projects</code></td>
+              <td class="px-6 py-4 text-gray-600">Projects with budget and time tracking</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_wip_overview</code></td>
+              <td class="px-6 py-4 text-gray-600">Work-in-progress (WIP) overview</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_opportunities</code></td>
+              <td class="px-6 py-4 text-gray-600">Sales opportunities and pipeline</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_fixed_assets</code></td>
+              <td class="px-6 py-4 text-gray-600">Fixed assets and depreciation</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4"><code class="text-exact-blue">get_margin_analysis</code></td>
+              <td class="px-6 py-4 text-gray-600">Margin analysis (sales vs. purchase)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm text-gray-500 mt-4">
+        <strong>44 tools</strong> available including projects, cost centers, opportunities, contracts and price lists. All tools are read-only for security.
+      </p>
+    </section>
+
+    <!-- Security -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Security</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <ul class="space-y-3">
+          <li class="flex items-start">
+            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div>
+              <strong class="text-gray-900">OAuth 2.0</strong>
+              <p class="text-gray-600">Secure authentication via Exact Online. We never see your password.</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div>
+              <strong class="text-gray-900">Read-only access</strong>
+              <p class="text-gray-600">All tools are read-only. No changes can be made.</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div>
+              <strong class="text-gray-900">Encrypted tokens</strong>
+              <p class="text-gray-600">Access tokens are stored encrypted and automatically refreshed.</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <svg class="w-5 h-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div>
+              <strong class="text-gray-900">EU hosting</strong>
+              <p class="text-gray-600">All data is processed within the EU (Cloudflare EU).</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Support -->
+    <section>
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Support</h2>
+      <div class="bg-exact-light rounded-xl p-6">
+        <p class="text-gray-700 mb-4">
+          Questions or issues? Contact us via:
+        </p>
+        <ul class="space-y-2 text-gray-700">
+          <li>Email: <a href="mailto:support@praatmetjeboekhouding.nl" class="text-exact-blue hover:underline">support@praatmetjeboekhouding.nl</a></li>
+          <li>GitHub: <a href="https://github.com/werkenmetai/Exact-online-MCP/issues" class="text-exact-blue hover:underline">Issues & Discussions</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Legal links -->
+    <section class="mt-12 pt-8 border-t border-gray-200">
+      <p class="text-sm text-gray-500">
+        By using this Service you agree to our
+        <a href="/en/terms" class="text-exact-blue hover:underline">Terms & Conditions</a> and
+        <a href="/en/privacy" class="text-exact-blue hover:underline">Privacy Policy</a>.
+      </p>
+    </section>
+  </div>
+
+  <script>
+    // Copy buttons
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const button = btn as HTMLElement;
+        const code = button.parentElement?.querySelector('code')?.textContent;
+        if (code) {
+          navigator.clipboard.writeText(code);
+          button.textContent = 'Copied!';
+          setTimeout(() => button.textContent = 'Copy', 2000);
+        }
+      });
+    });
+  </script>
+</Layout>

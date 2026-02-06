@@ -1,0 +1,317 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {
+  decodeState,
+  exchangeCodeForTokens,
+  getCurrentUser,
+  getDivisions,
+  type AuthState,
+} from '../lib/exact-auth';
+import { Database } from '../lib/database';
+
+const env = Astro.locals.runtime.env;
+const db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+// Get query parameters
+const url = new URL(Astro.request.url);
+const code = url.searchParams.get('code');
+const stateParam = url.searchParams.get('state');
+const error = url.searchParams.get('error');
+const errorDescription = url.searchParams.get('error_description');
+
+let success = false;
+let errorMessage = '';
+let user: { name: string; email: string; division: number } | null = null;
+let divisions: Array<{ code: number; name: string }> = [];
+let apiKey: string | null = null;
+let isNewUser = false;
+
+if (error) {
+  errorMessage = errorDescription || error || 'Unknown error from Exact Online';
+} else if (!code || !stateParam) {
+  errorMessage = 'Ongeldige callback - ontbrekende code of state parameter';
+} else {
+  try {
+    // Decode and verify state (with HMAC signature verification)
+    const state: AuthState = await decodeState(stateParam, env.SESSION_SECRET);
+
+    // Verify nonce matches cookie
+    const storedNonce = Astro.cookies.get('oauth_nonce')?.value;
+    if (!storedNonce || storedNonce !== state.nonce) {
+      throw new Error('State verification failed - possible CSRF attack');
+    }
+
+    // Clear the nonce cookie
+    Astro.cookies.delete('oauth_nonce', { path: '/' });
+
+    // Get PKCE code verifier from cookie
+    const codeVerifier = Astro.cookies.get('oauth_code_verifier')?.value;
+    Astro.cookies.delete('oauth_code_verifier', { path: '/' });
+
+    // Exchange code for tokens (with PKCE code verifier if available)
+    const tokens = await exchangeCodeForTokens(
+      code,
+      env.EXACT_CLIENT_ID,
+      env.EXACT_CLIENT_SECRET,
+      env.EXACT_REDIRECT_URI,
+      state.region,
+      codeVerifier
+    );
+
+    // Get user info
+    const exactUser = await getCurrentUser(tokens.access_token, state.region);
+
+    // Get divisions (pass currentDivision for API path)
+    const exactDivisions = await getDivisions(tokens.access_token, state.region, exactUser.CurrentDivision);
+
+    // Calculate token expiry with validation
+    // P15/BUG-006: Validate expires_in to catch unexpected API responses
+    const expiresInSeconds = tokens.expires_in;
+    if (!expiresInSeconds || expiresInSeconds < 60) {
+      console.error('Invalid expires_in from Exact Online:', expiresInSeconds);
+      throw new Error(`Ongeldige token expiry ontvangen van Exact Online: ${expiresInSeconds}s. Probeer opnieuw.`);
+    }
+    console.log(`Token expires_in: ${expiresInSeconds} seconds (${Math.round(expiresInSeconds / 60)} minutes)`);
+    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000);
+
+    // Get or create user in database
+    const dbUser = await db.getOrCreateUser(
+      exactUser.Email,
+      exactUser.FullName || exactUser.UserName
+    );
+
+    // Check if this is a new user (created just now)
+    const userCreatedAt = new Date(dbUser.created_at);
+    isNewUser = Date.now() - userCreatedAt.getTime() < 5000; // Created within last 5 seconds
+
+    // Upsert connection (tokens)
+    const connection = await db.upsertConnection(
+      dbUser.id,
+      state.region,
+      tokens.access_token,
+      tokens.refresh_token,
+      expiresAt,
+      {
+        id: exactUser.UserID,
+        name: exactUser.FullName || exactUser.UserName,
+        email: exactUser.Email,
+      }
+    );
+
+    // Sync divisions (legacy table for API key auth)
+    await db.syncDivisions(
+      connection.id,
+      exactDivisions.map(d => ({
+        code: d.Code,
+        name: d.Description,
+        isDefault: d.Code === exactUser.CurrentDivision,
+      }))
+    );
+
+    // P22: Sync user_divisions for OAuth MCP access (ChatGPT/Claude)
+    // This enables MCP clients to find the correct division via OAuth token
+    await db.syncUserDivisions(
+      dbUser.id,
+      connection.id,
+      exactDivisions.map(d => ({
+        code: d.Code,
+        name: d.Description,
+        isDefault: d.Code === exactUser.CurrentDivision,
+      }))
+    );
+
+    // Create session
+    const session = await db.createSession(dbUser.id);
+
+    // Set session cookie
+    Astro.cookies.set('session_id', session.id, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/',
+    });
+
+    // For new users, create an API key
+    if (isNewUser) {
+      const existingKeys = await db.getApiKeysByUser(dbUser.id);
+      if (existingKeys.length === 0) {
+        const { plainKey } = await db.createApiKey(dbUser.id, 'Default');
+        apiKey = plainKey;
+
+        // Store API key in temporary cookie for setup page (5 minutes, secure)
+        // Cookie is read server-side by Astro, so httpOnly is safe
+        Astro.cookies.set('new_api_key', plainKey, {
+          httpOnly: true, // Secure: not accessible via JavaScript (XSS protection)
+          secure: true,
+          sameSite: 'strict',
+          maxAge: 300, // 5 minutes
+          path: '/',
+        });
+      }
+    }
+
+    user = {
+      name: exactUser.FullName || exactUser.UserName,
+      email: exactUser.Email,
+      division: exactUser.CurrentDivision,
+    };
+
+    divisions = exactDivisions.map(d => ({
+      code: d.Code,
+      name: d.Description,
+    }));
+
+    success = true;
+
+    // If there's a return URL (e.g., OAuth flow), redirect there
+    if (state.returnUrl && state.returnUrl !== '/dashboard') {
+      return Astro.redirect(state.returnUrl);
+    }
+
+  } catch (e) {
+    console.error('OAuth callback error:', e);
+    errorMessage = e instanceof Error ? e.message : 'Er is een fout opgetreden';
+  }
+}
+---
+
+<Layout title={success ? 'Verbonden!' : 'Fout'}>
+  <div class="max-w-lg mx-auto px-4 py-16">
+    {success ? (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900">Succesvol verbonden!</h1>
+          <p class="text-gray-600 mt-2">Je Exact Online account is nu gekoppeld.</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <h3 class="font-medium text-gray-900 mb-2">Account Details</h3>
+          <dl class="text-sm">
+            <div class="flex justify-between py-1">
+              <dt class="text-gray-500">Naam</dt>
+              <dd class="text-gray-900">{user?.name}</dd>
+            </div>
+            <div class="flex justify-between py-1">
+              <dt class="text-gray-500">Email</dt>
+              <dd class="text-gray-900">{user?.email}</dd>
+            </div>
+            <div class="flex justify-between py-1">
+              <dt class="text-gray-500">Huidige divisie</dt>
+              <dd class="text-gray-900">{user?.division}</dd>
+            </div>
+          </dl>
+        </div>
+
+        {divisions.length > 1 && (
+          <div class="bg-blue-50 rounded-lg p-4 mb-6">
+            <h3 class="font-medium text-gray-900 mb-2">Beschikbare administraties</h3>
+            <ul class="text-sm text-gray-600 space-y-1">
+              {divisions.map(d => (
+                <li>• {d.name} ({d.code})</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {apiKey && (
+          <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <h3 class="font-medium text-green-900 mb-2">Je API Key</h3>
+            <p class="text-sm text-green-700 mb-3">
+              Bewaar deze key veilig! Je kunt hem maar één keer zien.
+            </p>
+            <div class="bg-white rounded border border-green-300 p-3 font-mono text-sm break-all">
+              {apiKey}
+            </div>
+            <button
+              id="copyApiKey"
+              data-key={apiKey}
+              class="mt-3 w-full px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition-colors"
+            >
+              Kopieer API Key
+            </button>
+          </div>
+        )}
+
+        {/* Privacy Tip Card */}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div class="flex items-start">
+            <div class="flex-shrink-0 text-blue-600 mr-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-medium text-blue-900 mb-1">Privacy tip</h4>
+              <p class="text-blue-800 text-sm">
+                Check bij je AI-provider of "model training" uitstaat voor zakelijke data.
+                <a href="/docs/ai-privacy" class="font-medium underline hover:text-blue-900">
+                  Bekijk instellingen per provider →
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <a
+            href="/dashboard"
+            class="block w-full px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors text-center"
+          >
+            Naar Dashboard
+          </a>
+          <a
+            href="/setup"
+            class="block w-full px-6 py-3 bg-white text-exact-blue font-semibold rounded-lg border-2 border-exact-blue hover:bg-exact-light transition-colors text-center"
+          >
+            Claude Configureren
+          </a>
+        </div>
+      </div>
+    ) : (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900">Verbinding Mislukt</h1>
+          <p class="text-gray-600 mt-2">Er is iets misgegaan bij het verbinden.</p>
+        </div>
+
+        <div class="bg-red-50 rounded-lg p-4 mb-6">
+          <p class="text-sm text-red-700">{errorMessage}</p>
+        </div>
+
+        <a
+          href="/connect"
+          class="block w-full px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors text-center"
+        >
+          Opnieuw Proberen
+        </a>
+      </div>
+    )}
+  </div>
+
+  <script>
+    const copyBtn = document.getElementById('copyApiKey');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const key = copyBtn.getAttribute('data-key');
+        if (key) {
+          navigator.clipboard.writeText(key);
+          copyBtn.textContent = 'Gekopieerd!';
+          setTimeout(() => {
+            copyBtn.textContent = 'Kopieer API Key';
+          }, 2000);
+        }
+      });
+    }
+  </script>
+</Layout>

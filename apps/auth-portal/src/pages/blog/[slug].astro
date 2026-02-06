@@ -1,0 +1,2051 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { slug } = Astro.params;
+
+// Blog posts metadata
+const blogPosts: Record<string, {
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  readTime: string;
+}> = {
+  'betalingsbevestiging-automatiseren-email': {
+    title: 'Betalingsbevestiging Automatiseren | Exact Online + Gmail Workflow',
+    description: 'Leer hoe je automatisch een bedankmail stuurt wanneer een klant betaalt. Koppel Exact Online aan Gmail via ChatGPT en verbeter je klantenservice zonder extra werk.',
+    date: '2026-02-04',
+    category: 'Workflow Recipe',
+    readTime: '7 min',
+  },
+  'betaaldeadlines-google-calendar': {
+    title: 'Betaaldeadlines Automatisch in Google Calendar | Exact Online Workflow',
+    description: 'Nooit meer een betaaldeadline missen. Leer hoe je automatisch vervaldatums uit Exact Online in je Google Calendar zet met ChatGPT of Claude.',
+    date: '2026-02-04',
+    category: 'Workflow Recipe',
+    readTime: '7 min',
+  },
+  'btw-overzicht-exporteren-google-sheets': {
+    title: 'BTW Overzicht Exact Online Exporteren naar Google Sheets | Workflow',
+    description: 'Leer hoe je automatisch je BTW overzicht uit Exact Online exporteert naar Google Sheets met ChatGPT of Claude. Stap-voor-stap handleiding.',
+    date: '2026-02-04',
+    category: 'Workflow Recipe',
+    readTime: '8 min',
+  },
+  'btw-overzicht-opvragen-exact-online-ai': {
+    title: 'BTW-overzicht opvragen uit Exact Online met AI | Handleiding',
+    description: 'Leer hoe je met AI je BTW-overzicht direct uit Exact Online opvraagt. Geen rapporten uitdraaien, gewoon vragen stellen. Inclusief voorbeeldvragen.',
+    date: '2026-02-04',
+    category: 'Tutorial',
+    readTime: '5 min',
+  },
+  'vijf-nieuwe-features-exact-online': {
+    title: 'Nieuw in Exact Online: AI-facturen, multi-administratie en meer',
+    description: 'Download facturen via AI uit Exact Online, beheer meerdere administraties, en ontdek 47 tools. Plus: een gratis plan dat permanent gratis blijft.',
+    date: '2026-02-01',
+    category: 'Product',
+    readTime: '3 min',
+  },
+  'nog-makkelijker-inloggen': {
+    title: 'Nog Makkelijker Inloggen: OAuth voor Claude Desktop',
+    description: 'Geen API keys meer kopiëren! Met de nieuwe OAuth-flow log je in via je browser en ben je direct klaar.',
+    date: '2026-01-30',
+    category: 'Product',
+    readTime: '3 min',
+  },
+  '17-nieuwe-mcp-tools-exact-online': {
+    title: '17 Nieuwe MCP Tools: Van Projecten tot Prijslijsten',
+    description: 'Grote update: projectfacturatie, kostenplaatsen, vaste activa, verkoopkansen, contracten en meer. Nu 44 tools voor complete Exact Online integratie.',
+    date: '2026-01-29',
+    category: 'Product',
+    readTime: '6 min',
+  },
+  'mcp-claude-documenten-berekeningen': {
+    title: 'Documenten en Berekeningen Maken met Claude en Exact Online via MCP',
+    description: 'Ontdek hoe je via de MCP-koppeling met Claude rapporten, analyses en berekeningen maakt vanuit je Exact Online data. Met praktische voorbeelden.',
+    date: '2026-01-28',
+    category: 'Product',
+    readTime: '8 min',
+  },
+  'exact-online-chatgpt-koppelen': {
+    title: 'Exact Online koppelen met ChatGPT: Complete handleiding 2026',
+    description: 'Leer stap voor stap hoe je Exact Online verbindt met ChatGPT om vragen te stellen aan je boekhouding in natuurlijke taal.',
+    date: '2026-01-27',
+    category: 'Tutorial',
+    readTime: '8 min',
+  },
+  'ai-boekhouding-zzp': {
+    title: "AI Boekhouding voor ZZP'ers: Tijd en geld besparen",
+    description: 'Ontdek hoe kunstmatige intelligentie je boekhouding kan automatiseren.',
+    date: '2026-01-26',
+    category: 'Gids',
+    readTime: '6 min',
+  },
+  'openstaande-facturen-ai': {
+    title: 'Openstaande facturen automatisch controleren met AI',
+    description: 'Nooit meer handmatig je debiteuren nalopen met AI ondersteuning.',
+    date: '2026-01-25',
+    category: 'Productiviteit',
+    readTime: '5 min',
+  },
+  'claude-voor-accountants': {
+    title: 'Claude AI voor Accountants: De complete gids',
+    description: 'Hoe accountantskantoren Claude kunnen inzetten voor efficiëntere klantenservice.',
+    date: '2026-01-24',
+    category: 'Professional',
+    readTime: '10 min',
+  },
+  'wat-is-mcp-protocol': {
+    title: 'Wat is MCP (Model Context Protocol)? Uitleg voor niet-techneuten',
+    description: 'Een simpele uitleg van het protocol dat AI verbindt met bedrijfssoftware.',
+    date: '2026-01-23',
+    category: 'Technologie',
+    readTime: '4 min',
+  },
+  'omzet-analyseren-ai': {
+    title: 'Je omzet analyseren met AI: Inzichten in seconden',
+    description: 'Vraag je AI assistent om omzettrends en analyses.',
+    date: '2026-01-22',
+    category: 'Analyse',
+    readTime: '6 min',
+  },
+  'exact-online-api-tools': {
+    title: 'Exact Online API tools vergeleken',
+    description: 'Een vergelijking van manieren om Exact Online te koppelen.',
+    date: '2026-01-21',
+    category: 'Vergelijking',
+    readTime: '7 min',
+  },
+  'boekhouding-automatiseren-2026': {
+    title: 'Boekhouding automatiseren in 2026: De complete gids',
+    description: 'Alles over het automatiseren van je administratie met AI.',
+    date: '2026-01-20',
+    category: 'Gids',
+    readTime: '12 min',
+  },
+  'copilot-financiele-data': {
+    title: 'GitHub Copilot voor financiële data',
+    description: 'Hoe developers Copilot kunnen gebruiken voor boekhouddata.',
+    date: '2026-01-19',
+    category: 'Tips',
+    readTime: '5 min',
+  },
+  'btw-aangifte-ai-voorbereiding': {
+    title: 'BTW aangifte voorbereiden met AI',
+    description: 'Laat AI helpen bij het verzamelen van BTW gegevens.',
+    date: '2026-01-18',
+    category: 'Belasting',
+    readTime: '6 min',
+  },
+};
+
+const post = blogPosts[slug || ''];
+if (!post) {
+  return Astro.redirect('/blog');
+}
+
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": post.title,
+      "description": post.description,
+      "datePublished": post.date,
+      "author": { "@type": "Organization", "name": "Chef Data B.V." },
+      "publisher": { "@type": "Organization", "name": "Praat met je Boekhouding" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://praatmetjeboekhouding.nl/" },
+        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://praatmetjeboekhouding.nl/blog" },
+        { "@type": "ListItem", "position": 3, "name": post.title }
+      ]
+    }
+  ]
+};
+---
+
+<Layout title={post.title} description={post.description} jsonLd={articleJsonLd}>
+  <article class="max-w-4xl mx-auto px-4 py-12">
+    <nav class="mb-8">
+      <ol class="flex items-center space-x-2 text-sm text-gray-500">
+        <li><a href="/" class="hover:text-exact-blue">Home</a></li>
+        <li>/</li>
+        <li><a href="/blog" class="hover:text-exact-blue">Blog</a></li>
+        <li>/</li>
+        <li class="text-gray-900 truncate">{post.title}</li>
+      </ol>
+    </nav>
+
+    <header class="mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="px-3 py-1 bg-exact-light text-exact-blue text-sm font-medium rounded-full">{post.category}</span>
+        <span class="text-gray-500 text-sm">{post.readTime} leestijd</span>
+      </div>
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">{post.title}</h1>
+      <p class="text-xl text-gray-600">{post.description}</p>
+      <time class="block mt-4 text-gray-500">
+        {new Date(post.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
+      </time>
+    </header>
+
+    {slug === 'vijf-nieuwe-features-exact-online' && (
+      <div class="prose prose-lg max-w-none">
+
+        <div class="bg-gray-50 border-l-4 border-exact-blue p-6 rounded-r-lg mb-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-2">In het kort</p>
+          <ul class="text-gray-700 space-y-1 list-disc list-inside">
+            <li><strong>Facturen downloaden</strong> - vraag gewoon om de factuur en je krijgt een PDF</li>
+            <li><strong>Meerdere bedrijven</strong> - werk met al je administraties tegelijk</li>
+            <li><strong>Blijvend gratis</strong> - geen proefperiode, gewoon gratis gebruiken</li>
+            <li><strong>Stel elke vraag</strong> - van BTW tot cashflow, het antwoord is er</li>
+          </ul>
+        </div>
+
+        <p>Er is flink doorgebouwd. Het resultaat? Je kunt nu veel meer vragen stellen aan je boekhouding - en de antwoorden komen sneller.</p>
+
+        <h2>Vraag om een factuur, krijg een PDF</h2>
+
+        <p>Je kent het wel: een klant vraagt om een kopie van een factuur. Voorheen betekende dat inloggen in Exact Online, zoeken, klikken, exporteren...</p>
+
+        <p>Nu vraag je gewoon:</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="text-gray-800 font-medium">"Stuur mij factuur 2024-001 als PDF"</p>
+        </div>
+
+        <p>Klaar. Je krijgt het document direct.</p>
+
+        <p>Dit werkt ook voor meerdere facturen tegelijk:</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="text-gray-800 font-medium">"Geef mij alle openstaande facturen van Bakkerij De Gouden Croissant"</p>
+        </div>
+
+        <p>Perfect voor als je accountant iets nodig heeft, of als je snel wilt controleren wat er nog openstaat.</p>
+
+        <h2>Werk met meerdere bedrijven tegelijk</h2>
+
+        <p>Heb je een holding? Meerdere BV's? Of ben je accountant met klanten?</p>
+
+        <p>Je kunt nu kiezen welke administraties je wilt bevragen. En wisselen kan op elk moment.</p>
+
+        <div class="bg-gray-50 rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold text-gray-900 mb-3">Hoeveel administraties per plan?</p>
+          <ul class="text-gray-700 space-y-2">
+            <li><strong>Gratis:</strong> 2 bedrijven</li>
+            <li><strong>Starter:</strong> 3 bedrijven</li>
+            <li><strong>Pro:</strong> 10 bedrijven</li>
+            <li><strong>Enterprise:</strong> onbeperkt</li>
+          </ul>
+        </div>
+
+        <p>Je bepaalt zelf welke administraties actief zijn. En switchen kost je een paar klikken.</p>
+
+        <h2>Gratis betekent gratis</h2>
+
+        <p>Geen proefperiode van 14 dagen. Geen creditcard nodig.</p>
+
+        <p>Je krijgt elke maand vragen die je kunt stellen aan je boekhouding. Dat blijft zo, voor altijd.</p>
+
+        <p>Wil je meer? Dan kun je upgraden. Maar je hoeft niet. Probeer het gewoon uit zonder druk.</p>
+
+        <h2>Stel vragen over alles in je administratie</h2>
+
+        <p>Het begon met een paar mogelijkheden. Nu kun je vragen stellen over vrijwel alles:</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="text-gray-800 font-medium mb-3">"Hoeveel BTW moet ik dit kwartaal afdragen?"</p>
+          <p class="text-gray-800 font-medium mb-3">"Wat is mijn cashflow de komende 3 maanden?"</p>
+          <p class="text-gray-800 font-medium mb-3">"Welke facturen van klant X staan nog open?"</p>
+          <p class="text-gray-800 font-medium">"Hoeveel uur heb ik geschreven op project Y?"</p>
+        </div>
+
+        <p>Van financiele overzichten tot klantinformatie. Van projecten tot voorraad. Een koppeling, alle informatie.</p>
+
+        <h2>Hulp nodig? Chat direct vanuit je dashboard</h2>
+
+        <p>Geen e-mails die verloren gaan. Geen apart ticketsysteem.</p>
+
+        <p>Stuur een bericht vanuit je dashboard en je krijgt antwoord op dezelfde plek. Doordat je account direct zichtbaar is, krijg je vaak binnen minuten hulp.</p>
+
+        <h2>Zelf proberen?</h2>
+
+        <p><a href="/signup">Start gratis</a> en stel je eerste vraag. Binnen vijf minuten ben je klaar.</p>
+      </div>
+    )}
+
+    {slug === 'nog-makkelijker-inloggen' && (
+      <div class="prose prose-lg max-w-none">
+
+        <!-- Samenvatting voor featured snippet -->
+        <div class="bg-gray-50 border-l-4 border-exact-blue p-6 rounded-r-lg mb-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-2">TL;DR</p>
+          <ul class="text-gray-700 space-y-1 list-disc list-inside">
+            <li><strong>Geen codes meer kopiëren</strong> — één URL, klaar</li>
+            <li><strong>Inloggen via je browser</strong> — gewoon met je Exact Online account</li>
+            <li><strong>Verbinding blijft werken</strong> — nooit meer handmatig opnieuw verbinden</li>
+            <li>Werkt met Claude Desktop, Claude Code én ChatGPT</li>
+          </ul>
+        </div>
+
+        <p>Groot nieuws: verbinden met Exact Online is vanaf nu <strong>nóg simpeler</strong>. Geen codes meer kopiëren, geen lange adressen meer onthouden. Gewoon één keer klikken en inloggen via je browser. Klaar.</p>
+
+        <h2>Wat is er veranderd?</h2>
+
+        <h3>Vroeger: codes kopiëren</h3>
+        <p>Het oude proces zag er zo uit:</p>
+        <ol>
+          <li>Inloggen op praatmetjeboekhouding.nl</li>
+          <li>Exact Online koppelen</li>
+          <li>Een sleutelcode kopiëren</li>
+          <li>Die code in een adres plakken</li>
+          <li>Instellingen aanpassen</li>
+          <li>Claude herstarten</li>
+        </ol>
+        <p>Niet heel ingewikkeld, maar ook niet ideaal. En als je je code kwijtraakte, moest je opnieuw beginnen.</p>
+
+        <h3>Nu: inloggen via je browser</h3>
+        <p>Het nieuwe proces:</p>
+        <ol>
+          <li>Eén URL toevoegen aan Claude</li>
+          <li>Claude opent je browser</li>
+          <li>Log in met Exact Online</li>
+          <li>Klaar!</li>
+        </ol>
+        <p>Dat is het. Geen codes, geen kopiëren, geen gedoe.</p>
+
+        <h2>Hoe werkt het?</h2>
+        <p>De nieuwe methode gebruikt dezelfde beveiligingsstandaard die banken en grote techbedrijven gebruiken. Wanneer je voor het eerst een vraag stelt aan Claude over je boekhouding:</p>
+
+        <ol>
+          <li>Claude ziet dat je nog niet bent ingelogd</li>
+          <li>Je browser opent automatisch naar Exact Online</li>
+          <li>Je logt in met je bestaande Exact Online account</li>
+          <li>Exact Online bevestigt de verbinding aan Claude</li>
+          <li>Je kunt direct vragen stellen</li>
+        </ol>
+
+        <p>De verbinding wordt veilig opgeslagen en automatisch vernieuwd. Je hoeft nooit meer handmatig opnieuw te verbinden.</p>
+
+        <!-- Mid-article CTA -->
+        <div class="bg-exact-light rounded-xl p-6 my-8 text-center not-prose">
+          <p class="text-lg font-semibold text-gray-900 mb-2">Direct aan de slag?</p>
+          <p class="text-gray-600 mb-4">Bekijk de nieuwe setup handleiding.</p>
+          <a href="/docs/claude-desktop-setup" class="inline-block px-6 py-2 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">Setup handleiding</a>
+        </div>
+
+        <h2>Hoe stel je het in?</h2>
+        <p>De instelling is simpel. Volg de instructies op onze <a href="/docs/claude-desktop-setup">setup pagina</a>. In 2 minuten ben je klaar.</p>
+
+        <p>Het enige wat je nodig hebt is de koppeling-URL. Die vind je op je <a href="/dashboard">dashboard</a> na het verbinden met Exact Online.</p>
+
+        <h2>Werkt het ook met ChatGPT?</h2>
+        <p>Ja! ChatGPT ondersteunt dezelfde verbinding. De stappen zijn vergelijkbaar:</p>
+        <ol>
+          <li>Ga naar ChatGPT instellingen</li>
+          <li>Voeg de koppeling toe (de URL staat op je dashboard)</li>
+          <li>ChatGPT vraagt je om in te loggen</li>
+          <li>Log in via Exact Online</li>
+          <li>Klaar!</li>
+        </ol>
+
+        <h2>Wat als ik de oude methode gebruik?</h2>
+        <p>Je bestaande verbinding blijft gewoon werken. Je hoeft niets te veranderen. Maar bij een nieuwe installatie raden we de nieuwe methode aan — het is simpeler en veiliger.</p>
+
+        <h2>Voordelen van de nieuwe aanpak</h2>
+
+        <h3>Veiliger</h3>
+        <ul>
+          <li>Geen codes meer die je kunt verliezen of per ongeluk delen</li>
+          <li>De verbinding verloopt automatisch en wordt stilletjes vernieuwd</li>
+          <li>Dezelfde beveiliging die banken gebruiken</li>
+        </ul>
+
+        <h3>Simpeler</h3>
+        <ul>
+          <li>Eén URL voor iedereen — geen persoonlijke codes</li>
+          <li>Niets meer kopiëren of plakken</li>
+          <li>Verbinding blijft vanzelf werken — nooit meer handmatig opnieuw verbinden</li>
+        </ul>
+
+        <h3>Betrouwbaarder</h3>
+        <ul>
+          <li>Als de verbinding verloopt, vraagt Claude automatisch opnieuw om in te loggen</li>
+          <li>Geen foutmeldingen meer over ongeldige codes</li>
+          <li>Werkt consistent op alle platforms</li>
+        </ul>
+
+        <h2>Aan de slag</h2>
+        <p>Klaar om over te stappen? Volg onze <a href="/docs/claude-desktop-setup">bijgewerkte setup handleiding</a> voor stap-voor-stap instructies. Het kost je letterlijk 2 minuten.</p>
+
+        <p>Heb je vragen? <a href="/docs">Bekijk onze documentatie</a> of stuur een bericht via het contactformulier.</p>
+      </div>
+    )}
+
+    {slug === '17-nieuwe-mcp-tools-exact-online' && (
+      <div class="prose prose-lg max-w-none">
+
+        <div class="bg-gray-50 border-l-4 border-exact-blue p-6 rounded-r-lg mb-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-2">In het kort</p>
+          <ul class="text-gray-700 space-y-1 list-disc list-inside">
+            <li><strong>Nieuwe vragen mogelijk</strong> - over projecten, valuta, kostenplaatsen, investeringen, contracten en marges</li>
+            <li><strong>Voor jouw type bedrijf</strong> - of je nu consultant bent, importeur, SaaS-ondernemer of handelaar</li>
+            <li><strong>Veilig</strong> - je vraagt alleen informatie op, er wordt niets gewijzigd in je administratie</li>
+          </ul>
+        </div>
+
+        <p>Je kunt nu veel meer vragen stellen aan je Exact Online administratie. Hieronder lees je per type bedrijf wat je nu kunt vragen - met concrete voorbeelden die je direct kunt gebruiken.</p>
+
+        <nav class="bg-gray-50 rounded-lg p-6 my-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-3">Spring naar jouw situatie</p>
+          <ol class="space-y-1 text-exact-blue list-decimal list-inside">
+            <li><a href="#consultants" class="hover:underline">Consultants en projectbureaus</a></li>
+            <li><a href="#importeurs" class="hover:underline">Importeurs en exporteurs</a></li>
+            <li><a href="#grotere-bedrijven" class="hover:underline">Grotere bedrijven met afdelingen</a></li>
+            <li><a href="#productiebedrijven" class="hover:underline">Productiebedrijven met investeringen</a></li>
+            <li><a href="#saas" class="hover:underline">SaaS en abonnementsbedrijven</a></li>
+            <li><a href="#handel" class="hover:underline">Handel en retail</a></li>
+          </ol>
+        </nav>
+
+        <h2 id="consultants">Voor consultants en projectbureaus</h2>
+
+        <p>Werk je op projectbasis? Nu kun je vragen stellen over je projecten en onderhanden werk.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je nu vragen:</p>
+          <ul class="space-y-2">
+            <li>"Welke projecten lopen achter op budget?"</li>
+            <li>"Hoeveel onderhanden werk moet nog gefactureerd worden?"</li>
+            <li>"Geef een overzicht van projecten die bijna op zijn maar nog niet volledig gefactureerd"</li>
+            <li>"Wat zijn mijn openstaande projectfacturen?"</li>
+          </ul>
+        </div>
+
+        <p>Geen rapporten meer exporteren en samenvoegen. Je krijgt direct inzicht in wat je nog moet factureren.</p>
+
+        <h2 id="importeurs">Voor importeurs en exporteurs</h2>
+
+        <p>Werk je met buitenlandse leveranciers of klanten? Vraag nu naar valuta en wisselkoersen.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je nu vragen:</p>
+          <ul class="space-y-2">
+            <li>"Wat is de huidige wisselkoers voor USD naar EUR?"</li>
+            <li>"Met welke valuta's werk ik in mijn administratie?"</li>
+            <li>"Hoeveel heb ik dit kwartaal in dollars ingekocht?"</li>
+            <li>"Toon mijn openstaande facturen in vreemde valuta"</li>
+          </ul>
+        </div>
+
+        <h2 id="grotere-bedrijven">Voor grotere bedrijven met afdelingen</h2>
+
+        <p>Heb je meerdere vestigingen of afdelingen? Vraag naar resultaten per kostenplaats.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je nu vragen:</p>
+          <ul class="space-y-2">
+            <li>"Vergelijk de kosten van afdeling Marketing met Sales dit kwartaal"</li>
+            <li>"Wat zijn de resultaten per vestiging?"</li>
+            <li>"Toon de top 3 kostenplaatsen met de hoogste uitgaven"</li>
+            <li>"Hoe verhoudt het budget zich tot de werkelijke kosten per afdeling?"</li>
+          </ul>
+        </div>
+
+        <div class="bg-exact-light rounded-xl p-6 my-8 text-center not-prose">
+          <p class="text-lg font-semibold text-gray-900 mb-2">Direct uitproberen?</p>
+          <p class="text-gray-600 mb-4">Verbind je Exact Online en stel je eerste vraag.</p>
+          <a href="/connect" class="inline-block px-6 py-2 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">Gratis starten</a>
+          <span class="mx-2 text-gray-400">of</span>
+          <a href="/pricing" class="text-exact-blue font-semibold hover:underline">bekijk de prijzen</a>
+        </div>
+
+        <h2 id="productiebedrijven">Voor productiebedrijven met investeringen</h2>
+
+        <p>Heb je machines, voertuigen of andere bedrijfsmiddelen? Vraag naar je vaste activa en afschrijvingen.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je nu vragen:</p>
+          <ul class="space-y-2">
+            <li>"Wat is de totale boekwaarde van mijn bedrijfsmiddelen?"</li>
+            <li>"Hoeveel schrijf ik dit jaar af?"</li>
+            <li>"Welke activa zijn bijna volledig afgeschreven?"</li>
+            <li>"Geef een overzicht van mijn afschrijvingen per categorie"</li>
+          </ul>
+        </div>
+
+        <h2 id="saas">Voor SaaS en abonnementsbedrijven</h2>
+
+        <p>Werk je met terugkerende inkomsten? Vraag naar je contracten en MRR.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je nu vragen:</p>
+          <ul class="space-y-2">
+            <li>"Wat is mijn maandelijkse terugkerende omzet (MRR)?"</li>
+            <li>"Welke contracten verlopen de komende 90 dagen?"</li>
+            <li>"Bereken mijn jaarlijkse terugkerende omzet (ARR)"</li>
+            <li>"Welke klanten hebben de hoogste contractwaarde?"</li>
+          </ul>
+        </div>
+
+        <p>Perfect voor SaaS-bedrijven die grip willen op hun recurring revenue.</p>
+
+        <h2 id="handel">Voor handel en retail</h2>
+
+        <p>Verkoop je producten? Vraag nu naar je marges en prijzen.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je nu vragen:</p>
+          <ul class="space-y-2">
+            <li>"Welke 10 artikelen hebben de laagste marge?"</li>
+            <li>"Vergelijk mijn inkoop- en verkoopprijzen voor product X"</li>
+            <li>"Toon de marge per productcategorie"</li>
+            <li>"Welke producten leveren het meeste op?"</li>
+          </ul>
+        </div>
+
+        <p>Je krijgt direct inzicht in welke producten geld opleveren - en welke niet.</p>
+
+        <div class="border-l-4 border-gray-300 pl-6 my-8 not-prose">
+          <p class="text-lg italic text-gray-700">"Ik krijg eindelijk grip op mijn onderhanden werk. Voorheen moest ik drie rapporten exporteren om te zien welke projecten gefactureerd moesten worden."</p>
+          <p class="text-sm text-gray-500 mt-2">-- Consultant, Exact Online gebruiker</p>
+        </div>
+
+        <h2>Wat blijft hetzelfde?</h2>
+
+        <p><strong>Veiligheid:</strong> Je kunt alleen informatie opvragen. Er kan niets gewijzigd worden in je administratie.</p>
+
+        <p><strong>Geen opslag:</strong> We slaan geen financiele data op.</p>
+
+        <p><strong>Gratis blijft gratis:</strong> Je kunt nog steeds gratis vragen stellen elke maand.</p>
+
+        <h2>Aan de slag</h2>
+
+        <p>Deze mogelijkheden zijn direct beschikbaar. Je hoeft niets te updaten.</p>
+
+        <p>Bekijk de <a href="/docs">documentatie</a> of <a href="/connect">start direct</a> met je eerste vraag.</p>
+      </div>
+    )}
+
+    {slug === 'mcp-claude-documenten-berekeningen' && (
+      <div class="prose prose-lg max-w-none">
+
+        <!-- Samenvatting voor featured snippet (Bram: SEO) -->
+        <div class="bg-gray-50 border-l-4 border-exact-blue p-6 rounded-r-lg mb-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-2">Samenvatting</p>
+          <ul class="text-gray-700 space-y-1 list-disc list-inside">
+            <li>Genereer direct debiteurenoverzichten, kwartaalrapporten en BTW-berekeningen vanuit Exact Online</li>
+            <li><a href="https://www.anthropic.com/claude" class="text-exact-blue hover:underline" target="_blank" rel="noopener">Claude</a> haalt je data op, rekent, combineert en maakt er een leesbaar document van</li>
+            <li>Traditionele aanpak kost 30-60 minuten per rapport — met AI is het een kwestie van seconden</li>
+            <li>Alleen leesrechten, geen opslag van financiële data, volledig versleuteld</li>
+          </ul>
+        </div>
+
+        <p>Je kent het vast: je wilt snel een debiteurenoverzicht voor een klantgesprek, een kwartaalrapport voor je vennoten, of een berekening van je BTW-positie. In Exact Online zit alle data — maar het kost je moeite om er iets bruikbaars van te maken.</p>
+        <p>Met de koppeling tussen Exact Online en Claude verandert dat. Je vraagt in gewoon Nederlands wat je nodig hebt, en Claude maakt het voor je. Geen Excel. Geen exporteren. Gewoon vragen en krijgen.</p>
+
+        <!-- Inhoudsopgave (Bram: SEO + Google sitelinks) -->
+        <nav class="bg-gray-50 rounded-lg p-6 my-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-3">In dit artikel</p>
+          <ol class="space-y-1 text-exact-blue list-decimal list-inside">
+            <li><a href="#wat-is-mcp" class="hover:underline">Hoe praat Claude met je boekhouding?</a></li>
+            <li><a href="#traditioneel-vs-mcp" class="hover:underline">Traditioneel vs. AI: de vergelijking</a></li>
+            <li><a href="#5-dingen" class="hover:underline">5 dingen die je kunt laten maken</a></li>
+            <li><a href="#waarom-dit-werkt" class="hover:underline">Waarom dit werkt</a></li>
+            <li><a href="#veiligheid" class="hover:underline">Wat je moet weten over veiligheid</a></li>
+            <li><a href="#zo-begin-je" class="hover:underline">Zo begin je</a></li>
+            <li><a href="#faq" class="hover:underline">Veelgestelde vragen</a></li>
+          </ol>
+        </nav>
+
+        <h2 id="wat-is-mcp">Hoe praat Claude met je boekhouding?</h2>
+        <p>De koppeling tussen Claude en Exact Online werkt via een beveiligde standaard. Denk aan een brug tussen jouw boekhouddata en de AI. Claude vraagt de gegevens op, jij hoeft niets te exporteren of te kopiëren.</p>
+        <p>Benieuwd naar de techniek erachter? Lees dan <a href="/blog/wat-is-mcp-protocol">Hoe werkt de koppeling? Uitleg voor niet-techneuten</a>.</p>
+        <p>Het bijzondere is: Claude leest niet alleen je data. Claude kan er ook mee <strong>rekenen</strong>, <strong>combineren</strong> en <strong>documenten</strong> van maken. Dat is waar het interessant wordt.</p>
+
+        <!-- Vergelijkingstabel (Tom: Growth - voor/na vergelijking) -->
+        <h2 id="traditioneel-vs-mcp">Traditioneel vs. AI: de vergelijking</h2>
+        <p>Wat kost het je nu om financiële inzichten uit Exact Online te halen, en wat verandert er met de AI-koppeling?</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Taak</th>
+                <th>Traditionele aanpak</th>
+                <th>Met Claude</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Debiteurenoverzicht</td>
+                <td>30 min (filteren, exporteren, Excel)</td>
+                <td>1 vraag, direct antwoord</td>
+              </tr>
+              <tr>
+                <td>Kwartaalrapport</td>
+                <td>2-4 uur (data verzamelen, opmaken)</td>
+                <td>1 vraag, compleet rapport</td>
+              </tr>
+              <tr>
+                <td>BTW-controle</td>
+                <td>1-2 uur (handmatig per tarief)</td>
+                <td>1 vraag, overzicht per tarief</td>
+              </tr>
+              <tr>
+                <td>Klantanalyse</td>
+                <td>1-3 uur (draaitabellen, handmatig)</td>
+                <td>1 vraag, top 10 met trends</td>
+              </tr>
+              <tr>
+                <td>Cashflow-prognose</td>
+                <td>Halve dag of financieel adviseur</td>
+                <td>1 vraag, 3-maanden vooruit</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Dat is geen subtiel verschil. Het is een andere manier van werken. Ben je <a href="/blog/ai-boekhouding-zzp">ZZP'er</a>? Dan bespaar je hiermee uren per maand die je in je klanten kunt steken.</p>
+
+        <h2 id="5-dingen">5 dingen die je kunt laten maken</h2>
+
+        <h3>1. Debiteurenoverzicht met risico-analyse</h3>
+        <p><strong>Wat je vraagt:</strong></p>
+        <blockquote>"Maak een overzicht van al mijn openstaande facturen, gesorteerd op ouderdom. Voeg een risicobeoordeling toe."</blockquote>
+        <p><strong>Wat je krijgt:</strong></p>
+        <ul>
+          <li>Alle openstaande facturen per klant</li>
+          <li>Aantal dagen open per factuur</li>
+          <li>Risico-inschatting (laag/midden/hoog) op basis van betaalhistorie</li>
+          <li>Totaalbedrag per risico-categorie</li>
+          <li>Aanbeveling welke klanten je eerst moet bellen</li>
+        </ul>
+
+        <h3>2. Kwartaalrapport voor vennoten of investeerders</h3>
+        <p><strong>Wat je vraagt:</strong></p>
+        <blockquote>"Maak een kwartaalrapport Q4 2025 met omzet, kosten, winst en vergelijking met Q3."</blockquote>
+        <p><strong>Wat je krijgt:</strong></p>
+        <ul>
+          <li>Omzet breakdown per maand (oktober, november, december)</li>
+          <li>Kosten per categorie</li>
+          <li>Brutowinst en nettoresultaat</li>
+          <li>Vergelijking met vorig kwartaal inclusief percentages</li>
+          <li>Trends en opvallende verschuivingen</li>
+          <li>Samenvatting in 3-4 bulletpoints</li>
+        </ul>
+
+        <h3>3. BTW-berekening en controle</h3>
+        <p><strong>Wat je vraagt:</strong></p>
+        <blockquote>"Bereken mijn BTW-positie voor Q4 2025. Geef een overzicht per tarief en signaleer afwijkingen."</blockquote>
+        <p><strong>Wat je krijgt:</strong></p>
+        <ul>
+          <li>BTW verschuldigd per tarief (21%, 9%, 0%)</li>
+          <li>BTW vooraftrek op inkoop</li>
+          <li>Netto BTW-positie (te betalen of terug te vragen)</li>
+          <li>Vergelijking met vorig kwartaal</li>
+          <li>Waarschuwingen bij ongebruikelijke patronen</li>
+        </ul>
+        <p>Voor boekhouders en accountants die dit voor meerdere klanten doen: dit scheelt tientallen uren per kwartaal.</p>
+
+        <!-- Mid-article CTA (Tom: Growth - lezer is nu warm) -->
+        <div class="bg-exact-light rounded-xl p-6 my-8 text-center not-prose">
+          <p class="text-lg font-semibold text-gray-900 mb-2">Wil je dit zelf proberen?</p>
+          <p class="text-gray-600 mb-4">Verbind je Exact Online en stel je eerste vraag. Gratis tot 200 verzoeken per maand.</p>
+          <a href="/connect" class="inline-block px-6 py-2 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">Gratis starten</a>
+          <span class="mx-2 text-gray-400">of</span>
+          <a href="/pricing" class="text-exact-blue font-semibold hover:underline">bekijk de prijzen</a>
+        </div>
+
+        <h3>4. Klantanalyse met omzetberekening</h3>
+        <p><strong>Wat je vraagt:</strong></p>
+        <blockquote>"Analyseer mijn top 10 klanten. Bereken de omzet per klant, het aandeel in de totale omzet, en het betaalgedrag."</blockquote>
+        <p><strong>Wat je krijgt:</strong></p>
+        <ul>
+          <li>Top 10 klanten op omzet</li>
+          <li>Omzet per klant in euro's en als percentage van totaal</li>
+          <li>Gemiddelde betaaltermijn per klant</li>
+          <li>Trend (groei/daling ten opzichte van vorig jaar)</li>
+          <li>Concentratierisico (is je omzet te afhankelijk van 1-2 klanten?)</li>
+        </ul>
+        <p>Dit is strategische informatie die je helpt bij beslissingen over je klantenportfolio. Normaal gesproken een consultant-klus — nu een vraag aan Claude.</p>
+
+        <h3>5. Cashflow-prognose</h3>
+        <p><strong>Wat je vraagt:</strong></p>
+        <blockquote>"Maak een cashflow-prognose voor de komende 3 maanden op basis van mijn openstaande facturen en terugkerende kosten."</blockquote>
+        <p><strong>Wat je krijgt:</strong></p>
+        <ul>
+          <li>Verwachte inkomsten per maand (op basis van openstaande facturen en betaalpatronen)</li>
+          <li>Verwachte uitgaven per maand (op basis van historische kostenpatronen)</li>
+          <li>Netto cashflow per maand</li>
+          <li>Waarschuwing als er een maand krap wordt</li>
+          <li>Aanbevelingen voor opvolging</li>
+        </ul>
+
+        <!-- Social proof (Tom: Growth - vertrouwen opbouwen) -->
+        <div class="border-l-4 border-gray-300 pl-6 my-8 not-prose">
+          <p class="text-lg italic text-gray-700">"Ik bereidde altijd een hele ochtend mijn kwartaalcijfers voor. Nu vraag ik Claude om een samenvatting en heb ik binnen een minuut een rapport dat ik zo naar mijn vennoten kan sturen."</p>
+          <p class="text-sm text-gray-500 mt-2">— MKB-ondernemer, Exact Online gebruiker</p>
+        </div>
+
+        <h2 id="waarom-dit-werkt">Waarom dit werkt</h2>
+        <p>De kracht zit in de combinatie van drie dingen:</p>
+        <p><strong>1. Directe toegang tot actuele data</strong> — Claude heeft via de beveiligde koppeling direct toegang tot je Exact Online administratie. Geen exports, geen verouderde spreadsheets.</p>
+        <p><strong>2. Rekenkundig vermogen</strong> — Claude kan rekenen. Percentages, vergelijkingen, trends, uitschieters. Zonder dat jij formules hoeft te bedenken.</p>
+        <p><strong>3. Natuurlijke taal output</strong> — Het resultaat is niet een tabel met nummers. Claude schrijft conclusies, legt verbanden uit, en geeft aanbevelingen in gewoon Nederlands.</p>
+
+        <h2 id="veiligheid">Wat je moet weten over veiligheid</h2>
+        <ul>
+          <li><strong>Alleen lezen</strong> — Claude kan niets wijzigen in je Exact Online. Dit is technisch afgedwongen.</li>
+          <li><strong>Geen opslag</strong> — Je financiële data wordt niet opgeslagen. Elk verzoek gaat direct naar Exact Online en weer terug.</li>
+          <li><strong>Jouw autorisatie</strong> — Alleen jij bepaalt welke data toegankelijk is via je persoonlijke koppeling.</li>
+          <li><strong>Versleuteld</strong> — Alle communicatie is versleuteld via HTTPS.</li>
+        </ul>
+        <p>Meer weten? Lees <a href="/blog/exact-online-chatgpt-koppelen">Exact Online koppelen met AI: Stap-voor-stap uitleg</a>.</p>
+
+        <h2 id="zo-begin-je">Zo begin je</h2>
+        <ol>
+          <li><strong>Ga naar</strong> <a href="/connect">praatmetjeboekhouding.nl/connect</a></li>
+          <li><strong>Verbind</strong> je Exact Online account (alleen leesrechten)</li>
+          <li><strong>Volg de instructies</strong> om je AI-assistent te verbinden</li>
+          <li><strong>Stel je eerste vraag</strong> — begin simpel: "Wat is mijn omzet deze maand?"</li>
+        </ol>
+        <p>Daarna kun je steeds complexere vragen stellen. Claude onthoudt de context, dus je kunt doorvragen: "En hoe verhoudt zich dat tot vorig jaar?" of "Maak daar een rapport van."</p>
+
+        <h2 id="faq">Veelgestelde vragen</h2>
+        <h3>Kan Claude ook PDF-rapporten maken?</h3>
+        <p>Claude genereert tekst en tabellen die je eenvoudig kunt kopiëren naar Word, Google Docs, of een PDF-generator. De output is direct bruikbaar.</p>
+
+        <h3>Werkt dit ook met ChatGPT?</h3>
+        <p>Ja. De koppeling werkt met Claude, ChatGPT en andere AI-assistenten. <a href="/blog/exact-online-chatgpt-koppelen">Lees hier meer over de ChatGPT-koppeling</a>.</p>
+
+        <h3>Hoe nauwkeurig zijn de berekeningen?</h3>
+        <p>Claude rekent met de exacte cijfers uit je Exact Online administratie. De berekeningen zijn net zo nauwkeurig als de data die erin gaat.</p>
+
+        <h3>Kost het geld?</h3>
+        <p>Je kunt gratis starten met ~60 vragen per maand. Heb je meer nodig? Starter €9/maand, Pro €25/maand.</p>
+      </div>
+    )}
+
+    {slug === 'exact-online-chatgpt-koppelen' && (
+      <div class="prose prose-lg max-w-none">
+
+        <p>Stel je voor: je opent ChatGPT en vraagt "Hoeveel omzet heb ik deze maand?" Je krijgt direct antwoord uit je Exact Online boekhouding. Geen rapporten uitdraaien, geen Excel. Gewoon vragen en antwoord krijgen.</p>
+
+        <p>Dat kan nu. Met <strong>Praat met je Boekhouding</strong> verbind je Exact Online met ChatGPT of Claude. In 3 simpele stappen.</p>
+
+        <div class="bg-gray-50 rounded-lg p-4 my-4 not-prose">
+          <p class="text-sm text-gray-600"><strong>Wat heb je nodig?</strong> Een Exact Online account, ChatGPT Plus of Claude Pro, en 5 minuten tijd.</p>
+        </div>
+
+        <h2>Stap 1: Log in met Exact Online</h2>
+        <p>Ga naar <a href="/connect">praatmetjeboekhouding.nl/connect</a> en klik op "Verbinden met Exact Online". Je logt in met je gewone Exact-gegevens.</p>
+
+        <div class="bg-gray-50 rounded-lg p-4 my-4 not-prose">
+          <p class="text-sm text-gray-600">De koppeling kan alleen lezen. Er kan niets gewijzigd worden in je boekhouding.</p>
+        </div>
+
+        <h2>Stap 2: Geef toestemming</h2>
+        <p>Exact Online vraagt of je toestemming geeft. Klik op "Toestaan". Dan zie je een bevestiging dat de koppeling gelukt is.</p>
+
+        <h2>Stap 3: Voeg de koppeling toe aan ChatGPT</h2>
+        <p>Je krijgt een stukje tekst om te kopieren. Plak dit in ChatGPT of Claude volgens de instructies op het scherm. Klaar!</p>
+
+        <div class="bg-gray-50 rounded-lg p-4 my-4 not-prose">
+          <p class="text-sm text-gray-600">De setup wizard helpt je stap voor stap. Je hoeft niets technisch te weten.</p>
+        </div>
+
+        <h2>Stel je eerste vraag</h2>
+        <p>Open ChatGPT of Claude en vraag bijvoorbeeld: "Wat is mijn omzet deze maand?" of "Welke facturen staan nog open?"</p>
+        <p>Dan zie je direct je cijfers uit Exact Online.</p>
+
+        <h2>Veelgestelde vragen</h2>
+
+        <h3>Is mijn data veilig?</h3>
+        <p>Ja. Wij slaan geen financiele gegevens op. Alles gaat rechtstreeks van Exact Online naar jouw ChatGPT.</p>
+
+        <h3>Wat kan ChatGPT zien?</h3>
+        <p>Alleen wat jij mag zien in Exact Online: facturen, klanten, leveranciers, transacties.</p>
+
+        <h3>Kost het geld?</h3>
+        <p>Je kunt gratis starten met ongeveer 60 vragen per maand. Daarna vanaf 9 euro per maand.</p>
+      </div>
+    )}
+
+    {slug === 'ai-boekhouding-zzp' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>Besteed je uren aan je administratie?</h2>
+        <p>Je bent ondernemer geworden om je vak uit te oefenen. Niet om facturen te sorteren. Toch ben je elke maand uren kwijt aan je boekhouding.</p>
+
+        <p>Met AI krijg je die tijd terug. Stel gewoon een vraag en je krijgt direct antwoord.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je vragen:</p>
+          <ul class="space-y-2">
+            <li>"Hoeveel BTW moet ik dit kwartaal betalen?"</li>
+            <li>"Welke facturen staan nog open?"</li>
+            <li>"Wat was mijn omzet vorige maand?"</li>
+            <li>"Wie zijn mijn beste klanten dit jaar?"</li>
+          </ul>
+        </div>
+
+        <h2>Geen rapporten meer uitdraaien</h2>
+        <p>Vergeet ingewikkelde menu's en Excel exports. Je vraagt gewoon wat je wilt weten. De AI haalt het direct uit je Exact Online.</p>
+
+        <h2>Je blijft zelf in controle</h2>
+        <p>De AI kan alleen meekijken, niet aanpassen. Je boekhouding blijft veilig. En je boekhouder kan gewoon meekijken wanneer nodig.</p>
+
+        <h2>Begin vandaag nog</h2>
+        <p>In 5 minuten heb je de koppeling gemaakt. Daarna stel je gewoon je eerste vraag.</p>
+      </div>
+    )}
+
+    {slug === 'openstaande-facturen-ai' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>Weet jij welke facturen nog open staan?</h2>
+        <p>Je hebt hard gewerkt en netjes gefactureerd. Maar betaalt iedereen ook op tijd? Dat uitzoeken kost vaak een halfuur per week.</p>
+
+        <p>Met AI zie je het in seconden. Vraag gewoon wie je nog geld schuldig is.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je vragen:</p>
+          <ul class="space-y-2">
+            <li>"Welke facturen staan langer dan 30 dagen open?"</li>
+            <li>"Hoeveel geld staat er nog uit in totaal?"</li>
+            <li>"Welke klant moet ik het eerst nabellen?"</li>
+            <li>"Wie betaalt altijd te laat?"</li>
+          </ul>
+        </div>
+
+        <h2>Sneller je geld binnen</h2>
+        <p>Als je weet wie je moet nabellen, kun je dat meteen doen. Hoe eerder je belt, hoe eerder je betaald krijgt. Simpel maar effectief.</p>
+
+        <h2>Geen Excel meer nodig</h2>
+        <p>Vroeger: Exact Online openen, filters instellen, exporteren naar Excel, handmatig analyseren. Nu: gewoon vragen.</p>
+
+        <h2>Houd je cashflow gezond</h2>
+        <p>Wekelijks even checken wie je nog geld schuldig is. Het kost je 2 minuten en voorkomt verrassingen.</p>
+      </div>
+    )}
+
+    {slug === 'claude-voor-accountants' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>Waarom Claude voor accountants?</h2>
+        <p>Claude is nauwkeurig, begrijpt context, en werkt direct samen met Exact Online. Ideaal voor accountantskantoren die sneller willen werken.</p>
+
+        <h2>Toepassingen voor accountantskantoren</h2>
+        <h3>Klantvragen beantwoorden</h3>
+        <p>Je klant belt: "Hoeveel winst heb ik dit kwartaal?" Je stelt de vraag aan Claude en hebt direct antwoord. Terwijl je klant nog aan de lijn is.</p>
+
+        <h3>Analyses over meerdere klanten</h3>
+        <p>Vergelijk de brutomarge van al je retail klanten en laat uitschieters markeren. In seconden, niet in uren.</p>
+
+        <h3>BTW controle</h3>
+        <p>Vraag een overzicht van BTW verschuldigd en te vorderen, uitgesplitst per tarief. Per klant of over alle administraties heen.</p>
+
+        <h2>Wat levert het op?</h2>
+        <p>Accountantskantoren die dit gebruiken besparen gemiddeld 60% tijd per klantvraag. BTW controles gaan 40% sneller. En klanten waarderen de snelle service.</p>
+      </div>
+    )}
+
+    {slug === 'wat-is-mcp-protocol' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>MCP in één zin</h2>
+        <p><strong>MCP (Model Context Protocol)</strong> is een standaard manier om AI assistenten te verbinden met externe software en data.</p>
+
+        <h2>Het probleem vóór MCP</h2>
+        <p>AI assistenten zijn slim, maar hebben geen toegang tot je boekhoudsoftware, CRM of documenten. Je moest alles handmatig kopiëren.</p>
+
+        <h2>De oplossing met MCP</h2>
+        <p>MCP is als een universele stekker voor AI. Net zoals USB een standaard is voor apparaten, is MCP een standaard voor AI-integraties.</p>
+
+        <h2>Hoe werkt het?</h2>
+        <p>Jij vraagt → Claude begrijpt → MCP Server vertaalt → Exact Online antwoordt → Claude formuleert antwoord.</p>
+
+        <h2>Is het veilig?</h2>
+        <p>Ja: authenticatie, autorisatie, logging en encryptie zijn ingebouwd.</p>
+      </div>
+    )}
+
+    {slug === 'omzet-analyseren-ai' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>Wil je weten hoe je er financieel voor staat?</h2>
+        <p>Het is lastig om grip te houden op je cijfers. Hoeveel heb je deze maand verdiend? Groeit je omzet of daalt die? Excel geeft je antwoorden, maar kost je uren.</p>
+
+        <p>Met AI vraag je het gewoon. Je krijgt in seconden een helder antwoord.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je vragen:</p>
+          <ul class="space-y-2">
+            <li>"Wat is mijn omzet deze maand?"</li>
+            <li>"Hoe verhoudt dit kwartaal zich tot vorig jaar?"</li>
+            <li>"Wie zijn mijn 5 beste klanten?"</li>
+            <li>"In welke maand verdien ik het meest?"</li>
+            <li>"Wat is mijn gemiddelde factuur waard?"</li>
+          </ul>
+        </div>
+
+        <h2>Zie trends die je anders mist</h2>
+        <p>Vraag of je omzet stijgt of daalt. De AI vergelijkt het met vorige periodes en vertelt je wat opvalt. Zonder dat jij hoeft te rekenen.</p>
+
+        <h2>Neem betere beslissingen</h2>
+        <p>Als je weet welke klanten het meest opleveren, weet je ook waar je je tijd in moet steken. Data helpt je slimmer ondernemen.</p>
+
+        <h2>Probeer het nu</h2>
+        <p>Verbind je Exact Online en stel je eerste vraag. Binnen een minuut weet je hoe je ervoor staat.</p>
+      </div>
+    )}
+
+    {slug === 'exact-online-api-tools' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>Overzicht van Exact Online koppelingen</h2>
+
+        <h3>1. Native App Store integraties</h3>
+        <p>Kant-en-klare koppelingen. Voordeel: eenvoudig. Nadeel: beperkte aanpasbaarheid.</p>
+
+        <h3>2. Zapier / Make</h3>
+        <p>No-code automatisering. Voordeel: flexibel. Nadeel: kosten kunnen oplopen.</p>
+
+        <h3>3. Maatwerk koppeling</h3>
+        <p>Op maat gebouwd door een programmeur. Voordeel: volledig op maat. Nadeel: duur (EUR 5.000+).</p>
+
+        <h3>4. AI-integratie (Praat met je Boekhouding)</h3>
+        <p>Verbind met ChatGPT/Claude. Voordeel: natuurlijke taal, betaalbaar. Nadeel: alleen-lezen.</p>
+
+        <h2>Welke kies je?</h2>
+        <p>Voor de meeste ondernemers die snel inzicht willen, is AI-integratie de snelste optie.</p>
+      </div>
+    )}
+
+    {slug === 'boekhouding-automatiseren-2026' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>Kost je boekhouding nog steeds uren per maand?</h2>
+        <p>Je bent niet de enige. Veel ondernemers spenderen 5 tot 10 uur per maand aan hun administratie. Dat is een halve werkdag die je aan je bedrijf kunt besteden.</p>
+
+        <p>Het goede nieuws: in 2026 kun je het meeste automatiseren. Niet met dure software, maar met AI die je gewoon kunt vragen stellen.</p>
+
+        <h2>Wat kun jij laten doen door AI?</h2>
+        <p>De vervelende taken die nu uren kosten:</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je vragen:</p>
+          <ul class="space-y-2">
+            <li>"Geef me een overzicht van alle openstaande facturen"</li>
+            <li>"Hoeveel BTW moet ik dit kwartaal afdragen?"</li>
+            <li>"Wat was mijn winst vorige maand?"</li>
+            <li>"Welke kosten zijn hoger dan normaal?"</li>
+          </ul>
+        </div>
+
+        <h2>Begin klein, groei later</h2>
+        <p>Je hoeft niet alles in een keer te doen. Start met de vragen die je elke maand stelt. Als dat bevalt, ontdek je vanzelf meer mogelijkheden.</p>
+
+        <h2>Wat levert het op?</h2>
+        <p>Ondernemers die dit gebruiken besparen gemiddeld 4 uur per maand. Dat is bijna een werkweek per jaar die je terugkrijgt voor je echte werk.</p>
+
+        <h2>Start vandaag</h2>
+        <p>Maak de koppeling met je Exact Online in 5 minuten. Stel je eerste vraag en ervaar het verschil.</p>
+      </div>
+    )}
+
+    {slug === 'copilot-financiele-data' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>Bouw je dashboards met boekhouddata?</h2>
+        <p>Als je werkt met financiele data weet je hoe lastig het is om aan de juiste cijfers te komen. Koppelingen uitzoeken, inlogmethodes regelen, data omzetten. Dat kost uren voordat je iets kunt bouwen.</p>
+
+        <p>Met een koppeling naar Exact Online vraag je de data gewoon op in je code-editor.</p>
+
+        <h2>Wat kun je ermee?</h2>
+        <p>Stel vragen over de boekhouddata terwijl je codeert:</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je vragen:</p>
+          <ul class="space-y-2">
+            <li>"Geef me de omzet per maand van het afgelopen jaar"</li>
+            <li>"Welke klanten hebben het hoogste openstaande bedrag?"</li>
+            <li>"Toon de BTW-bedragen per kwartaal"</li>
+            <li>"Wat is de gemiddelde betaaltermijn?"</li>
+          </ul>
+        </div>
+
+        <h2>Voor wie is dit handig?</h2>
+        <p>Iedereen die code schrijft en werkt met financiele data. Denk aan dashboards, rapportages of integraties met andere systemen.</p>
+
+        <h2>Snel aan de slag</h2>
+        <p>Voeg de koppeling toe aan je configuratie via de <a href="/docs/claude-desktop-setup">setup pagina</a>. Daarna kun je direct vragen stellen over de boekhouddata vanuit je editor.</p>
+      </div>
+    )}
+
+    {slug === 'btw-aangifte-ai-voorbereiding' && (
+      <div class="prose prose-lg max-w-none">
+        <h2>Heb je stress voor de BTW-deadline?</h2>
+        <p>Elke drie maanden hetzelfde verhaal. Je moet je BTW-aangifte doen, maar eerst moet je alle cijfers bij elkaar zoeken. Dat kost tijd die je niet hebt.</p>
+
+        <p>Met AI heb je binnen een minuut een compleet overzicht. Je vraagt gewoon wat je wilt weten.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-6 not-prose">
+          <p class="font-semibold mb-2">Dit kun je vragen:</p>
+          <ul class="space-y-2">
+            <li>"Hoeveel BTW moet ik dit kwartaal betalen?"</li>
+            <li>"Geef me de BTW per tarief (9% en 21%)"</li>
+            <li>"Zijn er facturen zonder BTW die dat wel moeten hebben?"</li>
+            <li>"Hoe verschilt dit kwartaal van vorig kwartaal?"</li>
+          </ul>
+        </div>
+
+        <h2>Check je BTW vaker</h2>
+        <p>Niet alleen vlak voor de deadline. Even snel vragen hoe je ervoor staat kost je 30 seconden. Zo voorkom je verrassingen.</p>
+
+        <h2>Ontdek fouten op tijd</h2>
+        <p>Een factuur met het verkeerde BTW-tarief? Nu zie je het meteen. Corrigeren is makkelijker als je het vroeg ontdekt.</p>
+
+        <h2>Klaar voor de aangifte</h2>
+        <p>Als de deadline nadert, vraag je een totaaloverzicht. Je hebt alle cijfers die je nodig hebt om de aangifte in te vullen.</p>
+      </div>
+    )}
+
+    {slug === 'btw-overzicht-opvragen-exact-online-ai' && (
+      <div class="prose prose-lg max-w-none">
+
+        <!-- Samenvatting voor featured snippet -->
+        <div class="bg-gray-50 border-l-4 border-exact-blue p-6 rounded-r-lg mb-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-2">Samenvatting</p>
+          <ul class="text-gray-700 space-y-1 list-disc list-inside">
+            <li>Vraag je BTW-positie direct op via ChatGPT of Claude</li>
+            <li>Geen rapporten exporteren of Excel nodig</li>
+            <li>Alleen-lezen verbinding: AI kan niets wijzigen</li>
+            <li>Binnen 5 minuten ingesteld en werkend</li>
+          </ul>
+        </div>
+
+        <p>Je wilt weten hoe je BTW ervoor staat, maar het kost je steeds tijd om in Exact Online de juiste rapporten te vinden. Je navigeert door menu's, stelt filters in, exporteert naar Excel, en maakt handmatig berekeningen. Tegen de tijd dat je klaar bent, is er alweer een halfuur voorbij.</p>
+        <p>Wat als je met AI direct je <strong>BTW-overzicht uit Exact Online</strong> kon opvragen? Gewoon vragen: "Hoeveel BTW moet ik afdragen dit kwartaal?" en binnen seconden antwoord krijgen. In dit artikel lees je precies hoe dat werkt, welke vragen je kunt stellen, en hoe je vandaag nog begint.</p>
+
+        <!-- Inhoudsopgave -->
+        <nav class="bg-gray-50 rounded-lg p-6 my-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-3">In dit artikel</p>
+          <ol class="space-y-1 text-exact-blue list-decimal list-inside">
+            <li><a href="#waarom-btw-inzicht" class="hover:underline">Waarom BTW-inzicht vaak te laat komt</a></li>
+            <li><a href="#hoe-ai-werkt" class="hover:underline">Hoe AI je BTW-data uit Exact Online ophaalt</a></li>
+            <li><a href="#5-btw-vragen" class="hover:underline">5 BTW-vragen die je direct kunt stellen</a></li>
+            <li><a href="#stap-voor-stap" class="hover:underline">Stap-voor-stap: BTW opvragen via ChatGPT of Claude</a></li>
+            <li><a href="#tips" class="hover:underline">Tips voor nauwkeurige BTW-antwoorden</a></li>
+            <li><a href="#veelgestelde-vragen" class="hover:underline">Veelgestelde vragen</a></li>
+          </ol>
+        </nav>
+
+        <h2 id="waarom-btw-inzicht">Waarom BTW-inzicht vaak te laat komt</h2>
+        <p>De meeste ondernemers checken hun BTW pas vlak voor de aangifte. Begrijpelijk: je hebt wel wat beters te doen dan door boekhoudrapportages te spitten. Maar dit leidt tot drie problemen:</p>
+
+        <h3>1. Verrassingen bij de deadline</h3>
+        <p>Je ontdekt pas twee dagen voor de deadline dat je veel meer moet afdragen dan verwacht. Je cashflow is er niet op ingericht, en je moet snel geld vrijmaken.</p>
+
+        <h3>2. Correcties zijn lastiger</h3>
+        <p>Een factuur verkeerd geboekt? Een BTW-tarief fout toegepast? Als je dit pas bij de aangifte ontdekt, kost het extra tijd om te corrigeren. Ontdek je het eerder, dan is het een kleine aanpassing.</p>
+
+        <h3>3. Verrassingen bij de accountant</h3>
+        <p>Je accountant vraagt om een BTW-overzicht, en je bent een uur bezig om de juiste data te verzamelen. Of erger: de cijfers kloppen niet met wat je accountant verwacht, en je moet op zoek naar de oorzaak.</p>
+
+        <p>De oplossing is simpel: check je BTW-positie vaker. Niet door handmatig rapporten uit te draaien, maar door het gewoon te vragen.</p>
+
+        <h2 id="hoe-ai-werkt">Hoe AI je BTW-data uit Exact Online ophaalt</h2>
+        <p>De verbinding tussen AI en je boekhouding werkt via een beveiligde standaard. AI-assistenten zoals ChatGPT en Claude kunnen hiermee veilig gegevens opvragen uit Exact Online.</p>
+
+        <p>Zo werkt het in de praktijk:</p>
+        <ol>
+          <li><strong>Je stelt een vraag</strong> in normale taal, bijvoorbeeld "Wat is mijn BTW-saldo dit kwartaal?"</li>
+          <li><strong>De AI begrijpt je vraag</strong> en haalt de juiste gegevens op uit Exact Online</li>
+          <li><strong>Exact Online stuurt de data terug</strong> - alleen de relevante transacties en BTW-bedragen</li>
+          <li><strong>De AI formuleert een antwoord</strong> met berekeningen en context</li>
+        </ol>
+
+        <p><strong>Belangrijk:</strong> De verbinding is alleen-lezen. De AI kan alleen gegevens opvragen, nooit aanpassen. Er kunnen geen facturen worden gemaakt, geen boekingen worden gewijzigd, geen data worden verwijderd. Dit is technisch afgedwongen, niet alleen beloofd.</p>
+
+        <!-- Mid-article CTA -->
+        <div class="bg-exact-light rounded-xl p-6 my-8 text-center not-prose">
+          <p class="text-lg font-semibold text-gray-900 mb-2">Direct je BTW-positie checken?</p>
+          <p class="text-gray-600 mb-4">Verbind je Exact Online en stel je eerste vraag. Gratis tot 60 vragen per maand.</p>
+          <a href="/connect" class="inline-block px-6 py-2 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">Gratis starten</a>
+          <span class="mx-2 text-gray-400">of</span>
+          <a href="/pricing" class="text-exact-blue font-semibold hover:underline">bekijk de prijzen</a>
+        </div>
+
+        <h2 id="5-btw-vragen">5 BTW-vragen die je direct kunt stellen</h2>
+        <p>Zodra je Exact Online hebt verbonden met een AI-assistent, kun je deze vragen direct stellen:</p>
+
+        <h3>1. "Wat is mijn BTW-schuld op dit moment?"</h3>
+        <p>Je krijgt direct een overzicht van je huidige BTW-positie: hoeveel je hebt ontvangen (af te dragen), hoeveel je hebt betaald (voorbelasting), en het nettobedrag.</p>
+
+        <h3>2. "Hoeveel BTW moet ik afdragen dit kwartaal?"</h3>
+        <p>De AI berekent je BTW-positie voor het lopende kwartaal. Handig om halverwege het kwartaal te checken of je op koers ligt.</p>
+
+        <h3>3. "Vergelijk mijn BTW-positie met vorig kwartaal"</h3>
+        <p>Zie direct of je BTW-afdracht stijgt of daalt, en met welk percentage. Nuttig om trends te signaleren.</p>
+
+        <h3>4. "Welke facturen bevatten 21% BTW dit kwartaal?"</h3>
+        <p>Krijg een lijst van alle facturen met het hoge BTW-tarief. Handig voor controle of om te zien welke producten/diensten dit tarief hebben.</p>
+
+        <h3>5. "Wat is mijn totale voorbelasting dit jaar?"</h3>
+        <p>Overzicht van alle BTW die je hebt betaald op inkopen. Nuttig voor jaarplanning en om te zien of je veel investeert.</p>
+
+        <h2 id="stap-voor-stap">Stap-voor-stap: BTW opvragen via ChatGPT of Claude</h2>
+        <p>Het instellen van de koppeling duurt ongeveer 5 minuten. Dit heb je nodig:</p>
+        <ul>
+          <li>Een Exact Online account</li>
+          <li>ChatGPT Plus/Team of Claude Pro</li>
+          <li>5 minuten tijd</li>
+        </ul>
+
+        <h3>Stap 1: Koppeling maken</h3>
+        <p>Ga naar <a href="/connect">praatmetjeboekhouding.nl/connect</a> en klik op "Verbinden met Exact Online". Je logt in met je bestaande Exact-gegevens en geeft toestemming voor leestoegang.</p>
+
+        <h3>Stap 2: Je AI-assistent configureren</h3>
+        <p>Na het verbinden krijg je instructies om je AI-assistent in te stellen. Voor Claude Desktop voeg je een URL toe. Voor ChatGPT volg je de stappen op het scherm.</p>
+        <p>Bekijk de complete <a href="/docs/claude-desktop-setup">setup handleiding</a> voor stap-voor-stap instructies.</p>
+
+        <h3>Stap 3: Je eerste BTW-vraag stellen</h3>
+        <p>Open je AI-assistent en vraag: "Wat is mijn BTW-positie dit kwartaal?"</p>
+        <p>Je krijgt een antwoord zoals:</p>
+
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <p class="font-mono text-sm text-gray-800">
+            <strong>BTW-overzicht Q1 2026</strong><br /><br />
+            Af te dragen BTW (verkopen): EUR 4.230<br />
+            Te vorderen BTW (inkopen): EUR 1.890<br />
+            <br />
+            <strong>Per saldo af te dragen: EUR 2.340</strong><br /><br />
+            Dit is 12% hoger dan Q4 2025 (EUR 2.090), wat past bij de omzetstijging van 15% dit kwartaal.
+          </p>
+        </div>
+
+        <h2 id="tips">Tips voor nauwkeurige BTW-antwoorden</h2>
+
+        <h3>Specificeer de periode</h3>
+        <p>Vraag niet "Wat is mijn BTW?" maar "Wat is mijn BTW voor Q1 2026?" of "Wat is mijn BTW van januari tot en met maart 2026?". Hoe specifieker, hoe beter het antwoord.</p>
+
+        <h3>Vraag om uitsplitsing per BTW-tarief</h3>
+        <p>Als je werkt met meerdere tarieven (0%, 9%, 21%), vraag dan expliciet om een uitsplitsing. Bijvoorbeeld: "Geef mijn BTW-overzicht dit kwartaal, uitgesplitst per tarief."</p>
+
+        <h3>Controleer steekproefsgewijs</h3>
+        <p>De AI rekent met de data uit je Exact Online administratie. Als die data klopt, klopt het antwoord. Controleer bij de eerste keer een paar cijfers handmatig om vertrouwen op te bouwen.</p>
+
+        <h3>Vraag door voor details</h3>
+        <p>Krijg je een antwoord dat vragen oproept? Vraag door. "Welke facturen zitten in dat bedrag van EUR 4.230?" of "Waarom is de voorbelasting lager dan vorig kwartaal?"</p>
+
+        <!-- Social proof -->
+        <div class="border-l-4 border-gray-300 pl-6 my-8 not-prose">
+          <p class="text-lg italic text-gray-700">"Ik checkte mijn BTW vroeger alleen voor de deadline. Nu vraag ik het maandelijks even - kost me 10 seconden en ik word nooit meer verrast."</p>
+          <p class="text-sm text-gray-500 mt-2">— Ondernemer, Exact Online gebruiker</p>
+        </div>
+
+        <h2 id="veelgestelde-vragen">Veelgestelde vragen</h2>
+
+        <h3>Kan de AI mijn BTW-aangifte voor me doen?</h3>
+        <p>Nee, de AI kan alleen data opvragen en berekeningen maken. Het daadwerkelijk indienen van de aangifte doe je nog steeds zelf via de Belastingdienst of via je accountant. De AI helpt je wel om de cijfers snel en foutloos te verzamelen.</p>
+
+        <h3>Werkt dit ook met verlegd BTW en intracommunautaire leveringen?</h3>
+        <p>Ja. Je kunt vragen: "Welke facturen hebben verlegde BTW dit kwartaal?" of "Geef een overzicht van mijn intracommunautaire leveringen." De AI haalt deze informatie op uit je Exact Online administratie.</p>
+
+        <h3>Hoe zit het met de veiligheid van mijn financiele data?</h3>
+        <p>Je financiele data blijft bij Exact Online. De AI vraagt de data real-time op, maar slaat niets op. De verbinding is versleuteld (HTTPS) en de AI heeft alleen leesrechten. Bekijk ons <a href="/docs/ai-privacy">privacybeleid</a> voor alle details.</p>
+
+        <h3>Wat als mijn boekhouding niet up-to-date is?</h3>
+        <p>De AI werkt met de data die in Exact Online staat. Als facturen nog niet zijn geboekt, worden ze niet meegenomen in de berekening. De AI kan je wel helpen om te checken: "Zijn er onverwerkte boekingen dit kwartaal?"</p>
+
+        <h3>Kost het geld?</h3>
+        <p>Je kunt gratis starten met ongeveer 60 vragen per maand. Voor meer vragen zijn er betaalde plannen vanaf EUR 9 per maand. Bekijk de <a href="/pricing">prijzen</a> voor alle opties.</p>
+
+        <h2>Conclusie: BTW-inzicht in seconden</h2>
+        <p>Je BTW-positie checken hoeft geen halfuur te kosten. Met een AI-koppeling naar Exact Online vraag je gewoon wat je wilt weten en krijg je binnen seconden antwoord. Geen rapporten exporteren, geen Excel, geen handmatige berekeningen.</p>
+        <p>Het resultaat: je checkt je BTW vaker, ontdekt fouten eerder, en wordt nooit meer verrast bij de deadline.</p>
+
+        <div class="bg-exact-light rounded-xl p-6 my-8 text-center not-prose">
+          <p class="text-lg font-semibold text-gray-900 mb-2">Klaar om te beginnen?</p>
+          <p class="text-gray-600 mb-4">Verbind je Exact Online en stel binnen 5 minuten je eerste BTW-vraag.</p>
+          <a href="/connect" class="inline-block px-6 py-2 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">Gratis starten</a>
+        </div>
+      </div>
+    )}
+
+    {slug === 'btw-overzicht-exporteren-google-sheets' && (
+      <div class="prose prose-lg max-w-none">
+
+        <!-- TL;DR box -->
+        <div class="bg-gray-50 border-l-4 border-exact-blue p-6 rounded-r-lg mb-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-2">TL;DR</p>
+          <ul class="text-gray-700 space-y-1 list-disc list-inside">
+            <li>Exporteer je BTW overzicht uit Exact Online direct naar Google Sheets</li>
+            <li>Geen handmatig kopiëren of CSV-gedoe meer</li>
+            <li>Werkt met ChatGPT Plus (ingebouwde koppelingen) of Claude Desktop</li>
+            <li>Setup duurt 15 minuten, daarna elk kwartaal 30 seconden</li>
+          </ul>
+        </div>
+
+        <h2>Het Probleem: BTW Voorbereiding Kost Te Veel Tijd</h2>
+        <p>Elk kwartaal hetzelfde ritueel. Je opent Exact Online, navigeert naar rapporten, stelt filters in, exporteert naar CSV, importeert in Sheets en maakt het op.</p>
+        <p>Een halfuur later ben je klaar met iets dat eigenlijk 2 minuten had moeten kosten.</p>
+
+        <p><strong>De realiteit:</strong></p>
+        <ul>
+          <li>68% van ondernemers wacht tot de laatste week voor de BTW deadline</li>
+          <li>Gemiddeld duurt BTW voorbereiding 45 minuten per kwartaal</li>
+          <li>Handmatige exports leiden tot kopieerfouten en versieconflicten</li>
+        </ul>
+
+        <!-- BTW Disclaimer -->
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-6 rounded-r-lg my-8 not-prose">
+          <p class="font-semibold text-amber-800 mb-2">Belangrijk</p>
+          <p class="text-amber-700">Deze workflow helpt bij de voorbereiding van je BTW overzicht. Controleer de cijfers altijd in Exact Online voordat je aangifte doet. Wij zijn een analyse tool, geen aangiftesoftware.</p>
+        </div>
+
+        <h2>Wat ga je maken?</h2>
+        <p>Een workflow die:</p>
+        <ol>
+          <li><strong>Je BTW data ophaalt</strong> uit Exact Online via AI</li>
+          <li><strong>De cijfers structureert</strong> per BTW-tarief (21%, 9%, 0%)</li>
+          <li><strong>Exporteert naar Google Sheets</strong> in een overzichtelijke tabel</li>
+          <li><strong>Klaar is voor controle</strong> door jou of je accountant</li>
+        </ol>
+
+        <p><strong>Tijdsinvestering:</strong> 15 minuten setup, daarna 30 seconden per kwartaal.</p>
+
+        <!-- Voorbeeld tabel -->
+        <div class="overflow-x-auto my-8">
+          <table>
+            <thead>
+              <tr>
+                <th>Categorie</th>
+                <th>Bedrag</th>
+                <th>BTW</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Verkopen 21%</td>
+                <td>EUR 45.000</td>
+                <td>EUR 9.450</td>
+              </tr>
+              <tr>
+                <td>Verkopen 9%</td>
+                <td>EUR 12.000</td>
+                <td>EUR 1.080</td>
+              </tr>
+              <tr>
+                <td>Verkopen 0%</td>
+                <td>EUR 5.000</td>
+                <td>EUR 0</td>
+              </tr>
+              <tr>
+                <td>Inkopen voorbelasting</td>
+                <td>EUR 18.000</td>
+                <td>EUR 3.780</td>
+              </tr>
+              <tr class="font-bold bg-gray-50">
+                <td>Per saldo af te dragen</td>
+                <td></td>
+                <td>EUR 6.750</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Wat Heb Je Nodig?</h2>
+
+        <h3>Optie A: ChatGPT Plus (Aanbevolen)</h3>
+        <p>ChatGPT heeft Google Sheets als <a href="https://help.openai.com/en/articles/11487775-connectors-in-chatgpt" target="_blank" rel="noopener">ingebouwde connector</a>. Dit maakt de setup het makkelijkst.</p>
+
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Tool</th>
+                <th>Waarom</th>
+                <th>Kosten</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="https://praatmetjeboekhouding.nl">Praat met je Boekhouding</a></td>
+                <td>Koppelt Exact Online aan ChatGPT</td>
+                <td>Gratis (60 vragen/maand)</td>
+              </tr>
+              <tr>
+                <td>ChatGPT Plus/Team/Enterprise</td>
+                <td>Google Sheets connector ingebouwd</td>
+                <td>EUR 20/maand</td>
+              </tr>
+              <tr>
+                <td>Google Account</td>
+                <td>Voor Google Sheets toegang</td>
+                <td>Gratis</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Optie B: Claude Desktop</h3>
+        <p>Claude heeft geen ingebouwde Google Sheets koppeling, maar je kunt dit oplossen via <a href="https://zapier.com/mcp" target="_blank" rel="noopener">Zapier</a> of een aparte koppeling.</p>
+
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Tool</th>
+                <th>Waarom</th>
+                <th>Kosten</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="https://praatmetjeboekhouding.nl">Praat met je Boekhouding</a></td>
+                <td>Koppelt Exact Online aan Claude</td>
+                <td>Gratis (60 vragen/maand)</td>
+              </tr>
+              <tr>
+                <td>Claude Pro/Max/Team</td>
+                <td>Ondersteunt koppelingen</td>
+                <td>EUR 20-25/maand</td>
+              </tr>
+              <tr>
+                <td><a href="https://zapier.com/mcp" target="_blank" rel="noopener">Zapier</a></td>
+                <td>Koppelt Google Sheets aan Claude</td>
+                <td>Gratis (beperkt)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Stap 1: Koppel Exact Online aan je AI</h2>
+        <p>Eerst moet je AI toegang krijgen tot je boekhouddata.</p>
+
+        <h3>Via ChatGPT:</h3>
+        <ol>
+          <li>Ga naar <a href="/connect">praatmetjeboekhouding.nl/connect</a></li>
+          <li>Klik op "Verbinden met Exact Online"</li>
+          <li>Log in met je Exact Online gegevens</li>
+          <li>Geef toestemming voor leestoegang</li>
+          <li>Kopieer de koppeling-URL (deze staat op je dashboard na het verbinden)</li>
+          <li>In ChatGPT: <strong>Settings</strong> → <strong>Connectors</strong> → <strong>Create</strong></li>
+          <li>Plak de URL en klik "Create"</li>
+        </ol>
+
+        <h3>Via Claude Desktop:</h3>
+        <ol>
+          <li>Volg dezelfde stappen 1-5 voor de URL</li>
+          <li>Open je Claude Desktop configuratiebestand</li>
+          <li>Voeg de configuratie toe (zie documentatie)</li>
+          <li>Herstart Claude Desktop</li>
+        </ol>
+
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <p class="text-sm text-gray-600">Zie de <a href="/docs/claude-desktop-setup" class="text-exact-blue hover:underline">stap-voor-stap setup handleiding</a> voor de exacte configuratie.</p>
+        </div>
+
+        <h2>Stap 2: Koppel Google Sheets aan je AI</h2>
+
+        <h3>Voor ChatGPT (Makkelijkst)</h3>
+        <p>Google Sheets is een ingebouwde connector in ChatGPT:</p>
+        <ol>
+          <li>Open ChatGPT → <strong>Settings</strong> → <strong>Connectors</strong></li>
+          <li>Zoek "Google Drive" in de lijst (Sheets zit hierin)</li>
+          <li>Klik "Connect" en autoriseer je Google account</li>
+          <li>Klaar! ChatGPT kan nu spreadsheets lezen en maken</li>
+        </ol>
+
+        <h3>Voor Claude Desktop (via Zapier)</h3>
+        <p>Claude heeft geen ingebouwde Sheets koppeling. De makkelijkste oplossing is via Zapier:</p>
+        <ol>
+          <li>Ga naar <a href="https://zapier.com/mcp" target="_blank" rel="noopener">zapier.com/mcp</a></li>
+          <li>Maak een account aan (of log in)</li>
+          <li>Klik "Add Action" en zoek naar "Google Sheets"</li>
+          <li>Voeg toe: <strong>"Create Spreadsheet Row in Google Sheets"</strong></li>
+          <li>Autoriseer je Google account</li>
+          <li>Volg de instructies om de koppeling toe te voegen aan Claude</li>
+        </ol>
+
+        <!-- Mid-article CTA -->
+        <div class="bg-exact-light rounded-xl p-6 my-8 text-center not-prose">
+          <p class="text-lg font-semibold text-gray-900 mb-2">Direct aan de slag?</p>
+          <p class="text-gray-600 mb-4">Verbind je Exact Online en exporteer je eerste BTW overzicht.</p>
+          <a href="/connect" class="inline-block px-6 py-2 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">Gratis starten</a>
+          <span class="mx-2 text-gray-400">of</span>
+          <a href="/pricing" class="text-exact-blue font-semibold hover:underline">bekijk de prijzen</a>
+        </div>
+
+        <h2>Stap 3: Test de Workflow</h2>
+        <p>Open een nieuwe chat en test eerst of beide koppelingen werken.</p>
+
+        <h3>Test 1: Exact Online verbinding</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800">Wat is mijn BTW positie dit kwartaal?</code>
+        </div>
+        <p>Je zou een overzicht moeten krijgen met af te dragen BTW, voorbelasting, en het nettobedrag.</p>
+
+        <h3>Test 2: Google Sheets verbinding</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800">Maak een nieuwe spreadsheet genaamd "BTW Test" met de tekst "Hello World" in cel A1</code>
+        </div>
+        <p>Als beide tests werken, ben je klaar voor de echte workflow.</p>
+
+        <h2>Stap 4: Exporteer je BTW Overzicht naar Sheets</h2>
+        <p>Nu het magische gedeelte. Typ de volgende prompt:</p>
+
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <p class="text-sm text-gray-600 mb-2">Basis prompt:</p>
+          <pre class="text-gray-800 whitespace-pre-wrap text-sm">Haal mijn BTW overzicht op voor Q4 2025 uit Exact Online en exporteer dit naar een nieuwe Google Spreadsheet.
+
+Maak een tabel met:
+- Verkopen per BTW tarief (21%, 9%, 0%)
+- Totaal verkopen
+- Inkopen (voorbelasting)
+- Per saldo af te dragen BTW
+
+Noem de spreadsheet "BTW Overzicht Q4 2025"</pre>
+        </div>
+
+        <p><strong>De AI zal:</strong></p>
+        <ol>
+          <li>Je BTW data ophalen uit Exact Online</li>
+          <li>De bedragen structureren per tarief</li>
+          <li>Een nieuwe Google Spreadsheet aanmaken</li>
+          <li>De data netjes in een tabel zetten</li>
+          <li>Je een link geven naar de spreadsheet</li>
+        </ol>
+
+        <h3>Uitgebreide prompt (voor meer detail):</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <pre class="text-gray-800 whitespace-pre-wrap text-sm">Haal mijn complete BTW overzicht op voor Q4 2025 en exporteer naar Google Sheets.
+
+Ik wil graag:
+
+Tabblad 1 - Samenvatting:
+- Verkopen per BTW tarief met bedragen en BTW
+- Inkopen voorbelasting
+- Netto BTW positie
+- Vergelijking met Q3 2025
+
+Tabblad 2 - Detail Verkopen:
+- Top 10 facturen op BTW bedrag
+- Klant, factuurnummer, datum, bedrag, BTW
+
+Noem het bestand "BTW Voorbereiding Q4 2025"</pre>
+        </div>
+
+        <h2>Pro Tips</h2>
+
+        <h3>Tip 1: Maak een Template Spreadsheet</h3>
+        <p>Werk je elk kwartaal met dezelfde structuur? Maak een template spreadsheet en vraag de AI om de data daarin te plaatsen:</p>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800 text-sm">Haal mijn BTW overzicht op voor Q1 2026 en vul dit in op de spreadsheet "BTW Template 2026" in tabblad "Q1" beginnend bij cel A2</code>
+        </div>
+
+        <h3>Tip 2: Voeg Validatie Toe</h3>
+        <p>Laat de AI ook controleren of de cijfers kloppen:</p>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800 text-sm">Na het exporteren: check of de som van de BTW per tarief overeenkomt met het totaal. Markeer afwijkingen groter dan EUR 1 in rood.</code>
+        </div>
+
+        <h3>Tip 3: Deel Direct met je Accountant</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800 text-sm">Deel de spreadsheet direct met mijn accountant op accountant@kantoor.nl met "kan bekijken" rechten</code>
+        </div>
+
+        <h2>Veelgestelde Vragen</h2>
+
+        <h3>Klopt de BTW berekening altijd?</h3>
+        <p>De AI haalt de exacte data op uit je Exact Online administratie. De cijfers zijn dus zo accuraat als je boekhouding. Controleer altijd de cijfers in Exact Online voordat je aangifte doet.</p>
+
+        <h3>Kan ik dit ook met andere spreadsheet software?</h3>
+        <p>Momenteel werkt deze workflow met Google Sheets. Microsoft Excel Online ondersteuning is in ontwikkeling. Je kunt de Google Sheet wel downloaden als .xlsx.</p>
+
+        <h3>Werkt dit ook met meerdere administraties?</h3>
+        <p>Ja. Als je meerdere administraties hebt gekoppeld, specificeer dan welke: <em>"Haal de BTW data op voor administratie 'Holding BV' en exporteer naar Sheets"</em></p>
+
+        <h3>Is mijn data veilig?</h3>
+        <p>Ja. We slaan geen financiele data op. Alle verzoeken gaan real-time naar Exact Online en Google. De verbinding is read-only naar Exact en versleuteld via HTTPS.</p>
+
+        <h3>Hoeveel kost dit?</h3>
+        <ul>
+          <li><strong>Praat met je Boekhouding:</strong> Gratis tot 60 vragen per maand</li>
+          <li><strong>ChatGPT Plus:</strong> EUR 20/maand (inclusief Sheets connector)</li>
+          <li><strong>Claude Pro + Zapier:</strong> EUR 20-25/maand + Zapier taken</li>
+        </ul>
+
+        <h2>Gerelateerde Workflows</h2>
+        <p>Als je deze workflow nuttig vindt, bekijk dan ook:</p>
+
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Workflow</th>
+                <th>Beschrijving</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="/blog/automatische-factuurherinneringen-ai-workflow">Automatische factuurherinneringen</a></td>
+                <td>Stuur herinneringen via Gmail</td>
+              </tr>
+              <tr>
+                <td>Maandelijkse P&L export</td>
+                <td>Winst & verlies naar Sheets</td>
+              </tr>
+              <tr>
+                <td>Cashflow update in Slack</td>
+                <td>Dagelijkse financiele updates</td>
+              </tr>
+              <tr>
+                <td>BTW deadline herinneringen</td>
+                <td>Nooit meer de deadline missen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Aan de Slag</h2>
+        <ol>
+          <li><strong><a href="/connect">Maak gratis account</a></strong> - Verbind je Exact Online</li>
+          <li><strong>Test de BTW vraag</strong> - "Wat is mijn BTW positie dit kwartaal?"</li>
+          <li><strong>Koppel Google Sheets</strong> - Via ChatGPT of Zapier</li>
+          <li><strong>Exporteer</strong> - Gebruik de prompts uit dit artikel</li>
+        </ol>
+
+        <p>Heb je vragen over de setup? <a href="/contact">Stuur ons een bericht</a> of bekijk de <a href="/faq">FAQ</a>.</p>
+
+        <h2>Meer informatie</h2>
+        <ul>
+          <li><a href="https://help.openai.com/en/articles/11487775-connectors-in-chatgpt" target="_blank" rel="noopener">ChatGPT Connectors - hoe koppelingen werken</a></li>
+          <li><a href="https://zapier.com/mcp" target="_blank" rel="noopener">Zapier: Verbind duizenden apps met AI</a></li>
+          <li><a href="/docs/claude-desktop-setup">Onze setup handleiding voor Claude Desktop</a></li>
+        </ul>
+
+        <p class="text-gray-500 text-sm mt-8"><em>Laatst bijgewerkt: 4 februari 2026</em></p>
+      </div>
+    )}
+
+    {slug === 'betalingsbevestiging-automatiseren-email' && (
+      <div class="prose prose-lg max-w-none">
+
+        <!-- TL;DR box -->
+        <div class="bg-gray-50 border-l-4 border-exact-blue p-6 rounded-r-lg mb-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-2">TL;DR</p>
+          <ul class="text-gray-700 space-y-1 list-disc list-inside">
+            <li>Stuur automatisch een bedankmail wanneer een klant een factuur betaalt</li>
+            <li>Combineer Exact Online met Gmail via ChatGPT Plus</li>
+            <li>Werkt met de ingebouwde Gmail connector van ChatGPT</li>
+            <li>Setup duurt 15 minuten, daarna volledig automatisch</li>
+          </ul>
+        </div>
+
+        <h2>Het Probleem: Gemiste Kansen bij Klantencontact</h2>
+        <p>Je factuur is betaald. Mooi. En dan? Bij de meeste ondernemers gebeurt er niets. De betaling komt binnen, Exact Online verwerkt het, en dat is het.</p>
+        <p>Maar je mist hiermee een waardevol contactmoment.</p>
+
+        <p><strong>Waarom een betalingsbevestiging sturen?</strong></p>
+        <ul>
+          <li><strong>Professionaliteit:</strong> Het onderscheidt je van bedrijven die alleen contact opnemen als er iets fout gaat</li>
+          <li><strong>Vertrouwen:</strong> Klanten krijgen zekerheid dat hun betaling correct is verwerkt</li>
+          <li><strong>Klantenrelatie:</strong> Een kort bedankje houdt de relatie warm voor toekomstige opdrachten</li>
+          <li><strong>Upsell kansen:</strong> Je kunt nieuwe diensten of aanbiedingen subtiel meenemen</li>
+        </ul>
+
+        <p>Het probleem? Niemand heeft tijd om elke binnenkomende betaling handmatig te checken en een mailtje te sturen. Dat is waar automatisering van pas komt.</p>
+
+        <h2>Wat ga je maken?</h2>
+        <p>Een workflow die:</p>
+        <ol>
+          <li><strong>Checkt</strong> welke facturen recent betaald zijn in Exact Online</li>
+          <li><strong>Genereert</strong> een gepersonaliseerde bedankmail per klant</li>
+          <li><strong>Verstuurt</strong> de email via jouw Gmail account</li>
+        </ol>
+
+        <p><strong>Tijdsinvestering:</strong> 15 minuten setup, daarna 0 minuten per week.</p>
+
+        <h2>Wat Heb Je Nodig?</h2>
+        <p>Deze workflow werkt het beste met ChatGPT Plus vanwege de ingebouwde Gmail connector.</p>
+
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Tool</th>
+                <th>Waarom</th>
+                <th>Kosten</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="https://praatmetjeboekhouding.nl">Praat met je Boekhouding</a></td>
+                <td>Koppelt Exact Online aan ChatGPT</td>
+                <td>Gratis (60 vragen/maand)</td>
+              </tr>
+              <tr>
+                <td>ChatGPT Plus/Team/Enterprise</td>
+                <td>Gmail connector ingebouwd</td>
+                <td>EUR 20/maand</td>
+              </tr>
+              <tr>
+                <td>Gmail</td>
+                <td>Voor het versturen van emails</td>
+                <td>Gratis</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Stap 1: Koppel Exact Online aan ChatGPT</h2>
+        <ol>
+          <li>Ga naar <a href="/connect">praatmetjeboekhouding.nl/connect</a></li>
+          <li>Klik op "Verbinden met Exact Online"</li>
+          <li>Log in met je Exact Online gegevens</li>
+          <li>Geef toestemming voor leestoegang</li>
+          <li>Kopieer de koppeling-URL (deze staat op je dashboard na het verbinden)</li>
+          <li>Open ChatGPT: <strong>Settings</strong> → <strong>Connectors</strong> → <strong>Create</strong></li>
+          <li>Plak de URL en klik "Create"</li>
+        </ol>
+
+        <h2>Stap 2: Koppel Gmail aan ChatGPT</h2>
+        <p>Gmail is een standaard connector in ChatGPT Plus:</p>
+        <ol>
+          <li>Open ChatGPT → <strong>Settings</strong> → <strong>Connectors</strong></li>
+          <li>Zoek "Gmail" in de lijst met beschikbare connectors</li>
+          <li>Klik "Connect"</li>
+          <li>Autoriseer je Google account (kies het account waarmee je zakelijke mail stuurt)</li>
+          <li>Accepteer de permissions</li>
+        </ol>
+
+        <!-- Mid-article CTA -->
+        <div class="bg-exact-light rounded-xl p-6 my-8 text-center not-prose">
+          <p class="text-lg font-semibold text-gray-900 mb-2">Direct aan de slag?</p>
+          <p class="text-gray-600 mb-4">Verbind je Exact Online en stuur je eerste betalingsbevestiging.</p>
+          <a href="/connect" class="inline-block px-6 py-2 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">Gratis starten</a>
+        </div>
+
+        <h2>Stap 3: Test de Workflow</h2>
+
+        <h3>Test 1: Exact Online verbinding</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800">Welke facturen zijn de afgelopen 7 dagen betaald?</code>
+        </div>
+
+        <h3>Test 2: Gmail verbinding</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800">Maak een concept email aan met onderwerp "Test" en inhoud "Dit is een test"</code>
+        </div>
+        <p>Check in je Gmail of de draft is aangemaakt.</p>
+
+        <h2>Stap 4: Stuur Betalingsbevestigingen</h2>
+
+        <h3>Optie A: Handmatig triggeren</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <pre class="text-gray-800 whitespace-pre-wrap text-sm">Check welke facturen de afgelopen 3 dagen betaald zijn en stuur elke klant een betalingsbevestiging via Gmail.
+
+Gebruik deze template:
+
+Onderwerp: Betalingsbevestiging [factuurnummer]
+
+Beste [naam klant],
+
+Bedankt voor je betaling van EUR [bedrag] voor factuur [nummer].
+
+We hebben de betaling in goede orde ontvangen en verwerkt.
+
+Met vriendelijke groet,
+[Mijn bedrijfsnaam]</pre>
+        </div>
+
+        <h3>Optie B: Concept emails maken (voor controle)</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800">Check betaalde facturen van de afgelopen week en maak concept emails aan in Gmail (niet versturen).</code>
+        </div>
+
+        <h2>Voorbeeld Email Templates</h2>
+
+        <h3>Standaard bevestiging</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <pre class="text-gray-800 whitespace-pre-wrap text-sm">Onderwerp: Betalingsbevestiging factuur [nummer]
+
+Beste [naam],
+
+Hartelijk dank voor je betaling.
+
+We hebben EUR [bedrag] ontvangen voor factuur [nummer]. De betaling is verwerkt en de factuur is hiermee volledig voldaan.
+
+Heb je vragen? Neem gerust contact met ons op.
+
+Met vriendelijke groet,
+[Naam]
+[Bedrijf]</pre>
+        </div>
+
+        <h3>Met upsell</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <pre class="text-gray-800 whitespace-pre-wrap text-sm">Onderwerp: Betaling ontvangen - Factuur [nummer]
+
+Beste [naam],
+
+Je betaling van EUR [bedrag] voor factuur [nummer] is in goede orde ontvangen. Bedankt!
+
+Nu we dit project hebben afgerond: we hebben onlangs [nieuwe dienst] gelanceerd dat mogelijk interessant voor je is. Wil je er meer over weten?
+
+Tot de volgende keer,
+[Naam]</pre>
+        </div>
+
+        <h2>Pro Tips</h2>
+
+        <h3>Tip 1: Personaliseer op Basis van Klanthistorie</h3>
+        <p>Vraag ChatGPT om context mee te nemen: <em>"Als dit de eerste factuur is van een klant, voeg dan toe: Welkom als klant!"</em></p>
+
+        <h3>Tip 2: Timing is Belangrijk</h3>
+        <p>Stuur de bevestiging binnen 24 uur na de betaling. Een goede routine: check elke ochtend om 9:00 de betalingen van de vorige dag.</p>
+
+        <h3>Tip 3: Segmenteer op Bedrag</h3>
+        <p>Grote klanten verdienen extra aandacht: <em>"Voor betalingen boven EUR 5.000: stuur een persoonlijke email en voeg toe dat ik graag even bel om te bedanken."</em></p>
+
+        <h2>Veelgestelde Vragen</h2>
+
+        <h3>Werkt dit ook als ik meerdere administraties heb?</h3>
+        <p>Ja. Specificeer welke administratie je wilt checken: <em>"Check betaalde facturen in administratie Holding BV en stuur bevestigingen"</em></p>
+
+        <h3>Wat als een klant meerdere facturen tegelijk betaalt?</h3>
+        <p>ChatGPT bundelt dit automatisch als je vraagt: <em>"Als een klant meerdere facturen heeft betaald, stuur dan een email met een overzicht in plaats van losse emails."</em></p>
+
+        <h3>Wordt mijn boekhouddata opgeslagen?</h3>
+        <p>Nee. Praat met je Boekhouding slaat geen financiele data op. Elk verzoek gaat real-time naar Exact Online.</p>
+
+        <h2>Gerelateerde Workflows</h2>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Workflow</th>
+                <th>Beschrijving</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="/blog/automatische-factuurherinneringen-ai-workflow">Automatische factuurherinneringen</a></td>
+                <td>Stuur herinneringen voor openstaande facturen</td>
+              </tr>
+              <tr>
+                <td><a href="/blog/btw-overzicht-exporteren-google-sheets">BTW overzicht naar Sheets</a></td>
+                <td>Exporteer BTW data voor je accountant</td>
+              </tr>
+              <tr>
+                <td><a href="/blog/betaaldeadlines-google-calendar">Betaaldeadlines in Calendar</a></td>
+                <td>Nooit meer een deadline missen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Aan de Slag</h2>
+        <ol>
+          <li><strong><a href="/connect">Maak gratis account</a></strong> - Verbind je Exact Online</li>
+          <li><strong>Koppel Gmail</strong> - Via ChatGPT's ingebouwde connector</li>
+          <li><strong>Test de basis</strong> - "Welke facturen zijn deze week betaald?"</li>
+          <li><strong>Stuur je eerste bevestiging</strong> - Begin met conceptmails</li>
+        </ol>
+
+        <p>Na 15 minuten setup heb je een professionele workflow die je klantenrelaties versterkt zonder extra werk.</p>
+
+        <p class="text-gray-500 text-sm mt-8"><em>Laatst bijgewerkt: 4 februari 2026</em></p>
+      </div>
+    )}
+
+    {slug === 'betaaldeadlines-google-calendar' && (
+      <div class="prose prose-lg max-w-none">
+
+        <!-- TL;DR box -->
+        <div class="bg-gray-50 border-l-4 border-exact-blue p-6 rounded-r-lg mb-8 not-prose">
+          <p class="font-semibold text-gray-900 mb-2">TL;DR</p>
+          <ul class="text-gray-700 space-y-1 list-disc list-inside">
+            <li>Haal openstaande facturen op uit Exact Online met hun vervaldatums</li>
+            <li>Zet betaaldeadlines automatisch als events in je Google Calendar</li>
+            <li>Krijg herinneringen 3 en 7 dagen voor de deadline</li>
+            <li>Werkt met ChatGPT Plus (ingebouwde Calendar koppeling) of Claude Desktop</li>
+          </ul>
+        </div>
+
+        <h2>Het Probleem: Gemiste Deadlines Kosten Je Geld</h2>
+        <p>Je kent het scenario. Je bent druk met je dagelijkse werk, schakelt tussen klanten, projecten en administratie. En dan komt die e-mail: "Uw factuur is 14 dagen over de vervaldatum..."</p>
+
+        <p><strong>De harde cijfers:</strong></p>
+        <ul>
+          <li>42% van ZZP'ers heeft minstens een keer een betaaldeadline gemist</li>
+          <li>Gemiddelde boete voor te late betaling: EUR 40 plus rente</li>
+          <li>Late betalingen van klanten zorgen bij 35% van ondernemers voor cashflowproblemen</li>
+        </ul>
+
+        <p>Stel je voor dat elke belangrijke betaaldeadline automatisch in je agenda staat. Met een herinnering een week van tevoren. En eentje drie dagen ervoor. Dat is precies wat we gaan bouwen.</p>
+
+        <h2>Wat ga je maken?</h2>
+        <p>Een workflow die:</p>
+        <ol>
+          <li><strong>Openstaande facturen ophaalt</strong> uit Exact Online (zowel te betalen als te ontvangen)</li>
+          <li><strong>Vervaldatums extraheert</strong> en omzet naar calendar events</li>
+          <li><strong>Events aanmaakt</strong> in je Google Calendar met de juiste details</li>
+          <li><strong>Herinneringen instelt</strong> zodat je op tijd actie kunt nemen</li>
+        </ol>
+
+        <h3>Het eindresultaat:</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <pre class="text-gray-800 whitespace-pre-wrap text-sm">Titel: Betaaldeadline: F2026-0142 - Bakkerij De Gouden Croissant (EUR 1.250)
+Datum: 15 februari 2026
+Tijd: 09:00 - 09:15
+
+Beschrijving:
+  Factuurnummer: F2026-0142
+  Klant: Bakkerij De Gouden Croissant
+  Bedrag: EUR 1.250,00
+  Type: Te ontvangen (debiteur)
+  Actie: Neem contact op als niet betaald
+
+Herinneringen: 7 dagen, 3 dagen, 1 dag van tevoren</pre>
+        </div>
+
+        <h2>Wat Heb Je Nodig?</h2>
+
+        <h3>Optie A: ChatGPT Plus (Aanbevolen)</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Tool</th>
+                <th>Waarom</th>
+                <th>Kosten</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="https://praatmetjeboekhouding.nl">Praat met je Boekhouding</a></td>
+                <td>Koppelt Exact Online aan ChatGPT</td>
+                <td>Gratis (60 vragen/maand)</td>
+              </tr>
+              <tr>
+                <td>ChatGPT Plus/Team/Enterprise</td>
+                <td>Google Calendar connector ingebouwd</td>
+                <td>EUR 20/maand</td>
+              </tr>
+              <tr>
+                <td>Google Account</td>
+                <td>Voor Calendar toegang</td>
+                <td>Gratis</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Optie B: Claude Desktop</h3>
+        <p>Claude heeft <a href="https://support.claude.com/en/articles/11088742-using-the-gmail-and-google-calendar-integrations" target="_blank" rel="noopener">Google Calendar integratie</a> beschikbaar (wordt nog uitgebreid).</p>
+
+        <h2>Stap 1: Koppel Exact Online aan je AI</h2>
+
+        <h3>Via ChatGPT:</h3>
+        <ol>
+          <li>Ga naar <a href="/connect">praatmetjeboekhouding.nl/connect</a></li>
+          <li>Klik op "Verbinden met Exact Online"</li>
+          <li>Log in met je Exact Online gegevens</li>
+          <li>Geef toestemming voor leestoegang</li>
+          <li>Kopieer de koppeling-URL (deze staat op je dashboard na het verbinden)</li>
+          <li>In ChatGPT: <strong>Settings</strong> → <strong>Connectors</strong> → <strong>Create</strong></li>
+          <li>Plak de URL en klik "Create"</li>
+        </ol>
+
+        <h2>Stap 2: Koppel Google Calendar aan je AI</h2>
+
+        <h3>Voor ChatGPT (Makkelijkst)</h3>
+        <ol>
+          <li>Open ChatGPT → <strong>Settings</strong> → <strong>Connectors</strong></li>
+          <li>Zoek "Google Calendar" in de lijst</li>
+          <li>Klik "Connect" en autoriseer je Google account</li>
+          <li>Selecteer welke agenda's ChatGPT mag gebruiken</li>
+          <li>Klaar. ChatGPT kan nu events lezen en aanmaken.</li>
+        </ol>
+
+        <!-- Mid-article CTA -->
+        <div class="bg-exact-light rounded-xl p-6 my-8 text-center not-prose">
+          <p class="text-lg font-semibold text-gray-900 mb-2">Direct aan de slag?</p>
+          <p class="text-gray-600 mb-4">Verbind je Exact Online en zet je eerste deadlines in de agenda.</p>
+          <a href="/connect" class="inline-block px-6 py-2 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">Gratis starten</a>
+        </div>
+
+        <h2>Stap 3: Test de Verbindingen</h2>
+
+        <h3>Test 1: Exact Online</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800">Welke facturen staan open met een vervaldatum in de komende 30 dagen?</code>
+        </div>
+
+        <h3>Test 2: Google Calendar</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <code class="text-gray-800">Wat staat er morgen in mijn agenda?</code>
+        </div>
+
+        <h2>Stap 4: Maak de Calendar Events</h2>
+
+        <h3>Basis prompt:</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <pre class="text-gray-800 whitespace-pre-wrap text-sm">Haal alle openstaande facturen op uit Exact Online (zowel te ontvangen als te betalen).
+
+Voor elke factuur met een vervaldatum in de komende 60 dagen:
+Maak een Google Calendar event aan met:
+- Titel: "Betaaldeadline: [factuurnr] - [klant/leverancier] (EUR [bedrag])"
+- Datum: de vervaldatum van de factuur
+- Tijd: 09:00
+- Beschrijving met: factuurnummer, relatie, bedrag, type
+- Herinneringen: 7 dagen en 3 dagen van tevoren
+
+Geef een samenvatting van welke events zijn aangemaakt.</pre>
+        </div>
+
+        <h3>Uitgebreide prompt (met prioriteit):</h3>
+        <div class="bg-gray-100 rounded-lg p-4 my-4 not-prose">
+          <pre class="text-gray-800 whitespace-pre-wrap text-sm">Haal alle openstaande facturen op uit Exact Online.
+
+Maak Google Calendar events voor vervaldatums in de komende 60 dagen.
+
+Gebruik deze regels:
+- Facturen boven EUR 5.000: markeer als URGENT in titel, zet 3 herinneringen
+- Facturen EUR 1.000-5.000: standaard titel, 2 herinneringen
+- Facturen onder EUR 1.000: prefix met "Klein:", 1 herinnering</pre>
+        </div>
+
+        <h2>Pro Tips</h2>
+
+        <h3>Tip 1: Gebruik Kleurtags</h3>
+        <p>Vraag de AI om verschillende kleuren te gebruiken: ROOD voor te betalen facturen, GROEN voor te ontvangen facturen.</p>
+
+        <h3>Tip 2: Wekelijkse Refresh</h3>
+        <p>Facturen veranderen. Plan een wekelijkse check: <em>"Verwijder calendar events voor facturen die inmiddels betaald zijn. Voeg events toe voor nieuwe openstaande facturen."</em></p>
+
+        <h3>Tip 3: Gescheiden Agenda</h3>
+        <p>Maak een aparte agenda "Financiele Deadlines" in Google Calendar. Zo kun je deze aan/uit zetten zonder je persoonlijke afspraken te vervuilen.</p>
+
+        <h2>Veelgestelde Vragen</h2>
+
+        <h3>Worden events automatisch bijgewerkt als een factuur betaald wordt?</h3>
+        <p>Nee, de workflow maakt eenmalig events aan. Je moet periodiek de workflow opnieuw draaien om betaalde facturen te verwijderen.</p>
+
+        <h3>Werkt dit ook met meerdere administraties?</h3>
+        <p>Ja. Specificeer welke: <em>"Haal openstaande facturen op uit administratie Holding BV en maak calendar events"</em></p>
+
+        <h3>Hoeveel kost dit?</h3>
+        <ul>
+          <li><strong>Praat met je Boekhouding:</strong> Gratis tot 60 vragen per maand</li>
+          <li><strong>ChatGPT Plus:</strong> EUR 20/maand (Calendar connector inbegrepen)</li>
+          <li><strong>Claude Pro:</strong> EUR 20/maand (Calendar integratie in beta)</li>
+        </ul>
+
+        <h3>Is mijn data veilig?</h3>
+        <p>Ja. We slaan geen financiele data op. Alle verzoeken gaan real-time naar Exact Online. De verbinding is read-only en versleuteld via HTTPS.</p>
+
+        <h2>Gerelateerde Workflows</h2>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Workflow</th>
+                <th>Beschrijving</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="/blog/automatische-factuurherinneringen-ai-workflow">Automatische factuurherinneringen</a></td>
+                <td>Stuur herinneringen via Gmail</td>
+              </tr>
+              <tr>
+                <td><a href="/blog/btw-overzicht-exporteren-google-sheets">BTW overzicht naar Sheets</a></td>
+                <td>Export voor je aangifte</td>
+              </tr>
+              <tr>
+                <td><a href="/blog/betalingsbevestiging-automatiseren-email">Betalingsbevestigingen</a></td>
+                <td>Bedankmail na betaling</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Aan de Slag</h2>
+        <ol>
+          <li><strong><a href="/connect">Maak gratis account</a></strong> - Verbind je Exact Online</li>
+          <li><strong>Test de factuurvraag</strong> - "Welke facturen staan open?"</li>
+          <li><strong>Koppel Google Calendar</strong> - Via ChatGPT connector of Claude integratie</li>
+          <li><strong>Maak je eerste events</strong> - Gebruik de prompts uit dit artikel</li>
+          <li><strong>Plan een wekelijkse refresh</strong> - Houd je agenda up-to-date</li>
+        </ol>
+
+        <p>Nooit meer een betaaldeadline missen. Dat is het idee.</p>
+
+        <p class="text-gray-500 text-sm mt-8"><em>Laatst bijgewerkt: 4 februari 2026</em></p>
+      </div>
+    )}
+
+    <!-- CTA -->
+    <div class="mt-12 bg-exact-light rounded-2xl p-8 text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Klaar om te beginnen?</h2>
+      <p class="text-gray-600 mb-6">Verbind je Exact Online en stel je eerste vraag</p>
+      <a href="/connect" class="inline-block px-8 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors">
+        Gratis starten →
+      </a>
+    </div>
+
+    <div class="mt-8 text-center">
+      <a href="/blog" class="text-exact-blue hover:underline">← Terug naar alle artikelen</a>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  /* Custom prose overrides for better readability */
+
+  /* H2 headers - Main sections that "pop" */
+  .prose :where(h2):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+    font-size: 1.75rem; /* ~28px - larger for visual impact */
+    font-weight: 700; /* Bold for emphasis */
+    color: #0066CC; /* Exact Blue - brand color for recognition */
+    margin-top: 3rem; /* ~48px - clear section separation */
+    margin-bottom: 1rem; /* Space before content */
+    padding-top: 1.5rem; /* Additional visual breathing room */
+    border-top: 1px solid #e5e7eb; /* Subtle section divider */
+    line-height: 1.3; /* Tighter line height for headers */
+  }
+
+  /* First h2 after TL;DR box shouldn't have border */
+  .prose > .not-prose + h2,
+  .prose > .not-prose + p + h2 {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  /* H3 headers - Subsections with clear hierarchy */
+  .prose :where(h3):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+    font-size: 1.25rem; /* ~20px - smaller than h2 but still prominent */
+    font-weight: 600; /* Semibold - lighter than h2 */
+    color: #1f2937; /* Gray-800 - dark but not as striking as blue */
+    margin-top: 2rem; /* ~32px */
+    margin-bottom: 0.75rem; /* Space before content */
+    padding-left: 0.75rem; /* Space for left border accent */
+    border-left: 3px solid #0066CC; /* Exact Blue accent border */
+    line-height: 1.4; /* Slightly tighter line height */
+  }
+
+  /* More spacing between paragraphs */
+  .prose :where(p):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+    margin-bottom: 1.5rem; /* 24px for more breathing room */
+  }
+
+  /* Lists need more spacing too */
+  .prose :where(ul, ol):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+    margin-top: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  /* More space after list items */
+  .prose :where(li):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+    margin-bottom: 0.75rem;
+  }
+</style>

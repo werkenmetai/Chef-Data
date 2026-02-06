@@ -1,0 +1,849 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Database, type User } from '../../lib/database';
+
+// Authentication check - only logged-in users can access
+const env = Astro.locals.runtime?.env;
+const sessionId = Astro.cookies.get('session_id')?.value;
+let isAuthenticated = false;
+let user: User | null = null;
+
+if (env?.DB && sessionId) {
+  try {
+    const db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+    const sessionResult = await db.validateSession(sessionId);
+
+    if (sessionResult) {
+      isAuthenticated = true;
+      user = sessionResult.user;
+    }
+  } catch (e) {
+    console.error('Prompts auth error:', e);
+  }
+}
+
+// Redirect unauthenticated users
+if (!isAuthenticated) {
+  return Astro.redirect('/connect?redirect=/en/prompts');
+}
+
+const categories = [
+  {
+    id: 'cfo-dashboard',
+    title: 'CFO Dashboard & Strategic Reporting',
+    icon: '👑',
+    description: 'Strategic reports and forecasts for executives and management.',
+    prompts: [
+      {
+        id: 'management-report',
+        title: 'Monthly Management Report',
+        prompt: `Create a complete management report with the following sections:
+
+1. FINANCIAL OVERVIEW
+   - Profit and loss statement this month vs previous month vs budget
+   - Variance analysis: explain all variances > 10%
+
+2. BALANCE SHEET RATIOS
+   - Current ratio (current assets / current liabilities)
+   - Quick ratio ((current assets - inventory) / current liabilities)
+   - Solvency ratio (equity / total assets)
+
+3. CASHFLOW INDICATORS
+   - Operating cashflow this month
+   - Working capital movement
+
+4. TOP 5 RISKS AND OPPORTUNITIES
+   - Identify based on the figures
+
+Use chain-of-thought analysis: explain HOW you reach each conclusion.
+Format as executive summary with JSON for dashboard metrics + markdown narrative.`,
+        output: 'JSON + Markdown',
+        level: 'CFO'
+      },
+      {
+        id: 'rolling-forecast',
+        title: 'Rolling Forecast 12 Months',
+        prompt: `Analyze the historical data from the past 24 months and create a rolling forecast:
+
+ANALYSIS:
+1. Identify seasonal patterns per month (index vs average)
+2. Calculate the underlying growth trend (CAGR)
+3. Identify outliers and correct for them
+
+FORECAST:
+- Project revenue for the next 12 months
+- Apply seasonal correction
+- Provide confidence interval (pessimistic / base / optimistic scenario)
+
+OUTPUT:
+Format as Excel-compatible CSV with columns:
+Month | Historical | Forecast_Pessimistic | Forecast_Base | Forecast_Optimistic | SeasonalIndex`,
+        output: 'CSV + Forecast',
+        level: 'Controller'
+      },
+      {
+        id: 'liquidity-forecast',
+        title: 'Liquidity Forecast 90 Days',
+        prompt: `Create a detailed liquidity forecast for the next 90 days:
+
+RECEIPTS PROJECTION:
+1. Outstanding receivables - expected collection per week
+   - Analyze historical payment behavior per customer
+   - Apply expected collection percentage per aging category
+2. Expected new revenue (based on trend)
+
+PAYMENTS PROJECTION:
+1. Outstanding payables - scheduled payment per due date
+2. Salary costs (fixed, per month)
+3. Rent and fixed expenses
+4. Expected variable costs
+
+CASHFLOW MODEL:
+Week | Opening Balance | Receipts | Payments | Closing Balance | Cumulative
+
+Mark weeks with potential liquidity shortage in red.
+Output as JSON for dashboard display.`,
+        output: 'JSON Dashboard',
+        level: 'Treasury'
+      }
+    ]
+  },
+  {
+    id: 'credit-control',
+    title: 'Credit Control & Accounts Receivable',
+    icon: '🛡️',
+    description: 'Professional receivables management and credit risk management.',
+    prompts: [
+      {
+        id: 'credit-risk-assessment',
+        title: 'Credit Risk Assessment per Customer',
+        prompt: `Perform a complete credit risk assessment for [CUSTOMER NAME]:
+
+1. CUSTOMER 360° ANALYSIS
+   - Total lifetime revenue
+   - Revenue last 12 months vs previous year
+   - Average order size
+
+2. PAYMENT BEHAVIOR ANALYSIS
+   - Average payment term (weighted by amount)
+   - Number of times paid late
+   - Longest payment delay ever
+   - Trend: is payment behavior improving or worsening?
+
+3. OUTSTANDING POSITION
+   - Total outstanding
+   - Aging distribution
+   - % of annual revenue
+
+4. CREDIT SCORE CALCULATION (1-10)
+   Weighting:
+   - Historical payment behavior: 40%
+   - Current exposure: 30%
+   - Revenue trend: 20%
+   - Relationship duration: 10%
+
+5. CREDIT LIMIT ADVICE
+   - Current implicit limit
+   - Recommended limit based on score
+
+Output as structured JSON with all metrics and final score.`,
+        output: 'JSON Risk Profile',
+        level: 'Credit Manager'
+      },
+      {
+        id: 'collection-matrix',
+        title: 'Collection Strategy Matrix',
+        prompt: `Create an actionable collection strategy matrix:
+
+STEP 1: SEGMENTATION
+Segment all outstanding invoices into:
+- Segment A: <30 days, large customers (>€10k/year)
+- Segment B: <30 days, small customers
+- Segment C: 30-60 days
+- Segment D: 60-90 days
+- Segment E: >90 days
+
+STEP 2: STRATEGY PER SEGMENT
+Segment A: Friendly reminder, relationship retention priority
+Segment B: Automated reminder
+Segment C: Phone contact, offer payment plan
+Segment D: Formal notice, payment arrangement
+Segment E: Consider debt collection, legal steps
+
+STEP 3: ACTION LIST
+Per invoice: Customer Name | Email | Phone | Invoice# | Amount | Days | Segment | Action | Priority
+
+Sort by priority (highest first).
+Format as CSV for CRM/task list import.`,
+        output: 'CSV Action List',
+        level: 'Credit Manager'
+      },
+      {
+        id: 'dso-analysis',
+        title: 'DSO Trend & Benchmark Analysis',
+        prompt: `Analyze Days Sales Outstanding (DSO) in detail:
+
+1. DSO CALCULATION
+   - DSO = (Average receivables balance / Revenue) × Number of days
+   - Calculate per month for past 12 months
+
+2. TREND ANALYSIS
+   - Is DSO rising or falling?
+   - Calculate trend line (linear regression)
+   - Project DSO over 6 months if trend continues
+
+3. BENCHMARK COMPARISON
+   - SME average: 45 days
+   - Your sector benchmark: [estimate based on business type]
+   - Performance vs benchmark
+
+4. TOP 10 DSO INFLUENCERS
+   - Which customers contribute most to high DSO?
+   - Calculate DSO impact per customer
+
+5. IMPROVEMENT POTENTIAL
+   - If DSO drops to benchmark, how much working capital is freed?
+
+Output as trend data for chart + insights in markdown.`,
+        output: 'Chart Data + Insights',
+        level: 'Controller'
+      }
+    ]
+  },
+  {
+    id: 'controller-toolkit',
+    title: 'Controller Toolkit & Cost Analysis',
+    icon: '🧮',
+    description: 'Management accounting analyses and variance investigation.',
+    prompts: [
+      {
+        id: 'variance-analysis',
+        title: 'Variance Analysis (Budget vs Actual)',
+        prompt: `Perform a complete variance analysis between budget and actual:
+
+STEP 1: DATA COLLECTION
+- Get actual figures per general ledger category
+- Compare with budget (if available, otherwise prior year)
+
+STEP 2: VARIANCE CALCULATION
+Per line:
+- Absolute variance = Actual - Budget
+- Percentage variance = (Actual - Budget) / Budget × 100%
+- Classification: Favorable (F) or Unfavorable (U)
+
+STEP 3: MATERIALITY FILTER
+Focus analysis on variances > €1,000 or > 10%
+
+STEP 4: ROOT CAUSE ANALYSIS
+Per material variance, analyze possible causes:
+- Volume effect (sold more/less)
+- Price effect (higher/lower prices)
+- Mix effect (different product mix)
+- Timing effect (delay/acceleration)
+
+STEP 5: MANAGEMENT SUMMARY
+Top 5 favorable variances
+Top 5 unfavorable variances
+Net impact on result
+
+Format as management report with tables.`,
+        output: 'Management Report',
+        level: 'Controller'
+      },
+      {
+        id: 'margin-analysis',
+        title: 'Product Group Margin Analysis',
+        prompt: `Calculate and analyze gross margin per product group:
+
+STEP 1: DATA AGGREGATION
+- Group sales per product group/item category
+- Link cost of goods sold to sales
+
+STEP 2: MARGIN CALCULATION
+Per product group:
+- Revenue
+- Cost of goods sold
+- Gross margin = Revenue - COGS
+- Gross margin % = Gross margin / Revenue × 100
+
+STEP 3: RANKING
+Sort from highest to lowest margin %
+
+STEP 4: ANALYSIS
+- Identify product groups with margin < 20% (risk)
+- Identify product groups with margin > 50% (opportunity)
+- Which product groups have declining margin trend?
+
+STEP 5: RECOMMENDATIONS
+- Which product groups to expand?
+- Which product groups to review or phase out?
+
+Output as JSON for dashboard + ranking table.`,
+        output: 'JSON + Ranking',
+        level: 'Controller'
+      }
+    ]
+  },
+  {
+    id: 'audit-compliance',
+    title: 'Audit & Compliance',
+    icon: '✅',
+    description: 'Controls and reconciliations for accountants and financial statements.',
+    prompts: [
+      {
+        id: 'vat-reconciliation',
+        title: 'VAT Return Reconciliation',
+        prompt: `Perform a complete VAT reconciliation:
+
+STEP 1: OUTPUT VAT
+- Total sales excl. VAT from invoicing
+- VAT calculated (21%, 9%, 0%, reverse charge)
+- Check: sum of VAT = VAT in return?
+
+STEP 2: INPUT VAT
+- Total purchases excl. VAT from bookings
+- Input VAT claimed
+- Check: input VAT = purchase invoices VAT?
+
+STEP 3: RECONCILIATION
+| Description | Accounting | VAT Return | Difference |
+|-------------|------------|------------|------------|
+
+STEP 4: EXPLAIN DIFFERENCES
+- Identify cause of each difference
+- Corrections for next return
+
+Output as audit trail report.`,
+        output: 'Audit Trail',
+        level: 'Accountant'
+      },
+      {
+        id: 'year-end-prep',
+        title: 'Year-End Preparation Check',
+        prompt: `Check if the administration is ready for financial statements:
+
+CHECKLIST:
+
+1. DEPRECIATION
+   [ ] Are all assets correctly depreciated?
+   [ ] Are there assets fully depreciated but still in use?
+
+2. PROVISIONS
+   [ ] Provision for doubtful accounts up to date?
+   [ ] Warranty provisions needed?
+
+3. ACCRUALS
+   [ ] Prepaid expenses
+   [ ] Accrued income
+   [ ] Accrued expenses
+   [ ] Deferred revenue
+
+4. CLOSING
+   [ ] All bank accounts reconciled?
+   [ ] Suspense accounts cleared?
+
+Per item: status (OK / Action needed) + comment
+
+Output as checklist for the accountant.`,
+        output: 'Checklist',
+        level: 'Accountant'
+      }
+    ]
+  },
+  {
+    id: 'project-finance',
+    title: 'Project Profitability',
+    icon: '🎯',
+    description: 'For project-based organizations and professional services.',
+    prompts: [
+      {
+        id: 'project-profitability',
+        title: 'Project Profitability Deep Dive',
+        prompt: `Analyze profitability per project in detail:
+
+PER PROJECT:
+
+1. REVENUE
+   - Invoiced to date
+   - Still to invoice (work in progress)
+   - Total expected revenue
+
+2. COSTS
+   - Direct hours × internal hourly rate
+   - Direct costs (purchases, travel)
+   - Allocated overhead
+
+3. MARGIN
+   - Gross margin = Revenue - Direct costs
+   - Net margin = Gross margin - Overhead
+   - Margin % = Net margin / Revenue
+
+4. STATUS INDICATORS
+   - 🟢 Green: margin > target
+   - 🟡 Yellow: margin 0-target
+   - 🔴 Red: margin < 0
+
+Output as JSON for dashboard.`,
+        output: 'JSON Dashboard',
+        level: 'Project Controller'
+      },
+      {
+        id: 'utilization',
+        title: 'Resource Utilization Analysis',
+        prompt: `Analyze employee utilization rate:
+
+PER EMPLOYEE:
+
+1. AVAILABLE HOURS
+   - Working days × 8 hours - leave - sickness = Available
+
+2. BILLABLE HOURS
+   - Hours booked on client projects
+
+3. UTILIZATION RATE
+   - Billable / Available × 100%
+
+4. BENCHMARK
+   - Target: typically 65-80% for consultancy
+   - Performance vs target
+
+TEAM OVERVIEW:
+| Employee | Available | Billable | Utilization | vs Target |
+
+Output as CSV + management summary.`,
+        output: 'CSV + Analysis',
+        level: 'Resource Manager'
+      }
+    ]
+  },
+  {
+    id: 'treasury',
+    title: 'Treasury & Cashflow Management',
+    icon: '💵',
+    description: 'Working capital optimization and liquidity management.',
+    prompts: [
+      {
+        id: 'working-capital',
+        title: 'Working Capital & CCC Analysis',
+        prompt: `Calculate and analyze working capital and Cash Conversion Cycle:
+
+1. WORKING CAPITAL CALCULATION
+   - Current assets (receivables + inventory + cash)
+   - Current liabilities (payables + other)
+   - Working capital = Current assets - Current liabilities
+
+2. CASH CONVERSION CYCLE (CCC)
+   - DIO (Days Inventory Outstanding) = Inventory / (COGS / 365)
+   - DSO (Days Sales Outstanding) = Receivables / (Revenue / 365)
+   - DPO (Days Payables Outstanding) = Payables / (Purchases / 365)
+   - CCC = DIO + DSO - DPO
+
+3. TREND ANALYSIS
+   Calculate above for past 12 months.
+   Is CCC improving or worsening?
+
+4. IMPROVEMENT POTENTIAL
+   - If DSO drops by 5 days → €X working capital freed
+
+Output as trend data + analysis.`,
+        output: 'Trend Data + Analysis',
+        level: 'Treasury'
+      },
+      {
+        id: 'covenant-check',
+        title: 'Covenant Compliance Check',
+        prompt: `Check financial ratios against bank covenants:
+
+STANDARD COVENANTS:
+
+1. SOLVENCY RATIO
+   - Calculation: Equity / Total assets
+   - Typical requirement: > 25%
+   - Status: ✅ Compliant / ⚠️ Warning / ❌ Breach
+
+2. CURRENT RATIO
+   - Calculation: Current assets / Current liabilities
+   - Typical requirement: > 1.0
+
+3. DEBT SERVICE COVERAGE RATIO (DSCR)
+   - Calculation: EBITDA / (Interest + Principal)
+   - Typical requirement: > 1.2
+
+SUMMARY:
+| Covenant | Requirement | Actual | Headroom | Status |
+
+Output as covenant compliance report.`,
+        output: 'Covenant Report',
+        level: 'CFO'
+      }
+    ]
+  },
+  {
+    id: 'power-exports',
+    title: 'Power User Exports',
+    icon: '📤',
+    description: 'Advanced data exports for analysis and integration.',
+    prompts: [
+      {
+        id: 'audit-export',
+        title: 'Journal Entries Export for Audit',
+        prompt: `Export all journal entries for audit purposes:
+
+COLUMNS:
+1. Fiscal year
+2. Period
+3. Document number
+4. Document date
+5. GL account number
+6. GL account name
+7. Description
+8. Debit
+9. Credit
+10. VAT code
+
+VALIDATION:
+- Total debit = Total credit
+- Number of lines
+
+Format as audit-ready CSV with UTF-8 encoding.`,
+        output: 'Audit CSV',
+        level: 'Accountant'
+      },
+      {
+        id: 'powerbi-export',
+        title: 'Power BI Dataset Generation',
+        prompt: `Generate datasets for Power BI import:
+
+DATASET 1: Fact_Invoices
+- InvoiceID, InvoiceNumber, InvoiceDate, DueDate
+- CustomerID, Amount, VATAmount, TotalAmount
+- Status, PaidDate, DaysOverdue
+
+DATASET 2: Dim_Customers
+- CustomerID, CustomerName, CustomerCode
+- Email, Phone, CustomerGroup
+
+DATASET 3: Fact_Transactions
+- TransactionID, Date, GLAccountID
+- Amount, Description, DocumentNumber
+
+Per dataset:
+- Correct data types (string, number, date)
+- Consistent relationship keys
+
+Output as separate JSON arrays per dataset.`,
+        output: 'Multi-JSON',
+        level: 'Data Analyst'
+      }
+    ]
+  },
+  {
+    id: 'ai-insights',
+    title: 'AI-Powered Insights',
+    icon: '🧠',
+    description: 'Advanced analyses with AI assistance.',
+    prompts: [
+      {
+        id: 'anomaly-detection',
+        title: 'Anomaly Detection in Transactions',
+        prompt: `Analyze transactions and identify anomalies:
+
+ANOMALY TYPES:
+
+1. AMOUNT ANOMALIES
+   - Transactions > 3× standard deviation from average
+   - Per supplier/customer: deviation from normal pattern
+
+2. TIMING ANOMALIES
+   - Bookings outside office hours
+   - Weekend bookings
+
+3. PATTERN ANOMALIES
+   - Invoices just under authorization threshold
+   - Duplicate payments
+
+RISK SCORING:
+Per anomaly: severity (1-5) × likelihood (1-5) = Risk score
+
+OUTPUT:
+Alert list sorted by risk score:
+| Date | Relation | Amount | Anomaly Type | Risk Score | Action |
+
+Output as alert JSON.`,
+        output: 'Alert JSON',
+        level: 'Controller'
+      },
+      {
+        id: 'financial-health',
+        title: 'Financial Health Score',
+        prompt: `Calculate a composite Financial Health Score:
+
+COMPONENTS (each 0-25 points, total 0-100):
+
+1. LIQUIDITY (25 points)
+   - Current ratio score
+   - Quick ratio score
+
+2. PROFITABILITY (25 points)
+   - Net margin %
+   - Trend vs prior year
+
+3. SOLVENCY (25 points)
+   - Equity ratio
+   - Debt-to-equity ratio
+
+4. GROWTH (25 points)
+   - Revenue growth YoY
+   - Customer growth
+
+TOTAL SCORE INTERPRETATION:
+- 80-100: Excellent 🟢
+- 60-79: Good 🟢
+- 40-59: Moderate 🟡
+- 20-39: Concerning 🟠
+- 0-19: Critical 🔴
+
+Output as dashboard widget JSON with:
+- Total score
+- Scores per component
+- Trend indicator
+- Top 3 improvement areas`,
+        output: 'Score JSON + Dashboard',
+        level: 'CFO'
+      }
+    ]
+  }
+];
+
+// Extended output formats
+const outputFormats = [
+  {
+    name: 'Excel/CSV',
+    icon: '📊',
+    instruction: 'Format as CSV with column headers for Excel import',
+    example: 'Customer;Amount;DueDate;Status'
+  },
+  {
+    name: 'JSON Dashboard',
+    icon: '📋',
+    instruction: 'Return as nested JSON for dashboard widgets',
+    example: '{"metrics": {"revenue": 50000}}'
+  },
+  {
+    name: 'Audit Trail',
+    icon: '✅',
+    instruction: 'Format as audit-ready table with date, source, amount',
+    example: 'Verifiable format'
+  },
+  {
+    name: 'Mermaid Diagram',
+    icon: '📈',
+    instruction: 'Visualize as Mermaid flowchart or sequence diagram',
+    example: 'graph TD; A-->B'
+  },
+  {
+    name: 'Python Code',
+    icon: '🐍',
+    instruction: 'Generate Python code with pandas for analysis',
+    example: 'import pandas as pd'
+  },
+  {
+    name: 'Executive Summary',
+    icon: '📝',
+    instruction: 'Write summary with max 5 bullets and key metrics',
+    example: 'Key points for management'
+  }
+];
+---
+
+<Layout title="Expert Prompt Handbook - Talk to Your Accounting" lang="en" description="Professional prompts for financial analysis of your Exact Online administration. For controllers, CFOs and accountants.">
+  <main class="min-h-screen bg-gray-50">
+    <!-- Hero -->
+    <section class="bg-gradient-to-br from-exact-blue to-blue-700 text-white py-16">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">Expert Level</span>
+          <span class="px-3 py-1 bg-amber-500/80 rounded-full text-sm font-medium">For Professionals</span>
+        </div>
+        <h1 class="text-4xl font-bold mb-4">Expert Prompt Handbook</h1>
+        <p class="text-xl text-blue-100 max-w-2xl">
+          Professional prompts for financial analysis. Designed for controllers, CFOs, accountants and business analysts.
+        </p>
+        <p class="text-blue-200 mt-2">
+          Welcome, {user?.name || user?.email}
+        </p>
+        <div class="mt-6 flex flex-wrap gap-2">
+          {categories.map(cat => (
+            <a href={`#${cat.id}`} class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm">
+              {cat.icon} {cat.title}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Pro Tips Banner -->
+    <section class="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+      <div class="max-w-6xl mx-auto px-4 py-4">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">💡</span>
+          <div>
+            <p class="text-amber-900 font-medium">Pro Tips for Expert Prompts:</p>
+            <ul class="text-amber-800 text-sm mt-1 space-y-1">
+              <li>• Replace [CUSTOMER NAME], [YEAR], [PERIOD] with actual values</li>
+              <li>• Request a specific output format for immediately usable results</li>
+              <li>• Combine prompts for in-depth analyses</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories -->
+    <div class="max-w-6xl mx-auto px-4 py-12 space-y-16">
+      {categories.map(category => (
+        <section id={category.id}>
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-3xl">{category.icon}</span>
+            <h2 class="text-2xl font-bold text-gray-900">{category.title}</h2>
+          </div>
+          {category.description && (
+            <p class="text-gray-600 mb-6">{category.description}</p>
+          )}
+
+          <div class="grid gap-6">
+            {category.prompts.map(item => (
+              <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 class="font-semibold text-gray-900 text-lg">{item.title}</h3>
+                    <div class="flex gap-2 mt-2">
+                      <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+                        {item.output}
+                      </span>
+                      <span class="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+                        {item.level}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4 mb-4 max-h-64 overflow-y-auto">
+                  <pre class="text-gray-700 text-sm whitespace-pre-wrap font-mono">{item.prompt}</pre>
+                </div>
+                <button
+                  class="copy-btn w-full py-3 px-4 bg-exact-blue text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                  data-prompt={item.prompt}
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <span>Copy prompt</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <!-- Output Formats Guide -->
+      <section id="formats" class="bg-white rounded-xl border border-gray-200 p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">📑 Output Formats Guide</h2>
+        <p class="text-gray-600 mb-6">
+          Add these instructions to your prompt for specific output formats.
+        </p>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {outputFormats.map(format => (
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xl">{format.icon}</span>
+                <h3 class="font-semibold text-gray-900">{format.name}</h3>
+              </div>
+              <p class="text-sm text-gray-600 mb-2">{format.instruction}</p>
+              <code class="text-xs bg-gray-100 text-gray-700 p-2 rounded block">
+                {format.example}
+              </code>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Quick Reference -->
+      <section class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 text-white">
+        <h2 class="text-2xl font-bold mb-4">🚀 Quick Reference: Combination Prompts</h2>
+        <p class="text-gray-300 mb-6">
+          Combine prompts for powerful analyses. Start broad, then zoom in.
+        </p>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="bg-white/10 rounded-lg p-4">
+            <h3 class="font-semibold mb-2">Customer Deep Dive</h3>
+            <ol class="text-sm text-gray-300 space-y-1">
+              <li>1. Customer 360 View</li>
+              <li>2. Credit Risk Assessment</li>
+              <li>3. Churn Risk Analysis</li>
+            </ol>
+          </div>
+          <div class="bg-white/10 rounded-lg p-4">
+            <h3 class="font-semibold mb-2">Month-End Close</h3>
+            <ol class="text-sm text-gray-300 space-y-1">
+              <li>1. Variance Analysis</li>
+              <li>2. VAT Reconciliation</li>
+              <li>3. Accountant Package</li>
+            </ol>
+          </div>
+          <div class="bg-white/10 rounded-lg p-4">
+            <h3 class="font-semibold mb-2">Cash Management</h3>
+            <ol class="text-sm text-gray-300 space-y-1">
+              <li>1. Liquidity Forecast</li>
+              <li>2. Working Capital Analysis</li>
+              <li>3. Collection Strategy</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Toast container -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 z-50">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+    </svg>
+    <span>Copied!</span>
+  </div>
+
+  <script>
+    // Copy to clipboard functionality
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const prompt = btn.getAttribute('data-prompt');
+        if (!prompt) return;
+
+        try {
+          await navigator.clipboard.writeText(prompt);
+
+          // Update button text
+          const span = btn.querySelector('span');
+          const originalText = span?.textContent;
+          if (span) span.textContent = '✓ Copied!';
+
+          // Show toast
+          const toast = document.getElementById('toast');
+          if (toast) {
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+              toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+          }
+
+          // Reset button text
+          setTimeout(() => {
+            if (span && originalText) span.textContent = originalText;
+          }, 2000);
+        } catch (err) {
+          console.error('Copy failed:', err);
+        }
+      });
+    });
+  </script>
+</Layout>

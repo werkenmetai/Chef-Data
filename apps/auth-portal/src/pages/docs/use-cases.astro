@@ -1,0 +1,1726 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const useCases = [
+  {
+    id: 'herinneringsmail',
+    icon: '📧',
+    title: 'Automatische herinneringsmail',
+    description: 'Stuur professionele betaalherinneringen met alle details',
+    prompt: `Stuur een e-mail naar Bakkerij De Groot met een overzicht van hun openstaande facturen.
+Vermeld per factuur: factuurnummer, datum, bedrag, en aantal dagen achterstallig.
+Gebruik een vriendelijke maar zakelijke toon.`,
+    result: `Onderwerp: Herinnering openstaande facturen - Uw bedrijf B.V.
+
+Beste heer/mevrouw De Groot,
+
+Hierbij een overzicht van de openstaande facturen:
+
+| Factuurnr | Datum      | Bedrag    | Dagen achterstallig |
+|-----------|------------|-----------|---------------------|
+| F2026-042 | 15-12-2025 | €1.250,00 | 43 dagen           |
+| F2026-051 | 02-01-2026 | €875,50   | 25 dagen           |
+| F2026-058 | 10-01-2026 | €2.100,00 | 17 dagen           |
+
+Totaal openstaand: €4.225,50
+
+Wij verzoeken u vriendelijk het totaalbedrag binnen 7 dagen over te maken.
+
+Met vriendelijke groet,
+[Uw naam]`,
+    tools: ['Exact Online data', 'E-mail opstellen', 'Tabel formatting'],
+    category: 'communicatie'
+  },
+  {
+    id: 'pdf-rapport',
+    icon: '📊',
+    title: 'PDF Management Rapport',
+    description: 'Genereer een professioneel rapport voor je directie of accountant',
+    prompt: `Maak een PDF management rapport voor Q4 2025 met:
+- Omzet vs vorig jaar
+- Top 10 klanten
+- Openstaande debiteuren
+- Cashflow overzicht
+- Aanbevelingen`,
+    result: `[Claude genereert een volledig rapport met grafieken en tabellen]
+
+📄 management-rapport-q4-2025.pdf
+
+Inhoud:
+1. Executive Summary
+   - Omzet Q4: €127.500 (+12% vs Q4 2024)
+   - Nettowinst: €31.875
+
+2. Omzetanalyse
+   [Staafgrafiek: maandelijkse omzet]
+
+3. Top 10 Klanten
+   [Tabel met naam, omzet, % van totaal]
+
+4. Debiteurenoverzicht
+   - Totaal openstaand: €45.230
+   - >30 dagen: €12.100 (3 klanten)
+
+5. Aanbevelingen
+   - Actie: Bel Klant X (€8.500, 45 dagen)
+   - Kans: Klant Y bestelt 40% meer dan vorig jaar`,
+    tools: ['Exact Online data', 'PDF generatie', 'Grafieken', 'Data analyse'],
+    category: 'rapportage'
+  },
+  {
+    id: 'dashboard',
+    icon: '📈',
+    title: 'Live Dashboard',
+    description: 'Laat Claude een interactief dashboard bouwen',
+    prompt: `Bouw een HTML dashboard met:
+- Omzet deze maand vs target
+- Aantal openstaande facturen
+- Cashpositie
+- Grafiek van omzet laatste 12 maanden
+Gebruik moderne styling met Tailwind CSS.`,
+    result: `[Claude genereert een volledig werkend HTML dashboard]
+
+<!DOCTYPE html>
+<html>
+  <!-- Volledig responsive dashboard met:
+  - KPI cards (omzet, facturen, cash)
+  - Interactieve Chart.js grafiek
+  - Kleurcodes voor targets
+  - Auto-refresh optie -->
+</html>
+
+💡 Dit dashboard kun je:
+- Opslaan als HTML bestand
+- Openen in je browser
+- Delen met collega's
+- Aanpassen naar wens`,
+    tools: ['Exact Online data', 'HTML/CSS generatie', 'Chart.js', 'Tailwind'],
+    category: 'visualisatie'
+  },
+  {
+    id: 'omzet-grafiek',
+    icon: '📉',
+    title: 'Omzet Trendanalyse',
+    description: 'Visualiseer je omzet met professionele grafieken',
+    prompt: `Maak een lijn-grafiek van mijn maandelijkse omzet van de afgelopen 2 jaar.
+Voeg toe:
+- Trendlijn
+- Vergelijking met vorig jaar
+- Markeer de beste en slechtste maand`,
+    result: `[Claude genereert een SVG of Canvas grafiek]
+
+📊 Omzet Trend 2024-2025
+
+     €50k ─┤                              ╭──● Dec '25
+          │                         ╭────╯    €48.200
+     €40k ─┤                    ╭───╯
+          │               ╭────╯
+     €30k ─┤          ╭───╯
+          │     ╭────╯
+     €20k ─┤────╯ ← Laagste: Feb '24
+          │        €18.500
+     €10k ─┤
+          └─┬───┬───┬───┬───┬───┬───┬
+           Jan Apr Jul Okt Jan Apr Jul
+
+📈 Trend: +15% jaar-op-jaar groei
+🏆 Beste maand: December 2025 (€48.200)
+📉 Slechtste: Februari 2024 (€18.500)`,
+    tools: ['Exact Online data', 'Data visualisatie', 'Trendanalyse'],
+    category: 'visualisatie'
+  },
+  {
+    id: 'klant-analyse',
+    icon: '🎯',
+    title: 'Klant Gezondheidscheck',
+    description: 'Analyseer het risico en de waarde van je klanten',
+    prompt: `Analyseer al mijn klanten en geef per klant:
+- Totale omzet dit jaar
+- Betalingsgedrag (gemiddelde dagen tot betaling)
+- Risico-score (laag/midden/hoog)
+- Aanbeveling
+
+Sorteer op risico, hoogste eerst.`,
+    result: `🔍 Klant Gezondheidscheck - Januari 2026
+
+⚠️ HOOG RISICO
+┌─────────────────┬──────────┬─────────┬─────────────────────┐
+│ Klant           │ Omzet    │ Betaling│ Aanbeveling         │
+├─────────────────┼──────────┼─────────┼─────────────────────┤
+│ Bouw BV         │ €45.000  │ 67 dagen│ Vooruitbetaling     │
+│ Tech Solutions  │ €12.500  │ 52 dagen│ Bellen, max krediet │
+└─────────────────┴──────────┴─────────┴─────────────────────┘
+
+✅ LAAG RISICO (Top klanten)
+┌─────────────────┬──────────┬─────────┬─────────────────────┐
+│ Retail Groep    │ €89.000  │ 14 dagen│ Volumekorting?      │
+│ Office Direct   │ €67.500  │ 18 dagen│ Upsell kans         │
+└─────────────────┴──────────┴─────────┴─────────────────────┘`,
+    tools: ['Exact Online data', 'Risico analyse', 'Tabel formatting'],
+    category: 'analyse'
+  },
+  {
+    id: 'btw-voorbereiding',
+    icon: '🧾',
+    title: 'BTW Aangifte Voorbereiding',
+    description: 'Bereid je BTW aangifte voor met alle details',
+    prompt: `Bereid mijn BTW aangifte voor Q4 2025 voor.
+Geef me:
+- Totaal te betalen/ontvangen BTW
+- Uitsplitsing per BTW-tarief (21%, 9%, 0%)
+- Lijst van facturen zonder BTW (check needed)
+- Export-ready format voor de Belastingdienst`,
+    result: `🧾 BTW Voorbereiding Q4 2025
+
+SAMENVATTING
+├─ Verschuldigde BTW:     €12.450,00
+├─ Voorbelasting:         €4.230,00
+└─ Te betalen:            €8.220,00
+
+UITSPLITSING VERSCHULDIGD
+┌──────────┬────────────┬────────────┐
+│ Tarief   │ Omzet      │ BTW        │
+├──────────┼────────────┼────────────┤
+│ 21%      │ €52.000,00 │ €10.920,00 │
+│ 9%       │ €17.000,00 │ €1.530,00  │
+│ 0% (EU)  │ €8.500,00  │ €0,00      │
+└──────────┴────────────┴────────────┘
+
+⚠️ CONTROLEER DEZE FACTUREN
+- F2025-234: Geen BTW, binnenland?
+- F2025-251: 0% maar geen BTW-nr klant
+
+📋 Klaar voor aangifte rubriek 1-5`,
+    tools: ['Exact Online data', 'BTW berekening', 'Validatie checks'],
+    category: 'financieel'
+  },
+  {
+    id: 'powerpoint',
+    icon: '🎬',
+    title: 'Investor Presentatie',
+    description: 'Genereer een pitch deck met je financiële data',
+    prompt: `Maak een PowerPoint presentatie voor investeerders met:
+Slide 1: Titel + key metrics
+Slide 2: Omzet groei (grafiek)
+Slide 3: Klantportfolio diversificatie
+Slide 4: Cashflow & runway
+Slide 5: Forecast 2026`,
+    result: `🎬 investor-pitch-2026.pptx
+
+[Slide 1: Titel]
+"Bedrijf B.V. - Series A"
+• €450K ARR (+85% YoY)
+• 47 actieve klanten
+• €180K cash positie
+
+[Slide 2: Groei]
+[Staafgrafiek met hockey-stick groei]
+2023: €120K → 2024: €243K → 2025: €450K
+
+[Slide 3: Klanten]
+[Taartdiagram]
+• Enterprise (40%): 5 klanten
+• MKB (45%): 32 klanten
+• Startup (15%): 10 klanten
+
+[Slide 4: Financieel]
+• Burn rate: €25K/maand
+• Runway: 7 maanden
+• Break-even: Q3 2026
+
+[Slide 5: Forecast]
+2026 target: €850K (+89%)`,
+    tools: ['Exact Online data', 'PowerPoint generatie', 'Grafieken', 'Forecasting'],
+    category: 'rapportage'
+  },
+  {
+    id: 'spreadsheet',
+    icon: '📑',
+    title: 'Excel Cashflow Model',
+    description: 'Bouw een dynamisch cashflow model',
+    prompt: `Maak een Excel cashflow model voor de komende 6 maanden.
+Baseer het op:
+- Mijn huidige openstaande facturen (verwachte inkomsten)
+- Historisch betalingsgedrag per klant
+- Vaste lasten uit mijn boekhouding
+Voeg formules toe zodat ik scenario's kan draaien.`,
+    result: `📑 cashflow-model-2026.xlsx
+
+[Sheet 1: Dashboard]
+Huidige cash: €45.000
+Verwacht over 6 maanden: €78.500
+
+[Sheet 2: Inkomsten]
+| Maand | Verwacht  | Basis                    |
+|-------|-----------|--------------------------|
+| Feb   | €32.000   | F001-F008 (gem. 18 dgn)  |
+| Mar   | €28.500   | F009-F015 + recurring    |
+| Apr   | €35.000   | Historisch gemiddelde    |
+
+[Sheet 3: Uitgaven]
+| Categorie    | Maand   | Bron              |
+|--------------|---------|-------------------|
+| Salarissen   | €15.000 | Exact loonkosten  |
+| Huur         | €2.500  | Vaste last        |
+| Software     | €1.200  | Abonnementen      |
+
+[Sheet 4: Scenario's]
+← Pas "betaalvertraging %" aan
+← Pas "omzetgroei %" aan
+→ Zie impact op runway`,
+    tools: ['Exact Online data', 'Excel generatie', 'Formules', 'Scenario analyse'],
+    category: 'financieel'
+  },
+  {
+    id: 'weekly-report',
+    icon: '📬',
+    title: 'Wekelijkse Update Mail',
+    description: 'Automatische management update elke week',
+    prompt: `Schrijf een wekelijkse management update email met:
+- Omzet deze week vs vorige week
+- Nieuwe klanten
+- Openstaande facturen update
+- Top 3 actiepunten
+
+Houd het kort en actionable.`,
+    result: `📬 Wekelijkse Update - Week 4, 2026
+
+Hey team,
+
+📊 DEZE WEEK IN CIJFERS
+• Omzet: €12.450 (+8% vs vorige week)
+• Nieuwe klanten: 2 (Firma X, Bedrijf Y)
+• Facturen verstuurd: 7 (€18.200)
+
+💰 CASHFLOW UPDATE
+• Ontvangen: €15.800
+• Openstaand: €42.300 (↓€3.500)
+• >30 dagen: €8.100 (2 klanten)
+
+🎯 ACTIEPUNTEN
+1. ☎️ Bel Klant Z - €5.200, 35 dagen
+2. 📧 Stuur offerte Project ABC
+3. 📋 Review Q1 targets vrijdag
+
+Fijne week!`,
+    tools: ['Exact Online data', 'E-mail formatting', 'Week-over-week analyse'],
+    category: 'communicatie'
+  },
+  {
+    id: 'contract-check',
+    icon: '📝',
+    title: 'Contract vs Werkelijkheid',
+    description: 'Check of klanten zich aan afspraken houden',
+    prompt: `Vergelijk voor al mijn klanten:
+- Afgesproken betalingstermijn (uit notities/contract)
+- Werkelijke gemiddelde betaaltijd
+- Afgesproken volume vs werkelijk
+
+Markeer klanten die afwijken van de afspraken.`,
+    result: `📝 Contract Compliance Check
+
+⚠️ AFWIJKINGEN GEVONDEN
+
+Klant: Groothandel BV
+├─ Contract: 14 dagen, €5.000/maand minimum
+├─ Werkelijk: 32 dagen, €3.200/maand
+└─ Actie: Heronderhandelen of aanspreken
+
+Klant: Retail Keten
+├─ Contract: 30 dagen, exclusiviteit
+├─ Werkelijk: 28 dagen ✓
+└─ Let op: Volume daalt (-15% vs vorig kwartaal)
+
+✅ CONFORM CONTRACT
+• IT Solutions BV - Alles volgens afspraak
+• Marketing Agency - Betaalt zelfs sneller
+• Logistics Partner - Volume +20%`,
+    tools: ['Exact Online data', 'Contract analyse', 'Compliance check'],
+    category: 'analyse'
+  },
+  {
+    id: 'jaarrekening-prep',
+    icon: '📚',
+    title: 'Jaarrekening Voorbereiding',
+    description: 'Verzamel alles wat je accountant nodig heeft',
+    prompt: `Bereid mijn jaarrekening 2025 voor. Geef me:
+- Balans per 31-12-2025
+- Winst & verliesrekening 2025
+- Openstaande posten lijst
+- Afschrijvingen overzicht
+- Vragen voor mijn accountant (ontbrekende info)`,
+    result: `📚 Jaarrekening Voorbereiding 2025
+
+BALANS PER 31-12-2025
+Activa                    Passiva
+─────────────────────     ─────────────────────
+Debiteuren    €45.230     Crediteuren   €12.400
+Bank          €38.500     Lening        €25.000
+Inventaris    €15.000     Eigen verm.   €61.330
+─────────────────────     ─────────────────────
+Totaal        €98.730     Totaal        €98.730
+
+WINST & VERLIES 2025
+Omzet                     €485.000
+Inkoopwaarde              €195.000
+─────────────────────────────────
+Brutowinst                €290.000
+Bedrijfskosten            €215.000
+─────────────────────────────────
+Nettoresultaat            €75.000
+
+❓ VRAGEN VOOR ACCOUNTANT
+1. Afschrijving laptop (juni 2025) - welke termijn?
+2. Voorziening dubieuze debiteuren nodig? (€8.100 >60d)
+3. Privé-gebruik auto - welk percentage?`,
+    tools: ['Exact Online data', 'Balans opstelling', 'Checklist generatie'],
+    category: 'financieel'
+  },
+  {
+    id: 'leverancier-onderhandeling',
+    icon: '🤝',
+    title: 'Leverancier Onderhandeling',
+    description: 'Bereid je voor op onderhandelingen met data',
+    prompt: `Ik heb een gesprek met leverancier "Office Supplies BV".
+Geef me:
+- Totaal besteed afgelopen 2 jaar
+- Trend (meer/minder)
+- Vergelijking met andere leveranciers in zelfde categorie
+- Onderhandelingspunten`,
+    result: `🤝 Onderhandeling Prep: Office Supplies BV
+
+📊 JOUW POSITIE
+• Totaal 2024: €18.500
+• Totaal 2025: €24.200 (+31%)
+• Gemiddelde order: €850
+• Betalingsgedrag: 100% op tijd
+
+📈 TREND
+Je bent een groeiende klant (+31% YoY)
+→ Sterke onderhandelingspositie!
+
+⚖️ VERGELIJKING CATEGORIE
+• Office Supplies BV: €24.200 (68%)
+• Kantoor Direct: €8.500 (24%)
+• Amazon Business: €2.800 (8%)
+
+💡 ONDERHANDELINGSPUNTEN
+1. "We besteden €24K/jaar en groeien 30%"
+2. "Concurrent biedt 15% korting bij €20K+"
+3. "Wij betalen altijd op tijd - waarde dat?"
+4. Vraag: Staffelkorting bij €30K/jaar?
+
+🎯 DOEL: 10-15% korting of betere voorwaarden`,
+    tools: ['Exact Online data', 'Spend analyse', 'Onderhandelingstips'],
+    category: 'analyse'
+  }
+];
+
+const categories = [
+  { id: 'communicatie', label: 'Communicatie', icon: '📧' },
+  { id: 'rapportage', label: 'Rapportages', icon: '📊' },
+  { id: 'visualisatie', label: 'Visualisatie', icon: '📈' },
+  { id: 'analyse', label: 'Analyse', icon: '🔍' },
+  { id: 'financieel', label: 'Financieel', icon: '💰' },
+];
+---
+
+<Layout title="Use Cases - Wat kun je doen met AI + Exact Online?" lang="nl">
+  <div class="max-w-6xl mx-auto px-4 py-16">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <span class="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
+        Inspiratie & Voorbeelden
+      </span>
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Wat kun je doen met AI + Exact Online?
+      </h1>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Niet alleen vragen stellen, maar <strong>doorpakken</strong>.
+        Combineer je boekhouddata met de kracht van AI om mails te schrijven,
+        rapporten te genereren, dashboards te bouwen en meer.
+      </p>
+    </div>
+
+    <!-- Intro -->
+    <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-8 mb-12">
+      <div class="flex flex-col md:flex-row items-center gap-6">
+        <div class="flex-shrink-0">
+          <div class="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center text-4xl">
+            🚀
+          </div>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-gray-900 mb-2">
+            Meer dan alleen antwoorden
+          </h2>
+          <p class="text-gray-600">
+            AI assistenten zoals Claude en ChatGPT kunnen veel meer dan vragen beantwoorden.
+            Ze kunnen <strong>documenten maken</strong>, <strong>e-mails schrijven</strong>,
+            <strong>grafieken genereren</strong>, en <strong>Excel bestanden bouwen</strong>.
+            Combineer dat met real-time data uit je Exact Online administratie en je hebt een
+            krachtige assistent die je uren werk bespaart.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category filter -->
+    <div class="flex flex-wrap gap-2 mb-8 justify-center">
+      <button
+        class="category-btn active px-4 py-2 rounded-full text-sm font-medium bg-gray-900 text-white transition-all"
+        data-category="all"
+      >
+        Alles
+      </button>
+      {categories.map(cat => (
+        <button
+          class="category-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
+          data-category={cat.id}
+        >
+          {cat.icon} {cat.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Use cases grid -->
+    <div class="space-y-8" id="use-cases-container">
+      {useCases.map((useCase, index) => (
+        <div
+          class="use-case-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
+          data-category={useCase.category}
+        >
+          <div class="p-6 md:p-8">
+            <!-- Header -->
+            <div class="flex items-start gap-4 mb-6">
+              <div class="text-4xl">{useCase.icon}</div>
+              <div>
+                <span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-medium mb-2">
+                  {categories.find(c => c.id === useCase.category)?.label}
+                </span>
+                <h3 class="text-xl font-bold text-gray-900">{useCase.title}</h3>
+                <p class="text-gray-600">{useCase.description}</p>
+              </div>
+            </div>
+
+            <!-- Prompt -->
+            <div class="mb-6">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span class="text-blue-600 text-xs">👤</span>
+                </div>
+                <span class="text-sm font-medium text-gray-700">Jouw vraag:</span>
+              </div>
+              <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <pre class="text-sm text-gray-800 whitespace-pre-wrap font-sans">{useCase.prompt}</pre>
+              </div>
+            </div>
+
+            <!-- Result -->
+            <div class="mb-6">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span class="text-purple-600 text-xs">🤖</span>
+                </div>
+                <span class="text-sm font-medium text-gray-700">AI resultaat:</span>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 overflow-x-auto">
+                <pre class="text-sm text-gray-800 whitespace-pre-wrap font-mono">{useCase.result}</pre>
+              </div>
+            </div>
+
+            <!-- Tools used -->
+            <div class="flex flex-wrap gap-2">
+              <span class="text-xs text-gray-500">Gebruikt:</span>
+              {useCase.tools.map(tool => (
+                <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
+                  {tool}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Tips section -->
+    <div class="mt-16 bg-yellow-50 rounded-2xl p-8 border border-yellow-200">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        💡 Tips voor betere resultaten
+      </h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="font-semibold text-gray-900 mb-2">Wees specifiek</h3>
+          <p class="text-gray-600 text-sm">
+            In plaats van "Geef me een overzicht", vraag "Geef me een overzicht van openstaande
+            facturen boven €1000, gesorteerd op ouderdom, met klantgegevens erbij."
+          </p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-900 mb-2">Vraag om formaat</h3>
+          <p class="text-gray-600 text-sm">
+            Specificeer hoe je het wilt: "Als tabel", "Als bullet points", "Als e-mail",
+            "Als Excel formule", "Als HTML pagina".
+          </p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-900 mb-2">Combineer taken</h3>
+          <p class="text-gray-600 text-sm">
+            "Analyseer mijn debiteuren EN schrijf een mail naar de top 3 wanbetalers" -
+            de AI kan meerdere stappen in één keer uitvoeren.
+          </p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-900 mb-2">Vraag om uitleg</h3>
+          <p class="text-gray-600 text-sm">
+            "Leg uit waarom je deze aanbeveling doet" of "Wat betekent dit voor mijn cashflow?" -
+            de AI kan context en advies geven.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consistency Section for Finance -->
+    <div class="mt-12 bg-blue-50 rounded-2xl p-8 border border-blue-200">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        🔄 Consistente output voor Finance
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Als finance professional wil je <strong>elke keer hetzelfde format</strong>.
+        Hier zijn drie manieren om consistentie te garanderen:
+      </p>
+
+      <!-- Method 1: Custom Instructions -->
+      <div class="bg-white rounded-xl p-6 mb-4 border border-blue-100">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="text-xl">⚙️</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900 mb-2">1. Custom Instructions instellen</h3>
+            <p class="text-gray-600 text-sm mb-3">
+              Zowel Claude als ChatGPT hebben "Custom Instructions" - regels die altijd gelden.
+              Stel hier je voorkeuren in:
+            </p>
+            <div class="bg-gray-50 rounded-lg p-4 text-sm font-mono text-gray-700">
+              <p class="mb-2"><strong>Voorbeeld Custom Instructions:</strong></p>
+              <pre class="whitespace-pre-wrap">Ik ben financial controller bij een Nederlands MKB-bedrijf.
+
+Bij financiële rapporten:
+- Gebruik altijd Nederlandse valutanotatie (€1.234,56)
+- Datums in DD-MM-YYYY format
+- Toon percentages met 1 decimaal
+- Sorteer tabellen op bedrag (hoogste eerst)
+- Voeg altijd een totaalregel toe
+- Markeer negatieve bedragen in rood
+
+Bij e-mails:
+- Zakelijke maar vriendelijke toon
+- Onderteken met "Met vriendelijke groet"
+- Vermeld altijd betalingstermijn</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Method 2: Saved Templates -->
+      <div class="bg-white rounded-xl p-6 mb-4 border border-blue-100">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="text-xl">📋</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900 mb-2">2. Prompt Templates opslaan</h3>
+            <p class="text-gray-600 text-sm mb-3">
+              Bewaar je meest gebruikte prompts in een notitie-app of tekstbestand.
+              Kopieer en plak ze elke keer:
+            </p>
+            <div class="bg-gray-50 rounded-lg p-4 text-sm">
+              <p class="font-medium text-gray-900 mb-2">📁 Mijn Finance Prompts:</p>
+              <div class="space-y-2 text-gray-600">
+                <p><strong>Wekelijks debiteurenoverzicht:</strong><br/>
+                <code class="bg-gray-200 px-1 rounded">"Geef debiteurenoverzicht per [DATUM]. Tabel met: klant, factuurnr, bedrag, vervaldag, dagen over tijd. Sorteer op dagen over tijd (hoogste eerst). Voeg actieadvies toe bij >30 dagen."</code></p>
+                <p><strong>Maandelijkse BTW check:</strong><br/>
+                <code class="bg-gray-200 px-1 rounded">"BTW overzicht [MAAND]. Split per tarief (21%, 9%, 0%). Toon: omzet, BTW, voorbelasting, saldo. Markeer afwijkingen >5% vs vorige maand."</code></p>
+                <p><strong>Kwartaalrapport directie:</strong><br/>
+                <code class="bg-gray-200 px-1 rounded">"Management rapport Q[X] [JAAR]. Inhoud: 1) KPIs (omzet, marge, DSO), 2) Top 5 klanten, 3) Cashflow, 4) Risico's, 5) Forecast. Max 2 pagina's, bullet points."</code></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Method 3: Upload Previous Result -->
+      <div class="bg-white rounded-xl p-6 mb-4 border border-blue-100">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="text-xl">📄</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900 mb-2">3. Vorig resultaat uploaden</h3>
+            <p class="text-gray-600 text-sm mb-3">
+              De simpelste manier voor consistentie: upload het vorige rapport als voorbeeld.
+              Claude kopieert exact het format.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-4 text-sm">
+              <p class="font-medium text-gray-900 mb-2">Hoe het werkt:</p>
+              <ol class="list-decimal list-inside space-y-1 text-gray-600">
+                <li>Upload je vorige rapport/mail/document als bijlage</li>
+                <li>Vraag: <code class="bg-gray-200 px-1 rounded">"Maak hetzelfde rapport maar dan voor deze maand"</code></li>
+                <li>Claude analyseert de structuur en past dezelfde opmaak toe</li>
+              </ol>
+              <div class="mt-3 p-3 bg-orange-50 rounded border border-orange-200">
+                <p class="text-orange-800 text-xs">
+                  <strong>Tip:</strong> Dit werkt met PDF, Word, Excel, en zelfs screenshots van rapporten.
+                  Je krijgt gegarandeerd dezelfde kolommen, dezelfde sortering, dezelfde stijl.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Method 4: Claude Skills -->
+      <div class="bg-white rounded-xl p-6 mb-4 border border-blue-100">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="text-xl">⚡</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900 mb-2">4. Claude Skills gebruiken <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full ml-2">Nieuw!</span></h3>
+            <p class="text-gray-600 text-sm mb-3">
+              <a href="https://www.anthropic.com/news/skills" target="_blank" class="text-blue-600 hover:underline">Agent Skills</a>
+              zijn herbruikbare instructiepakketten die Claude automatisch laadt voor specifieke taken.
+              Perfect voor terugkerende finance workflows.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-4 text-sm">
+              <p class="font-medium text-gray-900 mb-2">Voorbeeld Finance Skill:</p>
+              <pre class="whitespace-pre-wrap text-gray-700 font-mono text-xs bg-gray-100 p-3 rounded">---
+name: maandrapport-finance
+description: Genereert maandelijkse financiële rapporten in vast format
+---
+
+# Maandrapport Finance
+
+Bij het maken van financiële rapporten:
+
+## Format
+- Gebruik tabellen met kolommen: Omschrijving | Bedrag | % van totaal
+- Nederlandse notatie: €1.234,56
+- Datums: DD-MM-YYYY
+- Altijd totaalregel onderaan
+
+## Structuur
+1. Management samenvatting (max 5 bullets)
+2. Omzet vs budget
+3. Kosten analyse
+4. Cashflow
+5. Openstaande posten
+6. Actiepunten
+
+## Stijl
+- Zakelijk Nederlands
+- Negatieve trends in rood markeren
+- Vergelijk altijd met vorige periode</pre>
+            </div>
+            <p class="text-gray-500 text-xs mt-3">
+              Skills werken in Claude.ai (betaalde plannen), Claude Code, en via de API.
+              <a href="https://github.com/anthropics/skills" target="_blank" class="text-blue-600 hover:underline">Bekijk voorbeelden op GitHub →</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Method 5: Claude Cowork -->
+      <div class="bg-white rounded-xl p-6 border border-blue-100">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="text-xl">🤝</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900 mb-2">5. Claude Cowork <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-2">Nieuw 2026!</span></h3>
+            <p class="text-gray-600 text-sm mb-3">
+              <a href="https://venturebeat.com/technology/anthropic-launches-cowork-a-claude-desktop-agent-that-works-in-your-files-no" target="_blank" class="text-blue-600 hover:underline">Cowork</a>
+              is een nieuwe functie in Claude Desktop (macOS) waarbij Claude direct in je bestanden werkt.
+              Geef Claude toegang tot een map en laat het zelfstandig taken uitvoeren.
+            </p>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+              <div class="bg-gray-50 rounded-lg p-3">
+                <p class="font-medium text-gray-900">📊 Rapporten genereren</p>
+                <p class="text-gray-600 text-xs mt-1">"Maak elke maand een rapport in /Finance/Rapporten"</p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3">
+                <p class="font-medium text-gray-900">📧 Mails voorbereiden</p>
+                <p class="text-gray-600 text-xs mt-1">"Schrijf herinneringsmails naar /Concepten"</p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3">
+                <p class="font-medium text-gray-900">📑 Excel updaten</p>
+                <p class="text-gray-600 text-xs mt-1">"Update het cashflow model met nieuwe data"</p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3">
+                <p class="font-medium text-gray-900">🎬 Presentaties maken</p>
+                <p class="text-gray-600 text-xs mt-1">"Maak een PowerPoint voor de board meeting"</p>
+              </div>
+            </div>
+            <div class="mt-3 p-3 bg-green-50 rounded border border-green-200">
+              <p class="text-green-800 text-xs">
+                <strong>Voordeel:</strong> Claude leest je bestaande bestanden en templates,
+                dus output is automatisch consistent met je huidige documenten.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pro tips -->
+      <div class="mt-6 space-y-3">
+        <div class="flex items-start gap-3 p-4 bg-blue-100 rounded-lg">
+          <span class="text-xl">💡</span>
+          <div>
+            <p class="text-sm text-blue-900">
+              <strong>Pro tip 1:</strong> Begin je prompt met <code class="bg-blue-200 px-1 rounded">"Gebruik exact hetzelfde format als vorige keer"</code>
+              als je in dezelfde chat werkt. De AI onthoudt de context.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-blue-100 rounded-lg">
+          <span class="text-xl">💡</span>
+          <div>
+            <p class="text-sm text-blue-900">
+              <strong>Pro tip 2:</strong> Exporteer een goed rapport naar PDF en bewaar het als "template".
+              Upload het elke keer als referentie voor nieuwe rapporten.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step-by-step Workflows -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        📋 Stap-voor-stap Workflows
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Complete workflows van begin tot eind. Volg deze stappen voor terugkerende taken.
+      </p>
+
+      <!-- Workflow 1: Maandafsluiting -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">1</span>
+          Maandafsluiting Workflow
+        </h3>
+        <div class="space-y-4">
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">1</div>
+            <div>
+              <p class="font-medium text-gray-900">Openstaande posten controleren</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Geef overzicht openstaande debiteuren en crediteuren per vandaag. Markeer posten >30 dagen."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">2</div>
+            <div>
+              <p class="font-medium text-gray-900">Omzet vs vorige maand vergelijken</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Vergelijk omzet deze maand vs vorige maand. Toon verschil in € en %. Verklaar grote afwijkingen."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">3</div>
+            <div>
+              <p class="font-medium text-gray-900">BTW controle</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Bereken BTW positie deze maand. Splits per tarief. Signaleer facturen zonder BTW."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">4</div>
+            <div>
+              <p class="font-medium text-gray-900">Management rapport genereren</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Maak management rapport [MAAND]. KPIs, top klanten, cashflow, risico's. Max 1 A4."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-sm font-medium text-green-600 flex-shrink-0">✓</div>
+            <div>
+              <p class="font-medium text-gray-900">Herinneringen versturen</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Schrijf herinneringsmail voor elke klant met facturen >14 dagen. Vriendelijke toon, specifieke bedragen."</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workflow 2: BTW Aangifte -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">2</span>
+          BTW Aangifte Voorbereiding
+        </h3>
+        <div class="space-y-4">
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">1</div>
+            <div>
+              <p class="font-medium text-gray-900">Omzet per BTW-tarief ophalen</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Geef omzet Q[X] uitgesplitst per BTW-tarief: 21%, 9%, 0%, verlegd, EU-levering."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">2</div>
+            <div>
+              <p class="font-medium text-gray-900">Voorbelasting berekenen</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Bereken totale voorbelasting Q[X] uit inkoopfacturen. Splits per BTW-tarief."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">3</div>
+            <div>
+              <p class="font-medium text-gray-900">Afwijkingen controleren</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Check facturen met afwijkende BTW (0% binnenland, geen BTW-nr bij EU). Lijst voor handmatige controle."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">4</div>
+            <div>
+              <p class="font-medium text-gray-900">Aangifte samenvatting</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Vul BTW-aangifte rubrieken 1a t/m 5b in. Format: rubriek | omschrijving | bedrag. Te betalen/ontvangen onderaan."</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workflow 3: Jaarafsluiting -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">3</span>
+          Jaarafsluiting voor Accountant
+        </h3>
+        <div class="space-y-4">
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">1</div>
+            <div>
+              <p class="font-medium text-gray-900">Proefbalans genereren</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Proefbalans per 31-12-[JAAR]. Alle grootboekrekeningen met saldo. Debet/credit kolommen."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">2</div>
+            <div>
+              <p class="font-medium text-gray-900">Openstaande posten lijst</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Debiteurenlijst per 31-12 met: klant, factuurnr, datum, bedrag, ouderdom. Totaal moet aansluiten op balans."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">3</div>
+            <div>
+              <p class="font-medium text-gray-900">Vaste activa overzicht</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Overzicht vaste activa: aanschafwaarde, afschrijvingen, boekwaarde per 31-12."</code>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 flex-shrink-0">4</div>
+            <div>
+              <p class="font-medium text-gray-900">Aandachtspunten voor accountant</p>
+              <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-1">"Analyseer administratie [JAAR]. Signaleer: dubieuze debiteuren, ongebruikelijke boekingen, ontbrekende info."</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role-specific Guides -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        👤 Guides per Rol
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Verschillende rollen hebben verschillende behoeften. Hier zijn specifieke voorbeelden per functie.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- CFO -->
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+          <div class="w-12 h-12 bg-purple-200 rounded-xl flex items-center justify-center mb-4">
+            <span class="text-2xl">👔</span>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">CFO / Directie</h3>
+          <p class="text-sm text-gray-600 mb-4">High-level inzichten en strategische beslissingen</p>
+          <div class="space-y-2 text-sm">
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Vergelijk onze marges met vorig jaar"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Wat is onze runway bij huidige burn rate?"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Forecast omzet komende 6 maanden"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Board presentatie Q4 met grafieken"</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controller -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+          <div class="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center mb-4">
+            <span class="text-2xl">📊</span>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">Financial Controller</h3>
+          <p class="text-sm text-gray-600 mb-4">Analyse, rapportage en compliance</p>
+          <div class="space-y-2 text-sm">
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Budget vs actuals analyse per kostenplaats"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Reconciliatie bank vs grootboek"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Intercompany saldilijst per entiteit"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Maandrapport met variantie-analyse"</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boekhouder -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+          <div class="w-12 h-12 bg-green-200 rounded-xl flex items-center justify-center mb-4">
+            <span class="text-2xl">📒</span>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">Boekhouder</h3>
+          <p class="text-sm text-gray-600 mb-4">Dagelijkse administratie en controles</p>
+          <div class="space-y-2 text-sm">
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Welke facturen zijn nog niet betaald?"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Check dubbele boekingen deze maand"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"BTW-codes controleren op facturen"</p>
+            </div>
+            <div class="bg-white/70 rounded-lg p-2">
+              <p class="font-medium text-gray-800">"Herinneringsmail schrijven voor klant X"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Finance Calendar -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        📅 Finance Kalender
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Wanneer welke rapporten en checks uitvoeren? Plan je AI-taken in je agenda.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Weekly -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-2xl">📆</span>
+            <h3 class="font-bold text-gray-900">Wekelijks</h3>
+          </div>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Maandag:</strong> Debiteurenoverzicht, bel achterstallige klanten</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Woensdag:</strong> Cashflow update, facturen goedkeuren</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Vrijdag:</strong> Week-update naar management</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Monthly -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-2xl">📊</span>
+            <h3 class="font-bold text-gray-900">Maandelijks</h3>
+          </div>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-blue-500 mt-0.5">●</span>
+              <span><strong>Dag 1-5:</strong> Maandafsluiting vorige maand</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-500 mt-0.5">●</span>
+              <span><strong>Dag 5-10:</strong> Management rapport</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-500 mt-0.5">●</span>
+              <span><strong>Dag 15:</strong> Cashflow forecast update</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-500 mt-0.5">●</span>
+              <span><strong>Dag 25:</strong> BTW-check (kwartaalmaanden)</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Quarterly/Yearly -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-2xl">📈</span>
+            <h3 class="font-bold text-gray-900">Kwartaal & Jaar</h3>
+          </div>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-purple-500 mt-0.5">◆</span>
+              <span><strong>Kwartaal:</strong> BTW-aangifte, board rapport</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-500 mt-0.5">◆</span>
+              <span><strong>Half jaar:</strong> Budget review, forecast update</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-500 mt-0.5">◆</span>
+              <span><strong>December:</strong> Jaarafsluiting voorbereiden</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-500 mt-0.5">◆</span>
+              <span><strong>Januari:</strong> Jaarrekening voor accountant</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sector Examples -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        🏢 Voorbeelden per Sector
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Elke sector heeft specifieke vragen. Hier zijn voorbeelden voor veelvoorkomende branches.
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Retail -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl">🛒</span>
+            <div>
+              <h3 class="font-bold text-gray-900">Retail & E-commerce</h3>
+              <p class="text-sm text-gray-500">Webshops, winkels, groothandel</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Wat zijn mijn best verkopende producten deze maand?"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Vergelijk marges per productcategorie"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Seizoensanalyse: omzet december vs rest van jaar"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Klanten die >3x besteld hebben maar niet recent"</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dienstverlening -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl">💼</span>
+            <div>
+              <h3 class="font-bold text-gray-900">Dienstverlening</h3>
+              <p class="text-sm text-gray-500">Consultancy, bureaus, freelancers</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Omzet per klant dit jaar, wie is mijn grootste?"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Gemiddelde factuurwaarde en betalingstermijn per klant"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Projecten met negatieve marge identificeren"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Recurring revenue vs eenmalige omzet"</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Productie -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl">🏭</span>
+            <div>
+              <h3 class="font-bold text-gray-900">Productie & Maakindustrie</h3>
+              <p class="text-sm text-gray-500">Fabrieken, ambacht, productie</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Inkoopkosten grondstoffen vs vorig kwartaal"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Analyse leveranciers: wie is betrouwbaar qua prijs?"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Kostprijs per product categorie berekenen"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Voorraadwaarde en omloopsnelheid"</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZZP -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl">👨‍💻</span>
+            <div>
+              <h3 class="font-bold text-gray-900">ZZP & Freelance</h3>
+              <p class="text-sm text-gray-500">Eenmanszaken, freelancers</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Hoeveel heb ik dit jaar gefactureerd?"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Wat is mijn effectieve uurtarief per klant?"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Bereid mijn IB-aangifte voor: omzet en kosten"</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <p class="text-gray-800">"Zelfstandigenaftrek check: voldoe ik aan urencriterium?"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tool Combinations -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        🔗 Combineren met andere tools
+      </h2>
+      <p class="text-gray-600 mb-6">
+        De output van AI kun je direct gebruiken in andere tools. Hier zijn de beste combinaties.
+      </p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-2xl">📗</span>
+            <h3 class="font-semibold text-gray-900">Excel / Google Sheets</h3>
+          </div>
+          <p class="text-sm text-gray-600 mb-3">Vraag om data als CSV of tabel format</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded block">"Exporteer als CSV die ik in Excel kan plakken"</code>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-2xl">📊</span>
+            <h3 class="font-semibold text-gray-900">Power BI / Tableau</h3>
+          </div>
+          <p class="text-sm text-gray-600 mb-3">Vraag om data in het juiste format</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded block">"Format data voor Power BI import"</code>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-2xl">📝</span>
+            <h3 class="font-semibold text-gray-900">Notion / Confluence</h3>
+          </div>
+          <p class="text-sm text-gray-600 mb-3">Markdown format voor documentatie</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded block">"Output als Markdown voor Notion"</code>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-2xl">📧</span>
+            <h3 class="font-semibold text-gray-900">Outlook / Gmail</h3>
+          </div>
+          <p class="text-sm text-gray-600 mb-3">Direct kopieerbare e-mailtekst</p>
+          <code class="text-xs bg-gray-100 px-2 py-1 rounded block">"Schrijf mail die ik direct kan versturen"</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exact Online Modules Support -->
+    <div class="mt-16 bg-indigo-50 rounded-2xl p-8 border border-indigo-200">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        📦 Ondersteunde Exact Online Modules
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Exact Online heeft verschillende modules. Hier is wat we momenteel ondersteunen via de API.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <!-- Supported -->
+        <div class="bg-white rounded-xl p-4 border border-green-200">
+          <h3 class="font-semibold text-green-800 mb-3 flex items-center gap-2">
+            <span class="text-green-500">✓</span> Ondersteund
+          </h3>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li>• <strong>Financieel</strong> - Grootboek, journaalposten, W&V, balans</li>
+            <li>• <strong>Debiteuren</strong> - Verkoopfacturen, openstaande posten, ouderdomsanalyse (0-30, 31-60, 61-90, 90+ dagen)</li>
+            <li>• <strong>Crediteuren</strong> - Inkoopfacturen, leveranciers, ouderdomsanalyse</li>
+            <li>• <strong>Relatiebeheer</strong> - Klanten, leveranciers, contacten</li>
+            <li>• <strong>BTW</strong> - BTW-overzichten per tarief</li>
+            <li>• <strong>Bankmutaties</strong> - Transacties, afschriften</li>
+            <li>• <strong>Rekeningschema</strong> - Grootboekrekeningen</li>
+            <li>• <strong>Kostenplaatsen</strong> - Per transactieregel</li>
+            <li>• <strong>Kostendragers</strong> - Per transactieregel</li>
+            <li>• <strong>Budgetvergelijking</strong> - Werkelijk vs budget per grootboek</li>
+          </ul>
+        </div>
+
+        <!-- Partial -->
+        <div class="bg-white rounded-xl p-4 border border-yellow-200">
+          <h3 class="font-semibold text-yellow-800 mb-3 flex items-center gap-2">
+            <span class="text-yellow-500">◐</span> Gedeeltelijk
+          </h3>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li>• <strong>Multi-valuta</strong> - Leest data in originele valuta, geen automatische conversies</li>
+            <li>• <strong>Documenten</strong> - Metadata leesbaar, geen PDF-inhoud</li>
+          </ul>
+        </div>
+
+        <!-- Not Supported -->
+        <div class="bg-white rounded-xl p-4 border border-red-200">
+          <h3 class="font-semibold text-red-800 mb-3 flex items-center gap-2">
+            <span class="text-red-500">✗</span> Nog niet ondersteund
+          </h3>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li>• <strong>Projecten</strong> - Projectadministratie</li>
+            <li>• <strong>Urenregistratie</strong> - Timesheet data</li>
+            <li>• <strong>Voorraad</strong> - Artikelen, magazijn</li>
+            <li>• <strong>Handel</strong> - Orders, offertes</li>
+            <li>• <strong>Productie</strong> - BOM, werkorders</li>
+            <li>• <strong>HRM</strong> - Salarisadministratie</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="p-4 bg-indigo-100 rounded-lg">
+        <p class="text-sm text-indigo-800">
+          <strong>Tip:</strong> Wil je specifieke modules? <a href="/support" class="underline">Laat het ons weten</a> -
+          we breiden regelmatig uit op basis van klantvragen. Projecten en urenregistratie staan hoog op de roadmap.
+        </p>
+      </div>
+    </div>
+
+    <!-- Limitations -->
+    <div class="mt-16 bg-red-50 rounded-2xl p-8 border border-red-200">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        ⚠️ Beperkingen - Wat kan het NIET?
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Eerlijk zijn over beperkingen zorgt voor realistische verwachtingen. Dit zijn de grenzen:
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="font-semibold text-red-800 mb-3">❌ Kan NIET</h3>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 mt-0.5">✗</span>
+              <span><strong>Data aanpassen</strong> - Alleen lezen, nooit schrijven naar Exact</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 mt-0.5">✗</span>
+              <span><strong>Facturen versturen</strong> - Wel opstellen, maar jij verstuurt</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 mt-0.5">✗</span>
+              <span><strong>Betalingen doen</strong> - Geen toegang tot bankrekeningen</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 mt-0.5">✗</span>
+              <span><strong>Real-time sync</strong> - Data is van moment van opvragen</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 mt-0.5">✗</span>
+              <span><strong>Fiscaal advies</strong> - Geen vervanging voor accountant</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 mt-0.5">✗</span>
+              <span><strong>100% accuraat</strong> - Altijd controleren, AI kan fouten maken</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-500 mt-0.5">✗</span>
+              <span><strong>Projectadministratie</strong> - Projecten module nog niet ondersteund</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-green-800 mb-3">✓ Kan WEL</h3>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Financiële data lezen</strong> - Facturen, klanten, grootboek, BTW</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Rapporten maken</strong> - W&V, balans, debiteurenoverzicht</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Analyseren</strong> - Trends, afwijkingen, vergelijkingen</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Documenten genereren</strong> - Mail, PDF, Excel, PowerPoint</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Controleren</strong> - BTW, dubbele boekingen, afwijkingen</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Kostenplaatsen/dragers</strong> - Per transactie inzichtelijk</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-500 mt-0.5">✓</span>
+              <span><strong>Multi-administratie</strong> - Meerdere divisies/bedrijven</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-6 p-4 bg-yellow-100 rounded-lg border border-yellow-300">
+        <p class="text-sm text-yellow-800">
+          <strong>Belangrijk:</strong> AI is een hulpmiddel, geen vervanging. Controleer altijd belangrijke
+          cijfers voordat je ze gebruikt voor beslissingen of aangiftes. Bij twijfel, raadpleeg je accountant.
+        </p>
+      </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        🔧 Troubleshooting
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Output niet wat je verwacht? Hier zijn de meest voorkomende problemen en oplossingen.
+      </p>
+
+      <div class="space-y-4">
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Getallen kloppen niet / andere bedragen dan in Exact</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600 mb-2"><strong>Mogelijke oorzaken:</strong></p>
+            <ul class="text-sm text-gray-600 space-y-1 mb-3">
+              <li>• AI heeft gefilterd op andere periode dan je bedoelde</li>
+              <li>• Valuta conversie of BTW in/exclusief verwarring</li>
+              <li>• Niet alle administraties meegenomen</li>
+            </ul>
+            <p class="text-sm text-gray-600"><strong>Oplossing:</strong> Wees specifiek over periode, administratie, en of je BTW inclusief of exclusief wilt.</p>
+            <code class="text-xs bg-gray-100 px-2 py-1 rounded block mt-2">"Omzet januari 2026, administratie [NAAM], exclusief BTW, alleen status 'Verwerkt'"</code>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Format is anders dan vorige keer</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600 mb-2"><strong>Oorzaak:</strong> Nieuwe chat sessie, AI onthoudt vorige format niet.</p>
+            <p class="text-sm text-gray-600"><strong>Oplossing:</strong></p>
+            <ul class="text-sm text-gray-600 space-y-1 mt-1">
+              <li>1. Upload het vorige rapport als voorbeeld</li>
+              <li>2. Gebruik Custom Instructions met je format voorkeuren</li>
+              <li>3. Gebruik Claude Skills voor vaste templates</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">"Geen data gevonden" terwijl er wel data is</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600 mb-2"><strong>Mogelijke oorzaken:</strong></p>
+            <ul class="text-sm text-gray-600 space-y-1 mb-3">
+              <li>• Verkeerde administratie geselecteerd (bij meerdere)</li>
+              <li>• Filter te strikt (bijv. alleen "Betaald" status)</li>
+              <li>• Exact Online connectie verlopen</li>
+            </ul>
+            <p class="text-sm text-gray-600"><strong>Oplossing:</strong> Vraag eerst "Welke administraties heb ik?" en "Toon alle facturen zonder filter" om te checken.</p>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">AI begrijpt mijn vraag niet goed</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600 mb-2"><strong>Tips voor betere vragen:</strong></p>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>• Wees specifiek: "omzet" → "verkoopomzet exclusief BTW"</li>
+              <li>• Geef context: "voor mijn maandrapport aan de directie"</li>
+              <li>• Specificeer output: "als tabel met kolommen X, Y, Z"</li>
+              <li>• Gebruik voorbeelden: "zoals vorige maand, maar dan voor februari"</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Connectie werkt niet / foutmelding</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600 mb-2"><strong>Stappen:</strong></p>
+            <ol class="text-sm text-gray-600 space-y-1 list-decimal list-inside">
+              <li>Ga naar <a href="/connect" class="text-blue-600 hover:underline">praatmetjeboekhouding.nl/connect</a></li>
+              <li>Verbreek de huidige connectie</li>
+              <li>Maak opnieuw verbinding met Exact Online</li>
+              <li>Kopieer de nieuwe configuratie naar je AI tool</li>
+            </ol>
+            <p class="text-sm text-gray-600 mt-2">Blijft het probleem? <a href="/support" class="text-blue-600 hover:underline">Neem contact op</a>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        ❓ Veelgestelde vragen
+      </h2>
+      <p class="text-gray-600 mb-6">
+        De meest gestelde vragen over het gebruik van AI met Exact Online.
+      </p>
+
+      <div class="space-y-4">
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Hoe actueel is de data?</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600">De data wordt real-time opgehaald uit Exact Online op het moment dat je een vraag stelt.
+            Er is geen vertraging of cache - je krijgt altijd de meest recente data die in Exact staat.</p>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Kan de AI per ongeluk data aanpassen?</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600">Nee, absoluut niet. De connectie heeft alleen <strong>leesrechten</strong>.
+            Technisch is het onmogelijk om data aan te passen, te verwijderen of toe te voegen in Exact Online via onze koppeling.</p>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Welke data kan de AI zien?</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600">De AI heeft toegang tot dezelfde data als jij in Exact Online: facturen,
+            relaties, grootboekrekeningen, transacties, BTW-overzichten, etc. Gevoelige data zoals volledige
+            IBAN-nummers worden automatisch gemaskeerd voor privacy.</p>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Kan ik dit gebruiken voor meerdere administraties?</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600">Ja! Als je toegang hebt tot meerdere administraties in Exact Online,
+            kun je vragen stellen over elk van deze administraties. Vraag "Welke administraties heb ik?" om te zien
+            welke beschikbaar zijn, en specificeer dan in je vraag welke administratie je bedoelt.</p>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Hoeveel kost dit per maand?</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600">We bieden verschillende abonnementen aan. Het Gratis plan bevat
+            ~60 vragen per maand. Starter €9/maand, Pro €25/maand. Zie onze <a href="/pricing" class="text-blue-600 hover:underline">prijspagina</a>
+            voor alle opties. Let op: je hebt ook een abonnement nodig op de AI tool zelf (Claude, ChatGPT, etc.).</p>
+          </div>
+        </details>
+
+        <details class="bg-white rounded-xl border border-gray-200 overflow-hidden group">
+          <summary class="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50">
+            <span class="font-medium text-gray-900">Wordt mijn data gebruikt om AI te trainen?</span>
+            <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="p-4 pt-0 border-t border-gray-100 bg-gray-50">
+            <p class="text-sm text-gray-600">Nee. Bij Claude Pro kun je data training expliciet uitschakelen in de
+            privacy settings. Bij ChatGPT Team/Enterprise is training standaard uitgeschakeld.
+            Lees onze <a href="/docs/ai-privacy" class="text-blue-600 hover:underline">privacy handleiding</a> voor
+            instructies per AI tool.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Downloadable Templates -->
+    <div class="mt-16 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+        📥 Kant-en-klare Prompts
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Kopieer deze prompts direct naar je AI. Vervang [WAARDEN] door je eigen gegevens.
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl p-4 border border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-gray-900">📊 Maandrapport</h3>
+            <button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent)"
+                    class="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors">
+              Kopieer
+            </button>
+          </div>
+          <pre class="text-xs bg-gray-50 p-3 rounded overflow-x-auto whitespace-pre-wrap">Maak management rapport [MAAND] [JAAR].
+
+Inhoud:
+1. Samenvatting (3 bullets max)
+2. Omzet vs vorige maand (tabel + %)
+3. Top 5 klanten met omzet
+4. Openstaande debiteuren >14 dagen
+5. BTW positie
+6. Actiepunten
+
+Format: Nederlands, €-notatie, 1 decimaal percentages.</pre>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 border border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-gray-900">📧 Herinneringsmail</h3>
+            <button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent)"
+                    class="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors">
+              Kopieer
+            </button>
+          </div>
+          <pre class="text-xs bg-gray-50 p-3 rounded overflow-x-auto whitespace-pre-wrap">Schrijf herinneringsmail aan [KLANTNAAM].
+
+Inhoud:
+- Overzicht openstaande facturen (tabel)
+- Per factuur: nummer, datum, bedrag, dagen achterstallig
+- Totaal openstaand bedrag
+- Verzoek tot betaling binnen 7 dagen
+- Vriendelijke maar zakelijke toon
+
+Onderteken met [JOUW NAAM] en [BEDRIJFSNAAM].</pre>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 border border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-gray-900">🧾 BTW Voorbereiding</h3>
+            <button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent)"
+                    class="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors">
+              Kopieer
+            </button>
+          </div>
+          <pre class="text-xs bg-gray-50 p-3 rounded overflow-x-auto whitespace-pre-wrap">BTW aangifte voorbereiding Q[X] [JAAR].
+
+Geef:
+1. Omzet per BTW-tarief (21%, 9%, 0%, verlegd)
+2. Voorbelasting uit inkoopfacturen
+3. Te betalen/ontvangen saldo
+4. Controle: facturen met afwijkende BTW
+5. Format passend bij Belastingdienst rubrieken
+
+Administratie: [NAAM indien meerdere]</pre>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 border border-gray-200">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-gray-900">📈 Cashflow Forecast</h3>
+            <button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent)"
+                    class="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors">
+              Kopieer
+            </button>
+          </div>
+          <pre class="text-xs bg-gray-50 p-3 rounded overflow-x-auto whitespace-pre-wrap">Cashflow forecast komende 3 maanden.
+
+Gebaseerd op:
+- Openstaande debiteuren (verwachte ontvangst)
+- Openstaande crediteuren (te betalen)
+- Historisch betalingsgedrag per klant
+- Vaste lasten uit boekhouding
+
+Output als tabel: maand | inkomsten | uitgaven | saldo
+Eindig met totaal verwachte cashpositie.</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-12 text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        Klaar om dit zelf te proberen?
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Verbind je Exact Online administratie en ontdek wat mogelijk is.
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a
+          href="/connect"
+          class="px-8 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors"
+        >
+          Verbind Exact Online
+        </a>
+        <a
+          href="/exact/probeer"
+          class="px-8 py-3 bg-white text-exact-blue font-semibold rounded-lg border-2 border-exact-blue hover:bg-exact-light transition-colors"
+        >
+          Bekijk live demo
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Category filter functionality
+    document.querySelectorAll<HTMLElement>('.category-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Update active state
+        document.querySelectorAll('.category-btn').forEach(b => {
+          b.classList.remove('active', 'bg-gray-900', 'text-white');
+          b.classList.add('bg-gray-100', 'text-gray-700');
+        });
+        btn.classList.add('active', 'bg-gray-900', 'text-white');
+        btn.classList.remove('bg-gray-100', 'text-gray-700');
+
+        // Filter cards
+        const category = btn.dataset.category;
+        document.querySelectorAll<HTMLElement>('.use-case-card').forEach(card => {
+          if (category === 'all' || card.dataset.category === category) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+</Layout>

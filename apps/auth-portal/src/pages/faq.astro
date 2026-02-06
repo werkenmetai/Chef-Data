@@ -1,0 +1,417 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+interface FAQItem {
+  question: string;
+  answer: string;
+  category: 'setup' | 'usage' | 'billing' | 'security' | 'errors';
+}
+
+const faqs: FAQItem[] = [
+  // SETUP
+  {
+    category: 'setup',
+    question: 'Hoe stel ik Praat met je Boekhouding in voor Claude?',
+    answer: `
+      <ol>
+        <li>Ga naar je <a href="/dashboard" class="text-exact-blue hover:underline">Dashboard</a> en kopieer je sleutel</li>
+        <li>Open het Claude configuratiebestand:
+          <ul>
+            <li><strong>Mac:</strong> <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+            <li><strong>Windows:</strong> <code>%APPDATA%\\Claude\\claude_desktop_config.json</code></li>
+          </ul>
+        </li>
+        <li>Plak de configuratie die je op de <a href="/setup" class="text-exact-blue hover:underline">Setup pagina</a> vindt</li>
+        <li><strong>Herstart Claude Desktop</strong> (dit is nodig om de wijziging te activeren)</li>
+      </ol>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'Ik krijg de melding "No connection found"',
+    answer: `
+      <p>Je Exact Online account is niet (meer) gekoppeld. Dit los je zo op:</p>
+      <ol>
+        <li>Ga naar <a href="/connect" class="text-exact-blue hover:underline">Verbinden</a> en koppel opnieuw</li>
+        <li>Controleer of je de juiste regio hebt gekozen (Nederland, België, etc.)</li>
+        <li>Heb je meerdere Exact Online accounts? Zorg dat je de juiste kiest</li>
+      </ol>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'Mijn sleutel werkt niet',
+    answer: `
+      <p>Controleer het volgende:</p>
+      <ul>
+        <li>De sleutel begint met <code>exa_</code> - kopieer de volledige sleutel</li>
+        <li>Er staan geen extra spaties voor of na de sleutel</li>
+        <li>De sleutel is niet ingetrokken (check je <a href="/dashboard" class="text-exact-blue hover:underline">Dashboard</a>)</li>
+        <li>Je hebt Claude Desktop herstart na het aanpassen van het configuratiebestand</li>
+      </ul>
+      <p>Werkt het nog niet? Maak een nieuwe sleutel aan via je dashboard.</p>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'Hoe geef ik mijn sleutel een andere naam?',
+    answer: `
+      <p>Je kunt je sleutels een herkenbare naam geven:</p>
+      <ol>
+        <li>Ga naar je <a href="/dashboard" class="text-exact-blue hover:underline">Dashboard</a></li>
+        <li>Klik op het potlood-icoon naast de sleutel die je wilt hernoemen</li>
+        <li>Voer een nieuwe naam in (bijvoorbeeld "Claude Desktop" of "Werk laptop")</li>
+        <li>Klik op "Opslaan"</li>
+      </ol>
+      <p>Handig als je meerdere sleutels hebt.</p>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'Kan ik meerdere administraties koppelen?',
+    answer: `
+      <p>Ja. Na het verbinden met Exact Online zijn automatisch alle administraties beschikbaar waar je toegang toe hebt.</p>
+      <ul>
+        <li><strong>Gratis:</strong> 1 administratie</li>
+        <li><strong>Pro:</strong> Tot 5 administraties</li>
+        <li><strong>Enterprise:</strong> Onbeperkt</li>
+      </ul>
+      <p>Vraag in je AI-assistent: <em>"Welke administraties heb ik?"</em> om te zien welke beschikbaar zijn.</p>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'Hoe stel ik een standaard administratie in?',
+    answer: `
+      <p>Je kunt een standaard administratie instellen zodat je AI-assistent deze automatisch gebruikt:</p>
+      <ol>
+        <li>Ga naar je <a href="/dashboard" class="text-exact-blue hover:underline">Dashboard</a></li>
+        <li>Scroll naar het kopje "Administraties"</li>
+        <li>Klik op de administratie die je als standaard wilt gebruiken</li>
+        <li>Deze wordt nu automatisch gebruikt bij je vragen</li>
+      </ol>
+      <p>Je kunt altijd in je vraag aangeven dat je een andere administratie bedoelt.</p>
+    `,
+  },
+
+  // USAGE
+  {
+    category: 'usage',
+    question: 'Wat zijn "opdrachten"?',
+    answer: `
+      <p id="opdrachten"><strong>Opdrachten zijn tool-aanroepen naar de MCP server.</strong> Elke keer dat je AI-assistent gegevens ophaalt uit Exact Online, telt dat als 1 opdracht.</p>
+      <p><strong>Belangrijk:</strong> Eén vraag kan meerdere opdrachten gebruiken. Bijvoorbeeld:</p>
+      <ul>
+        <li><em>"Wat is mijn omzet deze maand?"</em> → 1-2 opdrachten (omzet ophalen)</li>
+        <li><em>"Vergelijk de omzet van januari en februari"</em> → 2-3 opdrachten (twee periodes ophalen)</li>
+        <li><em>"Geef een financieel overzicht"</em> → 3-5 opdrachten (meerdere datasets ophalen)</li>
+      </ul>
+      <p>In je <a href="/dashboard" class="text-exact-blue hover:underline">Dashboard</a> zie je hoeveel opdrachten je hebt gebruikt. Het aantal opdrachten per vraag hangt af van hoe complex de vraag is.</p>
+    `,
+  },
+  {
+    category: 'usage',
+    question: 'Welke vragen kan ik stellen?',
+    answer: `
+      <p>Je kunt vragen stellen over:</p>
+      <ul>
+        <li><strong>Financieel:</strong> Facturen (verkoop en inkoop), openstaande posten, banktransacties, grootboekrekeningen, saldibalans, BTW-aangiften</li>
+        <li><strong>Relaties:</strong> Klanten, leveranciers, contactpersonen, bankgegevens</li>
+        <li><strong>Projecten:</strong> Projecten, onderhanden werk (WIP), uren- en kostenregistratie</li>
+        <li><strong>Sales:</strong> Verkoopkansen, pipeline, contracten, recurring revenue</li>
+        <li><strong>Activa:</strong> Vaste activa, afschrijvingen, boekwaarde</li>
+        <li><strong>Analyse:</strong> Marge-analyse, kostenplaatsen, prijslijsten</li>
+        <li><strong>Producten:</strong> Artikelen, voorraad, valutakoersen</li>
+      </ul>
+      <p><strong>44 tools</strong> beschikbaar - allemaal read-only. Bekijk de <a href="/docs" class="text-exact-blue hover:underline">documentatie</a> voor meer voorbeelden.</p>
+    `,
+  },
+  {
+    category: 'usage',
+    question: 'Kan de AI mijn boekhouding aanpassen?',
+    answer: `
+      <p><strong>Nee.</strong> Je AI-assistent kan alleen lezen, nooit aanpassen. Er kunnen geen facturen, klanten of andere gegevens worden aangemaakt, gewijzigd of verwijderd.</p>
+      <p>Dit is een bewuste keuze voor veiligheid. Technisch onmogelijk gemaakt, niet alleen beloofd.</p>
+    `,
+  },
+  {
+    category: 'usage',
+    question: 'Hoe weet ik of de antwoorden kloppen?',
+    answer: `
+      <p><strong>Controleer belangrijke antwoorden altijd.</strong> AI kan fouten maken. Tips:</p>
+      <ul>
+        <li>Vraag om factuurnummers en referenties</li>
+        <li>Check steekproefsgewijs in Exact Online</li>
+        <li>Bij financiële beslissingen: altijd verifiëren</li>
+        <li>Vraag om de bron: <em>"Van welke facturen komt dit totaal?"</em></li>
+      </ul>
+    `,
+  },
+  {
+    category: 'usage',
+    question: 'Waarom krijg ik geen resultaten?',
+    answer: `
+      <p>Dit kan verschillende oorzaken hebben:</p>
+      <ul>
+        <li><strong>Geen gegevens:</strong> De gevraagde periode bevat geen facturen of transacties</li>
+        <li><strong>Verkeerde administratie:</strong> Geef aan welke administratie je bedoelt</li>
+        <li><strong>Te breed:</strong> Vraag specifieker, bijvoorbeeld "facturen van januari" in plaats van "alle facturen"</li>
+        <li><strong>Toegangsrechten:</strong> Je Exact Online gebruiker heeft mogelijk geen toegang tot bepaalde gegevens</li>
+      </ul>
+    `,
+  },
+
+  // BILLING
+  {
+    category: 'billing',
+    question: 'Hoeveel opdrachten heb ik nog over?',
+    answer: `
+      <p>Check je <a href="/dashboard" class="text-exact-blue hover:underline">Dashboard</a> voor je actuele gebruik.</p>
+      <ul>
+        <li><strong>Gratis:</strong> 200 opdrachten (~60 vragen) per maand</li>
+        <li><strong>Starter:</strong> 750 opdrachten (~250 vragen) per maand</li>
+        <li><strong>Pro:</strong> 2.500 opdrachten (~800 vragen) per maand</li>
+      </ul>
+      <p>Je limiet wordt automatisch hersteld op de 1e van elke maand. Zie ook: <a href="#opdrachten" class="text-exact-blue hover:underline">Wat zijn opdrachten?</a></p>
+    `,
+  },
+  {
+    category: 'billing',
+    question: 'Hoe upgrade ik naar Pro?',
+    answer: `
+      <p>Ga naar <a href="/pricing" class="text-exact-blue hover:underline">Prijzen</a> en klik op "Upgrade naar Pro". Je komt op een beveiligde betaalpagina.</p>
+      <p>Na betaling is je upgrade direct actief.</p>
+    `,
+  },
+  {
+    category: 'billing',
+    question: 'Hoe zeg ik mijn abonnement op?',
+    answer: `
+      <p>Ga naar je <a href="/dashboard" class="text-exact-blue hover:underline">Dashboard</a> en klik op "Beheer abonnement". Daar kun je:</p>
+      <ul>
+        <li>Je abonnement opzeggen</li>
+        <li>Je betaalmethode wijzigen</li>
+        <li>Facturen downloaden</li>
+      </ul>
+      <p>Na opzegging houd je Pro-toegang tot het einde van je betaalperiode. Geen opzegtermijn.</p>
+    `,
+  },
+  {
+    category: 'billing',
+    question: 'Krijg ik een factuur?',
+    answer: `
+      <p>Ja, na elke betaling ontvang je automatisch een factuur per e-mail. Je kunt ook alle facturen downloaden via "Beheer abonnement" in je dashboard.</p>
+    `,
+  },
+
+  // SECURITY
+  {
+    category: 'security',
+    question: 'Is mijn data veilig?',
+    answer: `
+      <p>Ja. Beveiliging is onze hoogste prioriteit:</p>
+      <ul>
+        <li><strong>Wachtwoord:</strong> Wij zien nooit je Exact Online wachtwoord - je logt direct bij Exact in</li>
+        <li><strong>Versleuteling:</strong> Verbindingsgegevens worden versleuteld opgeslagen</li>
+        <li><strong>EU:</strong> Alle gegevens blijven binnen de EU</li>
+        <li><strong>Alleen lezen:</strong> Wij kunnen nooit iets aanpassen in je boekhouding</li>
+        <li><strong>Geen opslag:</strong> Je boekhoudgegevens slaan we niet op</li>
+      </ul>
+    `,
+  },
+  {
+    category: 'security',
+    question: 'Wie kan mijn gegevens zien?',
+    answer: `
+      <p>Alleen jij, via je sleutel. Wij hebben geen toegang tot je boekhoudgegevens. De koppeling haalt gegevens op namens jou en stuurt ze direct naar je AI-assistent.</p>
+      <p>Let op: de AI-assistent die je gebruikt (Claude, ChatGPT) verwerkt je gegevens volgens hun eigen privacybeleid.</p>
+    `,
+  },
+  {
+    category: 'security',
+    question: 'Hoe trek ik de toegang in?',
+    answer: `
+      <p>Twee mogelijkheden:</p>
+      <ol>
+        <li><strong>Sleutel intrekken:</strong> In je <a href="/dashboard" class="text-exact-blue hover:underline">Dashboard</a>, klik op "Intrekken" naast de sleutel</li>
+        <li><strong>Volledig ontkoppelen:</strong> In Exact Online, ga naar Instellingen → Apps → Trek de toegang van "Praat met je Boekhouding" in</li>
+      </ol>
+    `,
+  },
+
+  // ERRORS
+  {
+    category: 'errors',
+    question: 'Melding: "Token expired" of "Verbinding verlopen"',
+    answer: `
+      <p>Je Exact Online verbinding is verlopen. Dit kan gebeuren na:</p>
+      <ul>
+        <li>Een wachtwoordwijziging in Exact Online</li>
+        <li>Het handmatig intrekken van app-toegang</li>
+        <li>Technische problemen bij het vernieuwen van de verbinding</li>
+      </ul>
+      <p><strong>Oplossing:</strong> <a href="/connect" class="text-exact-blue hover:underline">Opnieuw verbinden</a></p>
+    `,
+  },
+  {
+    category: 'errors',
+    question: 'Melding: "Rate limit exceeded" of "Limiet bereikt"',
+    answer: `
+      <p>Je hebt je maandelijkse limiet aan opdrachten bereikt. Je hebt twee opties:</p>
+      <ul>
+        <li><strong>Wachten:</strong> Je limiet wordt hersteld op de 1e van de maand</li>
+        <li><strong>Upgraden:</strong> Starter (€9) geeft je 750 opdrachten, Pro (€25) geeft je 2.500 opdrachten</li>
+      </ul>
+      <p>Zie ook: <a href="#opdrachten" class="text-exact-blue hover:underline">Wat zijn opdrachten?</a></p>
+    `,
+  },
+  {
+    category: 'errors',
+    question: 'Melding: "Division not found" of "Administratie niet gevonden"',
+    answer: `
+      <p>De gevraagde administratie bestaat niet of je hebt er geen toegang toe.</p>
+      <ul>
+        <li>Vraag eerst: <em>"Welke administraties heb ik?"</em></li>
+        <li>Controleer of je de juiste naam gebruikt</li>
+        <li>Check je toegangsrechten in Exact Online</li>
+      </ul>
+    `,
+  },
+  {
+    category: 'errors',
+    question: 'Claude reageert niet op mijn vragen over de boekhouding',
+    answer: `
+      <p>Controleer het volgende:</p>
+      <ol>
+        <li>Is de configuratie correct toegevoegd aan Claude? Check de instellingen</li>
+        <li>Heb je Claude Desktop herstart na het aanpassen van de configuratie?</li>
+        <li>Werkt je sleutel? Test met een simpele vraag: <em>"Test de Exact Online verbinding"</em></li>
+        <li>Zijn er storingen? Check de <a href="https://www.cloudflarestatus.com" class="text-exact-blue hover:underline" target="_blank">status pagina</a></li>
+      </ol>
+    `,
+  },
+];
+
+const categories = {
+  setup: { label: 'Installatie & Setup', icon: '🔧' },
+  usage: { label: 'Gebruik', icon: '💡' },
+  billing: { label: 'Abonnement & Betaling', icon: '💳' },
+  security: { label: 'Beveiliging & Privacy', icon: '🔒' },
+  errors: { label: 'Foutmeldingen', icon: '⚠️' },
+};
+
+// FAQPage JSON-LD for rich snippets
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": stripHtml(faq.answer)
+    }
+  }))
+};
+---
+
+<Layout title="Veelgestelde Vragen" description="Antwoorden op veelgestelde vragen over Praat met je Boekhouding" jsonLd={faqJsonLd}>
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">Veelgestelde Vragen</h1>
+    <p class="text-gray-600 mb-8">
+      Vind snel antwoord op je vraag. Staat je vraag er niet bij?
+      <a href="mailto:support@praatmetjeboekhouding.nl" class="text-exact-blue hover:underline">Neem contact op</a>.
+    </p>
+
+    <!-- Quick Jump -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-4">Categorieën</h2>
+      <div class="flex flex-wrap gap-2">
+        {Object.entries(categories).map(([key, { label, icon }]) => (
+          <a
+            href={`#${key}`}
+            class="px-4 py-2 bg-gray-100 hover:bg-exact-light rounded-lg text-sm font-medium text-gray-700 hover:text-exact-blue transition-colors"
+          >
+            {icon} {label}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- FAQ Sections -->
+    {Object.entries(categories).map(([categoryKey, { label, icon }]) => (
+      <section id={categoryKey} class="mb-12">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+          <span class="mr-2">{icon}</span>
+          {label}
+        </h2>
+        <div class="space-y-4">
+          {faqs
+            .filter((faq) => faq.category === categoryKey)
+            .map((faq, index) => (
+              <details class="bg-white rounded-xl shadow-sm border border-gray-100 group">
+                <summary class="px-6 py-4 cursor-pointer list-none flex justify-between items-center hover:bg-gray-50 rounded-xl">
+                  <span class="font-medium text-gray-900 pr-4">{faq.question}</span>
+                  <svg
+                    class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div class="px-6 pb-4 text-gray-600 prose prose-sm max-w-none" set:html={faq.answer} />
+              </details>
+            ))}
+        </div>
+      </section>
+    ))}
+
+    <!-- Still need help -->
+    <section class="bg-exact-light rounded-xl p-8 text-center">
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">Vraag niet gevonden?</h2>
+      <p class="text-gray-600 mb-6">
+        Ons team helpt je graag verder.
+      </p>
+      <div class="flex justify-center gap-4">
+        <a
+          href="mailto:support@praatmetjeboekhouding.nl"
+          class="px-6 py-3 bg-exact-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+        >
+          Email Support
+        </a>
+        <a
+          href="/docs"
+          class="px-6 py-3 bg-white text-gray-700 rounded-lg font-medium border border-gray-200 hover:border-gray-300 transition-colors"
+        >
+          Bekijk Documentatie
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    .prose code {
+      background: #f3f4f6;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      font-size: 0.875em;
+    }
+    .prose ul, .prose ol {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .prose li {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+  </style>
+</Layout>

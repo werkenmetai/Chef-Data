@@ -1,0 +1,375 @@
+---
+/**
+ * Admin Testimonials Management
+ *
+ * Manage approved testimonials for the website.
+ */
+import Layout from '../../../layouts/Layout.astro';
+import { Database } from '../../../lib/database';
+// AdminAppLauncher now in Layout.astro header
+
+const env = Astro.locals.runtime?.env;
+let db: Database | null = null;
+let isAdmin = false;
+
+interface Testimonial {
+  id: string;
+  user_id: string;
+  nps_score: number | null;
+  testimonial_quote: string;
+  testimonial_approved: number;
+  testimonial_display_name: string | null;
+  testimonial_company: string | null;
+  testimonial_role: string | null;
+  permission_website: number;
+  created_at: string;
+  user_email?: string;
+}
+
+let pendingTestimonials: Testimonial[] = [];
+let approvedTestimonials: Testimonial[] = [];
+
+try {
+  if (env?.DB) {
+    db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+    const sessionId = Astro.cookies.get('session_id')?.value;
+    if (sessionId) {
+      const session = await db.validateSession(sessionId);
+      if (session) {
+        const adminEmails = (env.ADMIN_EMAILS || '')
+          .split(',')
+          .map((e: string) => e.trim().toLowerCase())
+          .filter((e: string) => e.length > 0);
+
+        isAdmin = adminEmails.includes(session.user.email.toLowerCase());
+
+        if (isAdmin) {
+          // Get pending testimonials (with website permission, not yet approved)
+          const pendingResult = await env.DB.prepare(`
+            SELECT f.*, u.email as user_email
+            FROM feedback f
+            LEFT JOIN users u ON f.user_id = u.id
+            WHERE f.testimonial_quote IS NOT NULL
+              AND f.permission_website = 1
+              AND f.testimonial_approved = 0
+              AND f.status != 'spam'
+            ORDER BY f.created_at DESC
+          `).all<Testimonial>();
+
+          pendingTestimonials = pendingResult.results || [];
+
+          // Get approved testimonials
+          const approvedResult = await env.DB.prepare(`
+            SELECT f.*, u.email as user_email
+            FROM feedback f
+            LEFT JOIN users u ON f.user_id = u.id
+            WHERE f.testimonial_approved = 1
+            ORDER BY f.created_at DESC
+          `).all<Testimonial>();
+
+          approvedTestimonials = approvedResult.results || [];
+        }
+      }
+    }
+  }
+} catch (e) {
+  console.error('Admin testimonials error:', e);
+}
+---
+
+<Layout title="Testimonials Beheer">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    {!isAdmin ? (
+      <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+        <h1 class="text-2xl font-bold text-red-900 mb-4">Toegang Geweigerd</h1>
+        <p class="text-red-700">Je hebt geen toegang tot deze pagina.</p>
+        <a href="/dashboard" class="inline-block mt-4 text-red-600 hover:underline">
+          ← Terug naar Dashboard
+        </a>
+      </div>
+    ) : (
+      <>
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Testimonials Beheer</h1>
+            <p class="text-gray-600">Keur testimonials goed voor publicatie op de website</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <a
+              href="/admin/feedback"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              ← Alle Feedback
+            </a>
+          </div>
+        </div>
+
+        <!-- Pending Section -->
+        <div class="mb-12">
+          <h2 class="text-xl font-bold text-gray-900 mb-4">
+            Wachtend op Goedkeuring
+            {pendingTestimonials.length > 0 && (
+              <span class="ml-2 px-2 py-1 text-sm bg-amber-100 text-amber-800 rounded-full">
+                {pendingTestimonials.length}
+              </span>
+            )}
+          </h2>
+
+          {pendingTestimonials.length === 0 ? (
+            <div class="bg-gray-50 rounded-xl p-8 text-center">
+              <p class="text-gray-500">Geen testimonials in de wachtrij.</p>
+            </div>
+          ) : (
+            <div class="space-y-4">
+              {pendingTestimonials.map((t) => (
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" id={`testimonial-${t.id}`}>
+                  <div class="flex gap-6">
+                    <!-- Quote -->
+                    <div class="flex-1">
+                      <blockquote class="text-lg text-gray-900 italic mb-3">
+                        "{t.testimonial_quote}"
+                      </blockquote>
+                      <div class="flex items-center gap-4 text-sm text-gray-600">
+                        <span>{t.testimonial_display_name || 'Anoniem'}</span>
+                        {t.testimonial_company && (
+                          <>
+                            <span class="text-gray-300">•</span>
+                            <span>{t.testimonial_company}</span>
+                          </>
+                        )}
+                        {t.nps_score && (
+                          <>
+                            <span class="text-gray-300">•</span>
+                            <span class="text-green-600 font-medium">NPS: {t.nps_score}</span>
+                          </>
+                        )}
+                      </div>
+                      <p class="text-xs text-gray-400 mt-2">
+                        {t.user_email} • {new Date(t.created_at).toLocaleDateString('nl-NL')}
+                      </p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        class="approve-btn px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+                        data-id={t.id}
+                      >
+                        Goedkeuren
+                      </button>
+                      <button
+                        type="button"
+                        class="edit-btn px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        data-id={t.id}
+                        data-quote={t.testimonial_quote}
+                        data-name={t.testimonial_display_name}
+                      >
+                        Bewerken
+                      </button>
+                      <button
+                        type="button"
+                        class="reject-btn px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+                        data-id={t.id}
+                      >
+                        Afwijzen
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- Approved Section -->
+        <div>
+          <h2 class="text-xl font-bold text-gray-900 mb-4">
+            Goedgekeurde Testimonials
+            <span class="ml-2 px-2 py-1 text-sm bg-green-100 text-green-800 rounded-full">
+              {approvedTestimonials.length}
+            </span>
+          </h2>
+
+          {approvedTestimonials.length === 0 ? (
+            <div class="bg-gray-50 rounded-xl p-8 text-center">
+              <p class="text-gray-500">Nog geen goedgekeurde testimonials.</p>
+            </div>
+          ) : (
+            <div class="grid md:grid-cols-2 gap-4">
+              {approvedTestimonials.map((t) => (
+                <div class="bg-white rounded-xl shadow-sm border border-green-200 p-5" id={`testimonial-${t.id}`}>
+                  <blockquote class="text-gray-900 italic mb-3">
+                    "{t.testimonial_quote}"
+                  </blockquote>
+                  <div class="flex justify-between items-end">
+                    <div>
+                      <p class="font-medium text-gray-900">{t.testimonial_display_name || 'Anoniem'}</p>
+                      {t.testimonial_company && (
+                        <p class="text-sm text-gray-600">{t.testimonial_company}</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      class="revoke-btn text-sm text-red-600 hover:underline"
+                      data-id={t.id}
+                    >
+                      Intrekken
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- API Info -->
+        <div class="mt-12 bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <h3 class="font-semibold text-blue-900 mb-2">API Endpoint</h3>
+          <p class="text-blue-700 text-sm mb-3">
+            Goedgekeurde testimonials zijn beschikbaar via:
+          </p>
+          <code class="block bg-blue-100 text-blue-900 px-4 py-2 rounded text-sm">
+            GET /api/testimonials
+          </code>
+          <p class="text-xs text-blue-600 mt-2">
+            Gebruik dit endpoint om testimonials op de website te tonen.
+          </p>
+        </div>
+      </>
+    )}
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Testimonial Bewerken</h3>
+      <form id="editForm">
+        <input type="hidden" id="editId" name="id" />
+
+        <div class="mb-4">
+          <label for="editQuote" class="block text-sm font-medium text-gray-700 mb-1">Quote</label>
+          <textarea
+            id="editQuote"
+            name="testimonial_quote"
+            rows="4"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none resize-none"
+          ></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Weergavenaam</label>
+          <input
+            type="text"
+            id="editName"
+            name="testimonial_display_name"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+          />
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button type="button" id="cancelEdit" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+            Annuleren
+          </button>
+          <button type="submit" class="px-4 py-2 bg-exact-blue text-white font-medium rounded-lg hover:bg-exact-dark transition-colors">
+            Opslaan & Goedkeuren
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Approve testimonial
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        await updateTestimonial(id!, { testimonial_approved: true, status: 'published' });
+      });
+    });
+
+    // Reject testimonial
+    document.querySelectorAll('.reject-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (confirm('Weet je zeker dat je deze testimonial wilt afwijzen?')) {
+          const id = btn.getAttribute('data-id');
+          await updateTestimonial(id!, { status: 'archived' });
+        }
+      });
+    });
+
+    // Revoke testimonial
+    document.querySelectorAll('.revoke-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (confirm('Weet je zeker dat je deze testimonial wilt intrekken?')) {
+          const id = btn.getAttribute('data-id');
+          await updateTestimonial(id!, { testimonial_approved: false, status: 'reviewed' });
+        }
+      });
+    });
+
+    // Edit testimonial
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm') as HTMLFormElement;
+    const editId = document.getElementById('editId') as HTMLInputElement;
+    const editQuote = document.getElementById('editQuote') as HTMLTextAreaElement;
+    const editName = document.getElementById('editName') as HTMLInputElement;
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const quote = btn.getAttribute('data-quote');
+        const name = btn.getAttribute('data-name');
+
+        if (editModal && editId && editQuote && editName) {
+          editId.value = id || '';
+          editQuote.value = quote || '';
+          editName.value = name || '';
+          editModal.classList.remove('hidden');
+        }
+      });
+    });
+
+    document.getElementById('cancelEdit')?.addEventListener('click', () => {
+      editModal?.classList.add('hidden');
+    });
+
+    editModal?.addEventListener('click', (e) => {
+      if (e.target === editModal) {
+        editModal.classList.add('hidden');
+      }
+    });
+
+    editForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = editId.value;
+      await updateTestimonial(id, {
+        testimonial_quote: editQuote.value,
+        testimonial_display_name: editName.value,
+        testimonial_approved: true,
+        status: 'published'
+      });
+    });
+
+    async function updateTestimonial(id: string, data: Record<string, unknown>) {
+      try {
+        const response = await fetch(`/api/admin/feedback/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert('Er ging iets mis bij het bijwerken.');
+        }
+      } catch (error) {
+        console.error('Failed to update testimonial:', error);
+        alert('Er ging iets mis bij het bijwerken.');
+      }
+    }
+  </script>
+</Layout>

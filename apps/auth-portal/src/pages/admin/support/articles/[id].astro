@@ -1,0 +1,420 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { Database, type KnowledgeArticle } from '../../../../lib/database';
+// AdminAppLauncher now in Layout.astro header
+
+const env = Astro.locals.runtime?.env;
+const { id } = Astro.params;
+
+let db: Database | null = null;
+let isAdmin = false;
+let article: KnowledgeArticle | null = null;
+let success: string | null = null;
+let error: string | null = null;
+let deleted = false;
+
+try {
+  if (env?.DB && id) {
+    db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+    const sessionId = Astro.cookies.get('session_id')?.value;
+    if (sessionId) {
+      const session = await db.validateSession(sessionId);
+      if (session) {
+        const adminEmails = (env.ADMIN_EMAILS || '')
+          .split(',')
+          .map((e: string) => e.trim().toLowerCase())
+          .filter((e: string) => e.length > 0);
+
+        isAdmin = adminEmails.includes(session.user.email.toLowerCase());
+
+        if (isAdmin) {
+          // Get article by ID
+          article = await db.get<KnowledgeArticle>(
+            'SELECT * FROM knowledge_articles WHERE id = ?',
+            [id]
+          );
+
+          if (article && Astro.request.method === 'POST') {
+            const formData = await Astro.request.formData();
+            const action = formData.get('action');
+
+            if (action === 'delete') {
+              await db.deleteArticle(id);
+              deleted = true;
+            } else if (action === 'update') {
+              const slug = formData.get('slug')?.toString() || '';
+              const title_nl = formData.get('title_nl')?.toString() || '';
+              const title_en = formData.get('title_en')?.toString() || '';
+              const content_nl = formData.get('content_nl')?.toString() || '';
+              const content_en = formData.get('content_en')?.toString() || '';
+              const category = formData.get('category')?.toString() || 'other';
+              const tags = formData.get('tags')?.toString() || '';
+              const published = formData.get('published') === 'on';
+              const featured = formData.get('featured') === 'on';
+
+              if (!slug || !title_nl || !content_nl) {
+                error = 'Slug, titel (NL) en inhoud (NL) zijn verplicht';
+              } else {
+                // Check if slug changed and exists
+                if (slug !== article.slug) {
+                  const existing = await db.getArticle(slug);
+                  if (existing) {
+                    error = 'Deze slug bestaat al';
+                  }
+                }
+
+                if (!error) {
+                  await db.updateArticle(id, {
+                    slug,
+                    title_nl,
+                    title_en: title_en || null,
+                    content_nl,
+                    content_en: content_en || null,
+                    category,
+                    tags: tags || null,
+                    published,
+                    featured,
+                  });
+
+                  success = 'Artikel bijgewerkt';
+                  article = await db.get<KnowledgeArticle>(
+                    'SELECT * FROM knowledge_articles WHERE id = ?',
+                    [id]
+                  );
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} catch (e) {
+  console.error('Admin edit article error:', e);
+  error = 'Er is een fout opgetreden';
+}
+
+if (deleted) {
+  return Astro.redirect('/admin/support/articles');
+}
+
+const categoryOptions = [
+  { value: 'connection', label: 'Verbinding' },
+  { value: 'billing', label: 'Facturatie' },
+  { value: 'bug', label: 'Technisch' },
+  { value: 'feature', label: 'Features' },
+  { value: 'account', label: 'Account' },
+  { value: 'other', label: 'Overig' },
+];
+---
+
+<Layout title={article ? `Bewerk: ${article.title_nl}` : 'Artikel niet gevonden'}>
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    {!isAdmin ? (
+      <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+        <h1 class="text-2xl font-bold text-red-900 mb-4">Toegang Geweigerd</h1>
+        <p class="text-red-700">Je hebt geen toegang tot deze pagina.</p>
+        <a href="/dashboard" class="inline-block mt-4 text-red-600 hover:underline">
+          ← Terug naar Dashboard
+        </a>
+      </div>
+    ) : !article ? (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">Artikel niet gevonden</h1>
+        <p class="text-gray-600 mb-6">Dit artikel bestaat niet of is verwijderd.</p>
+        <a
+          href="/admin/support/articles"
+          class="inline-block px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors"
+        >
+          Terug naar overzicht
+        </a>
+      </div>
+    ) : (
+      <>
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Artikel Bewerken</h1>
+            <p class="text-gray-500 font-mono text-sm">ID: {article.id}</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <a
+              href={`/support/articles/${article.slug}`}
+              target="_blank"
+              class="text-gray-600 hover:text-gray-900 flex items-center gap-1"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Bekijken
+            </a>
+            <a href="/admin/support/articles" class="text-gray-600 hover:text-gray-900">
+              ← Terug
+            </a>
+          </div>
+        </div>
+
+        {error && (
+          <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-red-700">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p class="text-green-700">{success}</p>
+          </div>
+        )}
+
+        <!-- Stats Bar -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+          <div class="flex items-center gap-8 text-sm">
+            <div>
+              <span class="text-gray-500">Views:</span>
+              <span class="font-medium text-gray-900 ml-1">{article.view_count}</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Nuttig:</span>
+              <span class="font-medium text-green-600 ml-1">{article.helpful_count}</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Niet nuttig:</span>
+              <span class="font-medium text-red-600 ml-1">{article.not_helpful_count}</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Score:</span>
+              <span class="font-medium text-gray-900 ml-1">
+                {article.helpful_count + article.not_helpful_count > 0
+                  ? `${Math.round((article.helpful_count / (article.helpful_count + article.not_helpful_count)) * 100)}%`
+                  : '-'}
+              </span>
+            </div>
+            <div class="flex-1"></div>
+            <div>
+              <span class="text-gray-500">Aangemaakt:</span>
+              <span class="text-gray-700 ml-1">{new Date(article.created_at).toLocaleDateString('nl-NL')}</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Bijgewerkt:</span>
+              <span class="text-gray-700 ml-1">{new Date(article.updated_at).toLocaleDateString('nl-NL')}</span>
+            </div>
+          </div>
+        </div>
+
+        <form method="POST" class="space-y-6">
+          <input type="hidden" name="action" value="update" />
+
+          <!-- Basic Info -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Basis Informatie</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">
+                  Slug <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="slug"
+                  id="slug"
+                  required
+                  pattern="[a-z0-9-]+"
+                  value={article.slug}
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
+                  Categorie <span class="text-red-500">*</span>
+                </label>
+                <select
+                  name="category"
+                  id="category"
+                  required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+                >
+                  {categoryOptions.map(opt => (
+                    <option value={opt.value} selected={article.category === opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">
+                Tags
+              </label>
+              <input
+                type="text"
+                name="tags"
+                id="tags"
+                value={article.tags || ''}
+                placeholder="api, connectie, oauth (gescheiden door komma's)"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <!-- Dutch Content -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Nederlandse Inhoud</h2>
+
+            <div class="space-y-4">
+              <div>
+                <label for="title_nl" class="block text-sm font-medium text-gray-700 mb-1">
+                  Titel (NL) <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="title_nl"
+                  id="title_nl"
+                  required
+                  value={article.title_nl}
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="content_nl" class="block text-sm font-medium text-gray-700 mb-1">
+                  Inhoud (NL) <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="content_nl"
+                  id="content_nl"
+                  rows="12"
+                  required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none font-mono text-sm"
+                >{article.content_nl}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- English Content -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Engelse Inhoud (Optioneel)</h2>
+
+            <div class="space-y-4">
+              <div>
+                <label for="title_en" class="block text-sm font-medium text-gray-700 mb-1">
+                  Titel (EN)
+                </label>
+                <input
+                  type="text"
+                  name="title_en"
+                  id="title_en"
+                  value={article.title_en || ''}
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="content_en" class="block text-sm font-medium text-gray-700 mb-1">
+                  Inhoud (EN)
+                </label>
+                <textarea
+                  name="content_en"
+                  id="content_en"
+                  rows="12"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none font-mono text-sm"
+                >{article.content_en || ''}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Opties</h2>
+
+            <div class="space-y-4">
+              <label class="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="published"
+                  checked={article.published}
+                  class="w-5 h-5 text-exact-blue border-gray-300 rounded focus:ring-exact-blue"
+                />
+                <div>
+                  <span class="font-medium text-gray-900">Gepubliceerd</span>
+                  <p class="text-sm text-gray-500">Artikel zichtbaar voor gebruikers</p>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="featured"
+                  checked={article.featured}
+                  class="w-5 h-5 text-yellow-500 border-gray-300 rounded focus:ring-yellow-500"
+                />
+                <div>
+                  <span class="font-medium text-gray-900">Uitgelicht</span>
+                  <p class="text-sm text-gray-500">Tonen op de support startpagina</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="flex justify-between">
+            <button
+              type="button"
+              onclick="document.getElementById('deleteModal').classList.remove('hidden')"
+              class="px-4 py-2 text-red-600 hover:text-red-800 font-medium"
+            >
+              Verwijderen
+            </button>
+            <div class="flex gap-4">
+              <a
+                href="/admin/support/articles"
+                class="px-6 py-3 text-gray-600 font-medium hover:text-gray-900"
+              >
+                Annuleren
+              </a>
+              <button
+                type="submit"
+                class="px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors"
+              >
+                Opslaan
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Delete Modal -->
+        <div id="deleteModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+          <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-black opacity-50" onclick="document.getElementById('deleteModal').classList.add('hidden')"></div>
+            <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Artikel verwijderen?</h3>
+              <p class="text-gray-600 mb-6">
+                Weet je zeker dat je "{article.title_nl}" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+              </p>
+              <div class="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onclick="document.getElementById('deleteModal').classList.add('hidden')"
+                  class="px-4 py-2 text-gray-600 hover:text-gray-900"
+                >
+                  Annuleren
+                </button>
+                <form method="POST">
+                  <input type="hidden" name="action" value="delete" />
+                  <button
+                    type="submit"
+                    class="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Verwijderen
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+</Layout>

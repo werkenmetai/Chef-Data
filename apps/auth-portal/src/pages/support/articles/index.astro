@@ -1,0 +1,202 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { Database, type KnowledgeArticle } from '../../../lib/database';
+
+const env = Astro.locals.runtime?.env;
+const categoryFilter = Astro.url.searchParams.get('category');
+const searchQuery = Astro.url.searchParams.get('q');
+
+let db: Database | null = null;
+let articles: KnowledgeArticle[] = [];
+
+try {
+  if (env?.DB) {
+    db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+    if (searchQuery) {
+      articles = await db.searchArticles(searchQuery, 'nl');
+    } else {
+      articles = await db.getPublishedArticles(categoryFilter || undefined);
+    }
+  }
+} catch (e) {
+  console.error('Articles page error:', e);
+}
+
+// Group articles by category
+const categories: Record<string, KnowledgeArticle[]> = {};
+articles.forEach(article => {
+  if (!categories[article.category]) {
+    categories[article.category] = [];
+  }
+  categories[article.category].push(article);
+});
+
+const categoryLabels: Record<string, { label: string; icon: string }> = {
+  connection: { label: 'Verbinding', icon: '🔌' },
+  billing: { label: 'Facturatie', icon: '💳' },
+  bug: { label: 'Technisch', icon: '🐛' },
+  feature: { label: 'Features', icon: '💡' },
+  account: { label: 'Account', icon: '👤' },
+  other: { label: 'Overig', icon: '📄' },
+};
+---
+
+<Layout title="Help Artikelen">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <a href="/support" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Terug naar Support
+      </a>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Help Artikelen</h1>
+      <p class="text-gray-600">Vind antwoorden op veelgestelde vragen</p>
+    </div>
+
+    <!-- Search -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8">
+      <form method="GET" class="flex gap-2">
+        <input
+          type="text"
+          name="q"
+          value={searchQuery || ''}
+          placeholder="Zoek in artikelen..."
+          class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+        />
+        <button
+          type="submit"
+          class="px-4 py-2 bg-exact-blue text-white rounded-lg hover:bg-exact-dark transition-colors"
+        >
+          Zoeken
+        </button>
+        {(searchQuery || categoryFilter) && (
+          <a
+            href="/support/articles"
+            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Reset
+          </a>
+        )}
+      </form>
+    </div>
+
+    <!-- Category Filter -->
+    {!searchQuery && (
+      <div class="flex flex-wrap gap-2 mb-8">
+        <a
+          href="/support/articles"
+          class={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${!categoryFilter ? 'bg-exact-blue text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+        >
+          Alle
+        </a>
+        {Object.entries(categoryLabels).map(([key, { label, icon }]) => (
+          <a
+            href={`/support/articles?category=${key}`}
+            class={`px-3 py-1 rounded-full text-sm font-medium transition-colors flex items-center gap-1 ${categoryFilter === key ? 'bg-exact-blue text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          >
+            <span>{icon}</span>
+            {label}
+          </a>
+        ))}
+      </div>
+    )}
+
+    <!-- Search Results -->
+    {searchQuery && (
+      <div class="mb-6">
+        <p class="text-gray-600">
+          {articles.length} resultaten voor "{searchQuery}"
+        </p>
+      </div>
+    )}
+
+    <!-- Articles -->
+    {articles.length > 0 ? (
+      <div class="space-y-8">
+        {categoryFilter || searchQuery ? (
+          // Flat list for filtered/search results
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="space-y-3">
+              {articles.map(article => (
+                <a
+                  href={`/support/articles/${article.slug}`}
+                  class="block p-4 rounded-lg border border-gray-100 hover:border-exact-blue hover:bg-exact-light transition-colors group"
+                >
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <h3 class="font-medium text-gray-900 group-hover:text-exact-blue">
+                        {article.title_nl}
+                      </h3>
+                      <p class="text-sm text-gray-500 mt-1">
+                        {categoryLabels[article.category]?.icon} {categoryLabels[article.category]?.label || article.category}
+                        {article.featured && <span class="ml-2 text-yellow-500">★ Uitgelicht</span>}
+                      </p>
+                    </div>
+                    <span class="text-xs text-gray-400">{article.view_count} views</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : (
+          // Grouped by category
+          Object.entries(categories).map(([category, categoryArticles]) => (
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <span class="mr-2">{categoryLabels[category]?.icon || '📄'}</span>
+                {categoryLabels[category]?.label || category}
+                <span class="ml-2 text-sm font-normal text-gray-500">
+                  ({categoryArticles.length} artikelen)
+                </span>
+              </h2>
+              <div class="space-y-3">
+                {categoryArticles.map(article => (
+                  <a
+                    href={`/support/articles/${article.slug}`}
+                    class="block p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div class="flex items-center justify-between">
+                      <h3 class="font-medium text-gray-700 group-hover:text-exact-blue">
+                        {article.title_nl}
+                        {article.featured && <span class="ml-2 text-yellow-500 text-sm">★</span>}
+                      </h3>
+                      <svg class="w-4 h-4 text-gray-400 group-hover:text-exact-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    ) : (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <p class="text-gray-500">Geen artikelen gevonden.</p>
+        {(searchQuery || categoryFilter) && (
+          <a
+            href="/support/articles"
+            class="inline-block mt-4 text-exact-blue hover:underline"
+          >
+            Bekijk alle artikelen
+          </a>
+        )}
+      </div>
+    )}
+
+    <!-- Need more help -->
+    <div class="mt-8 bg-gray-50 rounded-xl border border-gray-200 p-6 text-center">
+      <p class="text-gray-600 mb-3">Niet gevonden wat je zocht?</p>
+      <a
+        href="/support/new"
+        class="inline-block px-4 py-2 bg-exact-blue text-white rounded-lg hover:bg-exact-dark transition-colors"
+      >
+        Start een gesprek met support
+      </a>
+    </div>
+  </div>
+</Layout>

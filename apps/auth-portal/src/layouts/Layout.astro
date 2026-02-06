@@ -1,0 +1,388 @@
+---
+import { getLanguageFromPath, getPathForLanguage, hasTranslation, t, type Language } from '../lib/i18n';
+import { Database, type User } from '../lib/database';
+import AdminAppLauncher from '../components/AdminAppLauncher.astro';
+
+// Session check for navigation
+let isLoggedIn = false;
+let isAdmin = false;
+let currentUser: User | null = null;
+let unreadMessageCount = 0;
+
+try {
+  const env = Astro.locals.runtime?.env;
+  const sessionId = Astro.cookies.get('session_id')?.value;
+
+  if (sessionId && env?.DB) {
+    const db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+    const sessionResult = await db.validateSession(sessionId);
+
+    if (sessionResult) {
+      isLoggedIn = true;
+      currentUser = sessionResult.user;
+
+      // Check if user is admin
+      const adminEmails = (env?.ADMIN_EMAILS || '').split(',').map((e: string) => e.trim().toLowerCase());
+      isAdmin = adminEmails.includes(currentUser.email.toLowerCase());
+
+      // Get unread message count for this user
+      try {
+        const unreadResult = await env.DB.prepare(`
+          SELECT COUNT(*) as count
+          FROM support_messages m
+          JOIN support_conversations c ON m.conversation_id = c.id
+          WHERE c.user_id = ?
+            AND m.sender_id != ?
+            AND m.read_at IS NULL
+        `).bind(currentUser.id, currentUser.id).first<{ count: number }>();
+        unreadMessageCount = unreadResult?.count || 0;
+      } catch {
+        // Silently fail - badge just won't show
+      }
+    }
+  }
+} catch (e) {
+  // Silently fail - user will see login button
+  console.error('Layout session check error:', e);
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  lang?: Language;
+  canonicalUrl?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  jsonLd?: object;
+}
+
+// Detect language from URL
+const pathname = new URL(Astro.request.url).pathname;
+const detectedLang = getLanguageFromPath(pathname);
+const lang = Astro.props.lang || detectedLang;
+
+const { title, description, canonicalUrl, ogImage, noindex, jsonLd } = Astro.props;
+const defaultDescription = lang === 'nl'
+  ? 'Verbind Exact Online met ChatGPT, Claude & Copilot. Stel vragen aan je boekhouding in natuurlijke taal. Gratis starten, geen technische kennis nodig.'
+  : 'Connect Exact Online with ChatGPT, Claude & Copilot. Ask questions about your accounting in natural language. Start free, no technical knowledge required.';
+const siteTitle = t('siteName', lang);
+const siteUrl = 'https://praatmetjeboekhouding.nl';
+
+// Get alternate language path for language switcher (only if translation exists)
+const altLang: Language = lang === 'nl' ? 'en' : 'nl';
+const altPath = getPathForLanguage(pathname, altLang);
+const showLanguageSwitcher = hasTranslation(pathname);
+
+// Construct full URLs
+const fullCanonicalUrl = canonicalUrl || `${siteUrl}${pathname}`;
+const fullAltUrl = `${siteUrl}${altPath}`;
+const fullOgImage = ogImage || `${siteUrl}/og-image.png`;
+
+// Default JSON-LD for SaaS product
+const defaultJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": siteTitle,
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "description": description || defaultDescription,
+  "url": siteUrl,
+  "author": {
+    "@type": "Organization",
+    "name": "Chef Data B.V.",
+    "url": "https://chefdata.nl"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR",
+    "description": "Gratis plan met 200 opdrachten per maand"
+  }
+};
+
+const structuredData = jsonLd || defaultJsonLd;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>{title} | {siteTitle}</title>
+    <meta name="title" content={`${title} | ${siteTitle}`} />
+    <meta name="description" content={description || defaultDescription} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Canonical & Alternate Languages -->
+    <link rel="canonical" href={fullCanonicalUrl} />
+    <link rel="alternate" hreflang={lang} href={fullCanonicalUrl} />
+    <link rel="alternate" hreflang={altLang} href={fullAltUrl} />
+    <link rel="alternate" hreflang="x-default" href={siteUrl} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={fullCanonicalUrl} />
+    <meta property="og:title" content={`${title} | ${siteTitle}`} />
+    <meta property="og:description" content={description || defaultDescription} />
+    <meta property="og:image" content={fullOgImage} />
+    <meta property="og:locale" content={lang === 'nl' ? 'nl_NL' : 'en_US'} />
+    <meta property="og:locale:alternate" content={lang === 'nl' ? 'en_US' : 'nl_NL'} />
+    <meta property="og:site_name" content={siteTitle} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={fullCanonicalUrl} />
+    <meta name="twitter:title" content={`${title} | ${siteTitle}`} />
+    <meta name="twitter:description" content={description || defaultDescription} />
+    <meta name="twitter:image" content={fullOgImage} />
+
+    <!-- Search Engine Verification: done via Cloudflare DNS (domain property) -->
+
+    <!-- Additional SEO Meta Tags -->
+    <meta name="author" content="Chef Data B.V." />
+    <meta name="keywords" content={lang === 'nl'
+      ? 'Exact Online, boekhouding, AI, ChatGPT, Claude, Copilot, MCP, boekhouden met AI, administratie automatiseren, facturen, omzet, financieel inzicht'
+      : 'Exact Online, accounting, AI, ChatGPT, Claude, Copilot, MCP, AI accounting, automate administration, invoices, revenue, financial insights'} />
+    <meta name="theme-color" content="#0066CC" />
+    <meta name="geo.region" content="NL" />
+    <meta name="geo.placename" content="Netherlands" />
+
+    <!-- Structured Data / JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </head>
+  <body class="min-h-screen bg-gray-50">
+    <!-- Skip to main content link for keyboard users -->
+    <a href="#main-content" class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-exact-blue focus:text-white">
+      {lang === 'en' ? 'Skip to main content' : 'Ga naar hoofdinhoud'}
+    </a>
+
+    <nav class="bg-white border-b border-gray-200" role="navigation" aria-label={lang === 'en' ? 'Main navigation' : 'Hoofdnavigatie'}>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <a href={lang === 'en' ? '/en' : '/'} class="flex items-center">
+              <span class="text-xl font-bold text-exact-blue">{siteTitle}</span>
+            </a>
+          </div>
+          <div class="flex items-center space-x-4 sm:space-x-6">
+            <!-- Mobile menu button -->
+            <button
+              type="button"
+              class="sm:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+              aria-label={lang === 'en' ? 'Open menu' : 'Menu openen'}
+              onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            <!-- Desktop navigation -->
+            {isLoggedIn && (
+              <a href={lang === 'en' ? '/en/prompts' : '/prompts'} class="text-gray-600 hover:text-gray-900 hidden sm:block">
+                Prompts
+              </a>
+            )}
+            <a href="/blog" class="text-gray-600 hover:text-gray-900 hidden sm:block">
+              Blog
+            </a>
+            <a href={lang === 'en' ? '/en/docs' : '/docs'} class="text-gray-600 hover:text-gray-900 hidden sm:block">
+              {t('nav.docs', lang)}
+            </a>
+            <a href={lang === 'en' ? '/en/pricing' : '/pricing'} class="text-gray-600 hover:text-gray-900 hidden sm:block">
+              {t('nav.pricing', lang)}
+            </a>
+
+            <!-- Resources dropdown (desktop) -->
+            <div class="relative hidden sm:block group">
+              <button
+                type="button"
+                class="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+              >
+                {lang === 'en' ? 'Help' : 'Hulp'}
+                <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="py-2">
+                  <a href="/support" class="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-exact-blue">
+                    {lang === 'en' ? 'FAQ & Support' : 'Veelgestelde vragen'}
+                  </a>
+                  <a href={lang === 'en' ? '/en/setup' : '/setup'} class="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-exact-blue">
+                    {lang === 'en' ? 'Setup Guide' : 'Installatiehandleiding'}
+                  </a>
+                  <a href="mailto:support@praatmetjeboekhouding.nl" class="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-exact-blue">
+                    {lang === 'en' ? 'Contact' : 'Contact'}
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Language Switcher (only shown on pages with translations) -->
+            {showLanguageSwitcher && (
+              <a
+                href={altPath}
+                class="flex items-center gap-1 px-2 py-1 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-md hover:border-gray-300 transition-colors"
+                title={altLang === 'en' ? 'Switch to English' : 'Schakel naar Nederlands'}
+              >
+                {altLang === 'en' ? (
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" viewBox="0 0 36 36" fill="none">
+                      <rect width="36" height="36" rx="4" fill="#012169"/>
+                      <path d="M0 0L36 36M36 0L0 36" stroke="white" stroke-width="4"/>
+                      <path d="M0 0L36 36M36 0L0 36" stroke="#C8102E" stroke-width="2"/>
+                      <path d="M18 0V36M0 18H36" stroke="white" stroke-width="6"/>
+                      <path d="M18 0V36M0 18H36" stroke="#C8102E" stroke-width="4"/>
+                    </svg>
+                    EN
+                  </span>
+                ) : (
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" viewBox="0 0 36 36" fill="none">
+                      <rect width="36" height="12" fill="#AE1C28"/>
+                      <rect y="12" width="36" height="12" fill="white"/>
+                      <rect y="24" width="36" height="12" fill="#21468B"/>
+                    </svg>
+                    NL
+                  </span>
+                )}
+              </a>
+            )}
+
+            <!-- Messages icon (only for logged-in users) -->
+            {isLoggedIn && (
+              <a
+                href={isAdmin ? '/admin/inbox' : '/support/conversations'}
+                class="relative text-gray-500 hover:text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors"
+                title={lang === 'en' ? 'Messages' : 'Berichten'}
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                {unreadMessageCount > 0 && (
+                  <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1">
+                    {unreadMessageCount > 9 ? '*' : unreadMessageCount}
+                  </span>
+                )}
+              </a>
+            )}
+
+            <!-- Admin App Launcher (only for admins) -->
+            {isAdmin && (
+              <AdminAppLauncher />
+            )}
+
+            <!-- Mijn Dashboard link (only for logged-in admins) -->
+            {isLoggedIn && isAdmin && (
+              <a
+                href={lang === 'en' ? '/en/dashboard' : '/dashboard'}
+                class="text-gray-600 hover:text-gray-900 hidden sm:block"
+                title={lang === 'en' ? 'My Dashboard' : 'Mijn Dashboard'}
+              >
+                {lang === 'en' ? 'My Dashboard' : 'Mijn Dashboard'}
+              </a>
+            )}
+
+            <!-- Dashboard/Login button -->
+            <a
+              href={isLoggedIn && isAdmin ? '/admin' : (lang === 'en' ? '/en/dashboard' : '/dashboard')}
+              class="px-4 py-2 bg-exact-blue text-white rounded-lg hover:bg-exact-dark transition-colors"
+            >
+              {isLoggedIn ? t('nav.dashboard', lang) : (lang === 'en' ? 'Login' : 'Inloggen')}
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobile-menu" class="hidden sm:hidden bg-white border-b border-gray-200 shadow-lg">
+      <div class="px-4 py-3 space-y-1">
+        {isLoggedIn && (
+          <a href={lang === 'en' ? '/en/prompts' : '/prompts'} class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md font-medium">
+            Prompts
+          </a>
+        )}
+        <a href="/blog" class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md font-medium">
+          Blog
+        </a>
+        <a href={lang === 'en' ? '/en/docs' : '/docs'} class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">
+          {t('nav.docs', lang)}
+        </a>
+        <a href={lang === 'en' ? '/en/pricing' : '/pricing'} class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md">
+          {t('nav.pricing', lang)}
+        </a>
+        <div class="border-t border-gray-100 my-2"></div>
+        <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          {lang === 'en' ? 'Help & Resources' : 'Hulp & Resources'}
+        </p>
+        <a href="/support" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-md">
+          {lang === 'en' ? 'FAQ & Support' : 'Veelgestelde vragen'}
+        </a>
+        <a href={lang === 'en' ? '/en/setup' : '/setup'} class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-md">
+          {lang === 'en' ? 'Setup Guide' : 'Installatiehandleiding'}
+        </a>
+        <a href="mailto:support@praatmetjeboekhouding.nl" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-md">
+          Contact
+        </a>
+        <div class="border-t border-gray-100 my-2"></div>
+        {isLoggedIn && isAdmin && (
+          <a
+            href={lang === 'en' ? '/en/dashboard' : '/dashboard'}
+            class="block px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+          >
+            {lang === 'en' ? 'My Dashboard' : 'Mijn Dashboard'}
+          </a>
+        )}
+        <a
+          href={isLoggedIn && isAdmin ? '/admin' : (lang === 'en' ? '/en/dashboard' : '/dashboard')}
+          class="block px-3 py-2 bg-exact-blue text-white rounded-md text-center font-medium"
+        >
+          {isLoggedIn ? t('nav.dashboard', lang) : (lang === 'en' ? 'Start Free' : 'Gratis Starten')}
+        </a>
+      </div>
+    </div>
+
+    <main id="main-content" tabindex="-1">
+      <slot />
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div class="text-gray-500 text-sm text-center md:text-left">
+            <p>© 2026 Chef Data B.V. - {siteTitle}</p>
+            <p class="text-xs text-gray-400 mt-1">KvK 96120924 · BTW NL867477702B01</p>
+          </div>
+          <div class="flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
+            <a href="/blog" class="text-gray-500 hover:text-gray-700">
+              Blog
+            </a>
+            <a href={lang === 'en' ? '/en/setup' : '/setup'} class="text-gray-500 hover:text-gray-700">
+              Setup
+            </a>
+            <a href={lang === 'en' ? '/en/voorwaarden' : '/voorwaarden'} class="text-gray-500 hover:text-gray-700">
+              {lang === 'en' ? 'Terms of Service' : 'Algemene Voorwaarden'}
+            </a>
+            <a href={lang === 'en' ? '/en/privacy' : '/privacy'} class="text-gray-500 hover:text-gray-700">
+              {t('footer.privacy', lang)}
+            </a>
+            <a href={lang === 'en' ? '/en/verwerkersovereenkomst' : '/verwerkersovereenkomst'} class="text-gray-500 hover:text-gray-700">
+              {lang === 'en' ? 'DPA' : 'Verwerkersovereenkomst'}
+            </a>
+            <a href="mailto:support@praatmetjeboekhouding.nl" class="text-gray-500 hover:text-gray-700">
+              {t('footer.contact', lang)}
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,561 @@
+---
+/**
+ * Admin Inbox - All Communications
+ *
+ * Unified view of all inbound communications with:
+ * - Filtering (type, unknown sender, date)
+ * - Bulk selection
+ * - Mass delete/archive
+ */
+import Layout from '../../layouts/Layout.astro';
+import { Database } from '../../lib/database';
+
+// Check admin access
+const env = Astro.locals.runtime?.env;
+const sessionId = Astro.cookies.get('session_id')?.value;
+
+if (!env?.DB || !sessionId) {
+  return Astro.redirect('/connect');
+}
+
+const db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+const session = await db.validateSession(sessionId);
+
+if (!session) {
+  return Astro.redirect('/connect');
+}
+
+const adminEmails = (env.ADMIN_EMAILS || '').split(',').map((e: string) => e.trim().toLowerCase());
+const isAdmin = adminEmails.includes(session.user.email.toLowerCase());
+
+if (!isAdmin) {
+  return Astro.redirect('/dashboard');
+}
+
+// Get filter params
+const url = new URL(Astro.request.url);
+const activeTab = url.searchParams.get('tab') || 'inkomend';
+const filterType = url.searchParams.get('type') || 'all';
+const filterUnknown = url.searchParams.get('unknown') === 'true';
+const page = parseInt(url.searchParams.get('page') || '1');
+const limit = 50;
+const offset = (page - 1) * limit;
+
+// Build query based on tab
+// direction = 'out' means customer sent TO us (we received = inkomend)
+// direction = 'in' means we sent TO customer (verzonden)
+let whereClause = '1=1';
+const params: unknown[] = [];
+
+if (activeTab === 'archief') {
+  // Show only archived items
+  whereClause += " AND (ce.archived = 1 OR ce.archived = TRUE)";
+} else {
+  // For inkomend/verzonden: exclude archived items
+  whereClause += " AND (ce.archived = 0 OR ce.archived = FALSE OR ce.archived IS NULL)";
+
+  if (activeTab === 'inkomend') {
+    whereClause += " AND ce.direction = 'out'";
+  } else if (activeTab === 'verzonden') {
+    whereClause += " AND ce.direction = 'in'";
+  }
+}
+
+if (filterType !== 'all') {
+  whereClause += ' AND ce.type = ?';
+  params.push(filterType);
+}
+
+if (filterUnknown) {
+  whereClause += ' AND ce.user_id IS NULL';
+}
+
+// Get counts for tabs (exclude archived from inkomend/verzonden)
+const inkomendCount = await env.DB.prepare(`
+  SELECT COUNT(*) as count FROM communication_events
+  WHERE direction = 'out' AND (archived = 0 OR archived IS NULL)
+`).first<{ count: number }>();
+
+const verzondenCount = await env.DB.prepare(`
+  SELECT COUNT(*) as count FROM communication_events
+  WHERE direction = 'in' AND (archived = 0 OR archived IS NULL)
+`).first<{ count: number }>();
+
+const archiefCount = await env.DB.prepare(`
+  SELECT COUNT(*) as count FROM communication_events WHERE archived = 1
+`).first<{ count: number }>();
+
+// Get total count
+const countResult = await env.DB.prepare(`
+  SELECT COUNT(*) as count FROM communication_events ce WHERE ${whereClause}
+`).bind(...params).first<{ count: number }>();
+const totalCount = countResult?.count || 0;
+const totalPages = Math.ceil(totalCount / limit);
+
+// Get communications
+const communications = await env.DB.prepare(`
+  SELECT
+    ce.*,
+    u.email as user_email,
+    u.name as user_name
+  FROM communication_events ce
+  LEFT JOIN users u ON ce.user_id = u.id
+  WHERE ${whereClause}
+  ORDER BY ce.created_at DESC
+  LIMIT ? OFFSET ?
+`).bind(...params, limit, offset).all();
+
+// Get counts by type for filters
+const typeCounts = await env.DB.prepare(`
+  SELECT
+    type,
+    COUNT(*) as count,
+    SUM(CASE WHEN user_id IS NULL THEN 1 ELSE 0 END) as unknown_count
+  FROM communication_events
+  GROUP BY type
+`).all<{ type: string; count: number; unknown_count: number }>();
+
+const unknownTotal = await env.DB.prepare(`
+  SELECT COUNT(*) as count FROM communication_events WHERE user_id IS NULL
+`).first<{ count: number }>();
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Nu';
+  if (diffMins < 60) return `${diffMins}m geleden`;
+  if (diffHours < 24) return `${diffHours}u geleden`;
+  if (diffDays < 7) return `${diffDays}d geleden`;
+  return date.toLocaleDateString('nl-NL');
+}
+
+function getTypeColor(type: string): string {
+  switch (type) {
+    case 'email': return 'bg-blue-100 text-blue-800';
+    case 'support': return 'bg-purple-100 text-purple-800';
+    case 'feedback': return 'bg-green-100 text-green-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+}
+
+function parseMetadata(metadataStr: string | null): Record<string, unknown> {
+  if (!metadataStr) return {};
+  try {
+    return JSON.parse(metadataStr);
+  } catch {
+    return {};
+  }
+}
+---
+
+<Layout title="Inbox">
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Inbox</h1>
+        <p class="text-gray-600">{totalCount} berichten</p>
+      </div>
+      <div class="flex items-center gap-3">
+        {activeTab !== 'archief' && (
+          <button
+            id="archive-selected"
+            class="hidden px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <span class="selected-count-archive">0</span> archiveren
+          </button>
+        )}
+        {activeTab === 'archief' && (
+          <button
+            id="unarchive-selected"
+            class="hidden px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <span class="selected-count-unarchive">0</span> herstellen
+          </button>
+        )}
+        <button
+          id="delete-selected"
+          class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+        >
+          <span class="selected-count">0</span> verwijderen
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200">
+      <nav class="flex gap-4" aria-label="Tabs">
+        <a
+          href="/admin/inbox?tab=inkomend"
+          class={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+            activeTab === 'inkomend'
+              ? 'border-exact-blue text-exact-blue'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <span class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            Inkomend
+            <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">{inkomendCount?.count || 0}</span>
+          </span>
+        </a>
+        <a
+          href="/admin/inbox?tab=verzonden"
+          class={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+            activeTab === 'verzonden'
+              ? 'border-exact-blue text-exact-blue'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <span class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+            Verzonden
+            <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">{verzondenCount?.count || 0}</span>
+          </span>
+        </a>
+        <a
+          href="/admin/inbox?tab=archief"
+          class={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+            activeTab === 'archief'
+              ? 'border-exact-blue text-exact-blue'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <span class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            Archief
+            <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">{archiefCount?.count || 0}</span>
+          </span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg border border-gray-200 p-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="text-sm font-medium text-gray-700">Filter:</span>
+
+        <!-- Type filters -->
+        <a
+          href={`/admin/inbox?tab=${activeTab}`}
+          class={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${filterType === 'all' && !filterUnknown ? 'bg-exact-blue text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+        >
+          Alles ({totalCount})
+        </a>
+
+        {typeCounts.results?.map((tc) => (
+          <a
+            href={`/admin/inbox?tab=${activeTab}&type=${tc.type}`}
+            class={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${filterType === tc.type ? 'bg-exact-blue text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          >
+            {tc.type === 'email' ? 'Email' : tc.type === 'support' ? 'Support' : tc.type === 'feedback' ? 'Feedback' : tc.type} ({tc.count})
+          </a>
+        ))}
+
+        {activeTab === 'inkomend' && (
+          <>
+            <div class="w-px h-6 bg-gray-300"></div>
+            <a
+              href={`/admin/inbox?tab=${activeTab}&unknown=true`}
+              class={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${filterUnknown ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}
+            >
+              Onbekende afzenders ({unknownTotal?.count || 0})
+            </a>
+          </>
+        )}
+      </div>
+    </div>
+
+    <!-- Messages list -->
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <!-- Select all header -->
+      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-4">
+        <input
+          type="checkbox"
+          id="select-all"
+          class="w-4 h-4 text-exact-blue rounded border-gray-300 focus:ring-exact-blue"
+        />
+        <label for="select-all" class="text-sm text-gray-600">Selecteer alles</label>
+      </div>
+
+      <!-- Messages -->
+      {communications.results?.length === 0 ? (
+        <div class="p-8 text-center text-gray-500">
+          Geen berichten gevonden
+        </div>
+      ) : (
+        <div class="divide-y divide-gray-100">
+          {communications.results?.map((comm: any) => {
+            const metadata = parseMetadata(comm.metadata);
+            const isUnknown = !comm.user_id;
+            const fromEmail = metadata.from_email || metadata.to_email || comm.user_email || 'Onbekend';
+
+            return (
+              <div class="flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors group">
+                <input
+                  type="checkbox"
+                  class="message-checkbox mt-1 w-4 h-4 text-exact-blue rounded border-gray-300 focus:ring-exact-blue"
+                  data-id={comm.id}
+                />
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class={`px-2 py-0.5 rounded text-xs font-medium ${getTypeColor(comm.type)}`}>
+                      {comm.type}
+                    </span>
+                    {isUnknown ? (
+                      <span class="px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
+                        Onbekend
+                      </span>
+                    ) : (
+                      <a
+                        href={`/admin/customer/${comm.user_id}`}
+                        class="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                      >
+                        Klant →
+                      </a>
+                    )}
+                    <span class="text-sm font-medium text-gray-900 truncate">
+                      {isUnknown ? fromEmail : (comm.user_name || comm.user_email)}
+                    </span>
+                    {comm.direction === 'out' && (
+                      <span class="text-xs text-gray-400">→ uitgaand</span>
+                    )}
+                  </div>
+
+                  <a href={`/admin/inbox/${comm.id}`} class="block hover:text-exact-blue">
+                    <p class="text-sm font-medium text-gray-800 truncate group-hover:text-exact-blue">
+                      {comm.subject || '(geen onderwerp)'}
+                    </p>
+
+                    <p class="text-sm text-gray-500 truncate">
+                      {comm.content?.substring(0, 150) || '(geen inhoud)'}
+                    </p>
+                  </a>
+                </div>
+
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                  <span>{formatDate(comm.created_at)}</span>
+                  {activeTab !== 'archief' ? (
+                    <button
+                      class="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-gray-700 transition-all"
+                      onclick={`archiveMessage('${comm.id}', true)`}
+                      title="Archiveren"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <button
+                      class="opacity-0 group-hover:opacity-100 p-1 text-green-500 hover:text-green-700 transition-all"
+                      onclick={`archiveMessage('${comm.id}', false)`}
+                      title="Herstellen"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                      </svg>
+                    </button>
+                  )}
+                  <button
+                    class="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 transition-all"
+                    onclick={`deleteMessage('${comm.id}')`}
+                    title="Verwijderen"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+
+    <!-- Pagination -->
+    {totalPages > 1 && (
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-600">
+          Pagina {page} van {totalPages}
+        </p>
+        <div class="flex gap-2">
+          {page > 1 && (
+            <a
+              href={`/admin/inbox?tab=${activeTab}&page=${page - 1}${filterType !== 'all' ? `&type=${filterType}` : ''}${filterUnknown ? '&unknown=true' : ''}`}
+              class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+            >
+              Vorige
+            </a>
+          )}
+          {page < totalPages && (
+            <a
+              href={`/admin/inbox?tab=${activeTab}&page=${page + 1}${filterType !== 'all' ? `&type=${filterType}` : ''}${filterUnknown ? '&unknown=true' : ''}`}
+              class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+            >
+              Volgende
+            </a>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+
+  <script>
+    // Select all functionality
+    const selectAll = document.getElementById('select-all') as HTMLInputElement;
+    const checkboxes = document.querySelectorAll('.message-checkbox') as NodeListOf<HTMLInputElement>;
+    const deleteBtn = document.getElementById('delete-selected');
+    const archiveBtn = document.getElementById('archive-selected');
+    const unarchiveBtn = document.getElementById('unarchive-selected');
+
+    function updateSelectedCount() {
+      const selected = document.querySelectorAll('.message-checkbox:checked');
+      const count = selected.length;
+
+      // Update delete button
+      if (deleteBtn) {
+        const span = deleteBtn.querySelector('.selected-count');
+        if (count > 0) {
+          deleteBtn.classList.remove('hidden');
+          if (span) span.textContent = count.toString();
+        } else {
+          deleteBtn.classList.add('hidden');
+        }
+      }
+
+      // Update archive button
+      if (archiveBtn) {
+        const span = archiveBtn.querySelector('.selected-count-archive');
+        if (count > 0) {
+          archiveBtn.classList.remove('hidden');
+          if (span) span.textContent = count.toString();
+        } else {
+          archiveBtn.classList.add('hidden');
+        }
+      }
+
+      // Update unarchive button
+      if (unarchiveBtn) {
+        const span = unarchiveBtn.querySelector('.selected-count-unarchive');
+        if (count > 0) {
+          unarchiveBtn.classList.remove('hidden');
+          if (span) span.textContent = count.toString();
+        } else {
+          unarchiveBtn.classList.add('hidden');
+        }
+      }
+    }
+
+    selectAll?.addEventListener('change', () => {
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      updateSelectedCount();
+    });
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', updateSelectedCount);
+    });
+
+    // Archive single message
+    (window as any).archiveMessage = async function(id: string, archived: boolean) {
+      const action = archived ? 'archiveren' : 'herstellen';
+      try {
+        const res = await fetch('/api/admin/communications/archive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: [id], archived })
+        });
+        if (res.ok) {
+          location.reload();
+        } else {
+          alert(`${action} mislukt`);
+        }
+      } catch (e) {
+        alert(`Fout bij ${action}`);
+      }
+    };
+
+    // Delete single message
+    (window as any).deleteMessage = async function(id: string) {
+      if (!confirm('Weet je zeker dat je dit bericht wilt verwijderen?')) return;
+
+      try {
+        const res = await fetch(`/api/admin/communications/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          location.reload();
+        } else {
+          alert('Verwijderen mislukt');
+        }
+      } catch (e) {
+        alert('Fout bij verwijderen');
+      }
+    };
+
+    // Bulk archive
+    async function bulkArchive(archived: boolean) {
+      const selected = document.querySelectorAll('.message-checkbox:checked') as NodeListOf<HTMLInputElement>;
+      const ids = Array.from(selected).map(cb => cb.dataset.id);
+
+      if (ids.length === 0) return;
+
+      const action = archived ? 'archiveren' : 'herstellen';
+      if (!confirm(`Weet je zeker dat je ${ids.length} berichten wilt ${action}?`)) return;
+
+      try {
+        const res = await fetch('/api/admin/communications/archive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids, archived })
+        });
+
+        if (res.ok) {
+          location.reload();
+        } else {
+          alert(`${action} mislukt`);
+        }
+      } catch (e) {
+        alert(`Fout bij ${action}`);
+      }
+    }
+
+    archiveBtn?.addEventListener('click', () => bulkArchive(true));
+    unarchiveBtn?.addEventListener('click', () => bulkArchive(false));
+
+    // Delete selected
+    deleteBtn?.addEventListener('click', async () => {
+      const selected = document.querySelectorAll('.message-checkbox:checked') as NodeListOf<HTMLInputElement>;
+      const ids = Array.from(selected).map(cb => cb.dataset.id);
+
+      if (ids.length === 0) return;
+      if (!confirm(`Weet je zeker dat je ${ids.length} berichten wilt verwijderen?`)) return;
+
+      try {
+        const res = await fetch('/api/admin/communications/bulk-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids })
+        });
+
+        if (res.ok) {
+          location.reload();
+        } else {
+          alert('Verwijderen mislukt');
+        }
+      } catch (e) {
+        alert('Fout bij verwijderen');
+      }
+    });
+  </script>
+</Layout>

@@ -1,0 +1,141 @@
+---
+/**
+ * OAuth Success Page
+ *
+ * This page handles localhost redirects for MCP OAuth flows.
+ * It attempts auto-redirect via JavaScript and provides a fallback
+ * for manual handling if the local MCP client isn't responding.
+ */
+import Layout from '../../layouts/Layout.astro';
+
+// Get the redirect URL and code from cookies
+const redirectUrl = Astro.cookies.get('oauth_success_redirect')?.value;
+const authCode = Astro.cookies.get('oauth_success_code')?.value;
+
+// Clear the cookies
+Astro.cookies.delete('oauth_success_redirect', { path: '/' });
+Astro.cookies.delete('oauth_success_code', { path: '/' });
+
+// If no redirect URL, show error
+if (!redirectUrl) {
+  return Astro.redirect('/oauth/login?error=missing_redirect');
+}
+---
+
+<Layout title="Autorisatie Succesvol">
+  <div class="max-w-md mx-auto px-4 py-16">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">Autorisatie Succesvol!</h1>
+        <p class="text-gray-600 mt-2">
+          Je Exact Online koppeling is actief.
+        </p>
+      </div>
+
+      <!-- Countdown display -->
+      <div id="countdown-container" class="flex flex-col items-center mb-6">
+        <div class="text-4xl font-bold text-exact-blue mb-2" id="countdown-number">3</div>
+        <p class="text-gray-500 text-sm" id="status-message">Doorsturen naar Claude Code...</p>
+        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+          <div id="progress-bar" class="bg-exact-blue h-2 rounded-full transition-all duration-1000" style="width: 100%"></div>
+        </div>
+      </div>
+
+      <!-- Fallback content (hidden initially) -->
+      <div id="fallback" class="hidden">
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+          <p class="text-amber-800 text-sm">
+            <strong>De automatische redirect is mislukt.</strong><br />
+            Dit kan gebeuren als je AI-assistent (Claude Code) niet meer actief is.
+          </p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+          <p class="text-sm font-medium text-gray-700 mb-2">Wat je kunt doen:</p>
+          <ol class="text-sm text-gray-600 space-y-2 list-decimal list-inside">
+            <li>Ga terug naar je terminal/VS Code</li>
+            <li>Start de MCP connectie opnieuw</li>
+            <li>De autorisatie is succesvol - probeer je vraag opnieuw</li>
+          </ol>
+        </div>
+
+        <!-- Manual redirect button -->
+        <a
+          href={redirectUrl}
+          id="manual-redirect"
+          class="block w-full px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors text-center mb-3"
+        >
+          Probeer opnieuw te verbinden
+        </a>
+
+        <!-- Show authorization code for debugging -->
+        <details class="text-sm text-gray-500">
+          <summary class="cursor-pointer hover:text-gray-700">Technische details (voor support)</summary>
+          <div class="mt-2 p-3 bg-gray-100 rounded font-mono text-xs break-all">
+            <p class="mb-1"><strong>Code:</strong> {authCode?.slice(0, 20)}...</p>
+            <p><strong>Redirect:</strong> {redirectUrl?.slice(0, 50)}...</p>
+          </div>
+        </details>
+      </div>
+
+      <p class="text-center text-xs text-gray-500 mt-6">
+        Je kunt dit venster sluiten zodra je applicatie verbonden is.
+      </p>
+    </div>
+  </div>
+
+  <script define:vars={{ redirectUrl }}>
+    // Countdown redirect to localhost
+    const statusMessage = document.getElementById('status-message');
+    const countdownContainer = document.getElementById('countdown-container');
+    const countdownNumber = document.getElementById('countdown-number');
+    const progressBar = document.getElementById('progress-bar');
+    const fallback = document.getElementById('fallback');
+
+    let countdown = 3;
+
+    function updateCountdown() {
+      countdownNumber.textContent = countdown;
+      // Progress bar: 100% -> 66% -> 33% -> 0%
+      progressBar.style.width = `${(countdown / 3) * 100}%`;
+
+      if (countdown === 0) {
+        statusMessage.textContent = 'Doorsturen...';
+        countdownNumber.textContent = '→';
+        attemptRedirect();
+      } else {
+        countdown--;
+        setTimeout(updateCountdown, 1000);
+      }
+    }
+
+    function attemptRedirect() {
+      try {
+        // Try the redirect
+        window.location.href = redirectUrl;
+
+        // If we're still here after 3 seconds, the redirect probably failed
+        setTimeout(() => {
+          showFallback();
+        }, 3000);
+
+      } catch (e) {
+        showFallback();
+      }
+    }
+
+    function showFallback() {
+      countdownContainer.classList.add('hidden');
+      fallback.classList.remove('hidden');
+      statusMessage.textContent = 'Handmatige actie vereist';
+    }
+
+    // Start countdown
+    updateCountdown();
+  </script>
+</Layout>

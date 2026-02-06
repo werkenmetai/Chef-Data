@@ -1,0 +1,15 @@
+{
+  "name": "@exact-mcp/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "REST API for Exact Online MCP dashboard and agents",
+  "scripts": {
+    "dev": "echo 'API not yet implemented'",
+    "build": "echo 'API not yet implemented'",
+    "typecheck": "echo 'API not yet implemented'",
+    "clean": "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

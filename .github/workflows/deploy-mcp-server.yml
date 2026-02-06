@@ -1,0 +1,57 @@
+name: Deploy MCP Server
+
+# Deploys the MCP server to Cloudflare Workers
+# Lessons learned:
+# - Use pnpm (not npm) because of workspace:* dependencies
+# - Don't specify pnpm version in action - let package.json handle it
+# - Include pnpm-lock.yaml in paths to ensure lockfile changes trigger deploy
+# - Run pnpm install from root to resolve workspace dependencies
+
+on:
+  push:
+    branches:
+      - main
+      - claude/setup-exact-online-mcp-Tnzgt
+    paths:
+      - 'apps/mcp-server/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-mcp-server.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Workers
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        # Don't specify version - uses packageManager from package.json
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        # Install from root to resolve workspace:* dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build shared package
+        # Build @exact-mcp/shared first (needed for workspace resolution)
+        run: pnpm --filter @exact-mcp/shared build
+
+      - name: Deploy to Cloudflare Workers (Production)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'apps/mcp-server'
+          command: deploy --env production

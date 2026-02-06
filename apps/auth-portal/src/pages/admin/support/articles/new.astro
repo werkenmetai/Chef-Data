@@ -1,0 +1,296 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { Database } from '../../../../lib/database';
+// AdminAppLauncher now in Layout.astro header
+
+const env = Astro.locals.runtime?.env;
+let db: Database | null = null;
+let isAdmin = false;
+let success: string | null = null;
+let error: string | null = null;
+let redirectTo: string | null = null;
+
+try {
+  if (env?.DB) {
+    db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+    const sessionId = Astro.cookies.get('session_id')?.value;
+    if (sessionId) {
+      const session = await db.validateSession(sessionId);
+      if (session) {
+        const adminEmails = (env.ADMIN_EMAILS || '')
+          .split(',')
+          .map((e: string) => e.trim().toLowerCase())
+          .filter((e: string) => e.length > 0);
+
+        isAdmin = adminEmails.includes(session.user.email.toLowerCase());
+
+        if (isAdmin && Astro.request.method === 'POST') {
+          const formData = await Astro.request.formData();
+
+          const slug = formData.get('slug')?.toString() || '';
+          const title_nl = formData.get('title_nl')?.toString() || '';
+          const title_en = formData.get('title_en')?.toString() || '';
+          const content_nl = formData.get('content_nl')?.toString() || '';
+          const content_en = formData.get('content_en')?.toString() || '';
+          const category = formData.get('category')?.toString() || 'other';
+          const tags = formData.get('tags')?.toString() || '';
+          const published = formData.get('published') === 'on';
+          const featured = formData.get('featured') === 'on';
+
+          // Validate
+          if (!slug || !title_nl || !content_nl) {
+            error = 'Slug, titel (NL) en inhoud (NL) zijn verplicht';
+          } else {
+            // Check if slug exists
+            const existing = await db.getArticle(slug);
+            if (existing) {
+              error = 'Deze slug bestaat al';
+            } else {
+              // Convert comma-separated tags to array
+              const tagsArray = tags ? tags.split(',').map(t => t.trim()).filter(t => t) : undefined;
+
+              const article = await db.createArticle({
+                slug,
+                title_nl,
+                title_en: title_en || undefined,
+                content_nl,
+                content_en: content_en || undefined,
+                category,
+                tags: tagsArray,
+                published,
+                featured,
+              });
+
+              if (article) {
+                redirectTo = `/admin/support/articles/${article.id}`;
+              } else {
+                error = 'Kon artikel niet aanmaken';
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} catch (e) {
+  console.error('Admin new article error:', e);
+  error = 'Er is een fout opgetreden';
+}
+
+if (redirectTo) {
+  return Astro.redirect(redirectTo);
+}
+
+const categoryOptions = [
+  { value: 'connection', label: 'Verbinding' },
+  { value: 'billing', label: 'Facturatie' },
+  { value: 'bug', label: 'Technisch' },
+  { value: 'feature', label: 'Features' },
+  { value: 'account', label: 'Account' },
+  { value: 'other', label: 'Overig' },
+];
+---
+
+<Layout title="Nieuw Artikel">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    {!isAdmin ? (
+      <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+        <h1 class="text-2xl font-bold text-red-900 mb-4">Toegang Geweigerd</h1>
+        <p class="text-red-700">Je hebt geen toegang tot deze pagina.</p>
+        <a href="/dashboard" class="inline-block mt-4 text-red-600 hover:underline">
+          ← Terug naar Dashboard
+        </a>
+      </div>
+    ) : (
+      <>
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Nieuw Artikel</h1>
+            <p class="text-gray-600">Voeg een nieuw kennisbank artikel toe</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <a href="/admin/support/articles" class="text-gray-600 hover:text-gray-900">
+              ← Terug naar overzicht
+            </a>
+          </div>
+        </div>
+
+        {error && (
+          <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-red-700">{error}</p>
+          </div>
+        )}
+
+        <form method="POST" class="space-y-6">
+          <!-- Basic Info -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Basis Informatie</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">
+                  Slug <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="slug"
+                  id="slug"
+                  required
+                  pattern="[a-z0-9-]+"
+                  placeholder="mijn-artikel-slug"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+                />
+                <p class="text-xs text-gray-500 mt-1">Kleine letters, cijfers en streepjes</p>
+              </div>
+
+              <div>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
+                  Categorie <span class="text-red-500">*</span>
+                </label>
+                <select
+                  name="category"
+                  id="category"
+                  required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+                >
+                  {categoryOptions.map(opt => (
+                    <option value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">
+                Tags
+              </label>
+              <input
+                type="text"
+                name="tags"
+                id="tags"
+                placeholder="api, connectie, oauth (gescheiden door komma's)"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <!-- Dutch Content -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Nederlandse Inhoud</h2>
+
+            <div class="space-y-4">
+              <div>
+                <label for="title_nl" class="block text-sm font-medium text-gray-700 mb-1">
+                  Titel (NL) <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="title_nl"
+                  id="title_nl"
+                  required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="content_nl" class="block text-sm font-medium text-gray-700 mb-1">
+                  Inhoud (NL) <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="content_nl"
+                  id="content_nl"
+                  rows="12"
+                  required
+                  placeholder="Markdown ondersteund: **bold**, *italic*, `code`, etc."
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none font-mono text-sm"
+                ></textarea>
+                <p class="text-xs text-gray-500 mt-1">Markdown wordt ondersteund</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- English Content -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Engelse Inhoud (Optioneel)</h2>
+
+            <div class="space-y-4">
+              <div>
+                <label for="title_en" class="block text-sm font-medium text-gray-700 mb-1">
+                  Titel (EN)
+                </label>
+                <input
+                  type="text"
+                  name="title_en"
+                  id="title_en"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="content_en" class="block text-sm font-medium text-gray-700 mb-1">
+                  Inhoud (EN)
+                </label>
+                <textarea
+                  name="content_en"
+                  id="content_en"
+                  rows="12"
+                  placeholder="English content (markdown supported)"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-exact-blue focus:border-transparent focus:outline-none font-mono text-sm"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Opties</h2>
+
+            <div class="space-y-4">
+              <label class="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="published"
+                  class="w-5 h-5 text-exact-blue border-gray-300 rounded focus:ring-exact-blue"
+                />
+                <div>
+                  <span class="font-medium text-gray-900">Publiceren</span>
+                  <p class="text-sm text-gray-500">Artikel zichtbaar maken voor gebruikers</p>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="featured"
+                  class="w-5 h-5 text-yellow-500 border-gray-300 rounded focus:ring-yellow-500"
+                />
+                <div>
+                  <span class="font-medium text-gray-900">Uitlichten</span>
+                  <p class="text-sm text-gray-500">Tonen op de support startpagina</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="flex justify-end gap-4">
+            <a
+              href="/admin/support/articles"
+              class="px-6 py-3 text-gray-600 font-medium hover:text-gray-900"
+            >
+              Annuleren
+            </a>
+            <button
+              type="submit"
+              class="px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors"
+            >
+              Artikel aanmaken
+            </button>
+          </div>
+        </form>
+      </>
+    )}
+  </div>
+</Layout>

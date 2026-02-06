@@ -1,0 +1,80 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getLanguageFromPath, t } from '../lib/i18n';
+
+// Detect language from URL if possible
+const pathname = new URL(Astro.request.url).pathname;
+const lang = getLanguageFromPath(pathname);
+---
+
+<Layout title={lang === 'en' ? 'Page Not Found' : 'Pagina Niet Gevonden'}>
+  <div class="min-h-[60vh] flex items-center justify-center px-4 py-16">
+    <div class="max-w-lg w-full text-center">
+      <!-- 404 Icon -->
+      <div class="mb-8">
+        <div class="inline-flex items-center justify-center w-24 h-24 bg-exact-light rounded-full">
+          <svg class="w-12 h-12 text-exact-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <h1 class="text-6xl font-bold text-gray-900 mb-4">404</h1>
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">
+        {lang === 'en' ? 'Page Not Found' : 'Pagina Niet Gevonden'}
+      </h2>
+      <p class="text-gray-600 mb-8">
+        {lang === 'en'
+          ? "Sorry, we couldn't find the page you're looking for. It may have been moved or doesn't exist."
+          : 'Sorry, we konden de pagina die je zoekt niet vinden. Misschien is deze verplaatst of bestaat deze niet meer.'}
+      </p>
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href={lang === 'en' ? '/en' : '/'}
+          class="inline-flex items-center justify-center px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          {lang === 'en' ? 'Back to Home' : 'Terug naar Home'}
+        </a>
+        <a
+          href={lang === 'en' ? '/en/dashboard' : '/dashboard'}
+          class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          {t('nav.dashboard', lang)}
+        </a>
+      </div>
+
+      <!-- Popular Links -->
+      <div class="mt-12 pt-8 border-t border-gray-200">
+        <p class="text-sm text-gray-500 mb-4">
+          {lang === 'en' ? 'Or try one of these pages:' : 'Of probeer een van deze pagina\'s:'}
+        </p>
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+          <a href={lang === 'en' ? '/en/connect' : '/connect'} class="text-exact-blue hover:underline">
+            {lang === 'en' ? 'Connect Exact Online' : 'Verbind Exact Online'}
+          </a>
+          <span class="text-gray-300">•</span>
+          <a href={lang === 'en' ? '/en/setup' : '/setup'} class="text-exact-blue hover:underline">
+            {t('nav.setup', lang)}
+          </a>
+          <span class="text-gray-300">•</span>
+          <a href={lang === 'en' ? '/en/pricing' : '/pricing'} class="text-exact-blue hover:underline">
+            {t('nav.pricing', lang)}
+          </a>
+          <span class="text-gray-300">•</span>
+          <a href={lang === 'en' ? '/en/docs' : '/docs'} class="text-exact-blue hover:underline">
+            {t('nav.docs', lang)}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

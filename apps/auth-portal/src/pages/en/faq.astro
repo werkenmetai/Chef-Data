@@ -1,0 +1,416 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+interface FAQItem {
+  question: string;
+  answer: string;
+  category: 'setup' | 'usage' | 'billing' | 'security' | 'errors';
+}
+
+const faqs: FAQItem[] = [
+  // SETUP
+  {
+    category: 'setup',
+    question: 'How do I install Chat with your Books in Claude?',
+    answer: `
+      <ol>
+        <li>Go to your <a href="/en/dashboard" class="text-exact-blue hover:underline">Dashboard</a> and copy your API key</li>
+        <li>Open the Claude configuration file:
+          <ul>
+            <li><strong>Mac:</strong> <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+            <li><strong>Windows:</strong> <code>%APPDATA%\\Claude\\claude_desktop_config.json</code></li>
+          </ul>
+        </li>
+        <li>Add the MCP server configuration (see <a href="/en/setup" class="text-exact-blue hover:underline">Setup page</a>)</li>
+        <li><strong>Restart Claude Desktop</strong> (important!)</li>
+      </ol>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'I get the error message "No connection found"',
+    answer: `
+      <p>This means your Exact Online account is not (or no longer) connected. Solutions:</p>
+      <ol>
+        <li>Go to <a href="/en/connect" class="text-exact-blue hover:underline">Connect</a> and reconnect</li>
+        <li>Check that you selected the correct region (Netherlands, Belgium, etc.)</li>
+        <li>If you have multiple Exact Online accounts, make sure you choose the right one</li>
+      </ol>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'My API key is not working',
+    answer: `
+      <p>Check the following:</p>
+      <ul>
+        <li>The key starts with <code>exa_</code> - copy the complete key</li>
+        <li>There are no extra spaces before or after the key</li>
+        <li>The key has not been revoked (check your <a href="/en/dashboard" class="text-exact-blue hover:underline">Dashboard</a>)</li>
+        <li>You have restarted Claude Desktop after changing the config</li>
+      </ul>
+      <p>Still not working? Generate a new key via the dashboard.</p>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'How do I rename my API key?',
+    answer: `
+      <p>You can give your API keys a recognizable name:</p>
+      <ol>
+        <li>Go to your <a href="/en/dashboard" class="text-exact-blue hover:underline">Dashboard</a></li>
+        <li>Click on the pencil icon next to the API key you want to rename</li>
+        <li>Enter a new name (e.g., "Claude Desktop" or "Work laptop")</li>
+        <li>Click "Save"</li>
+      </ol>
+      <p>This helps you distinguish between multiple API keys.</p>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'Can I connect multiple administrations?',
+    answer: `
+      <p>Yes! After connecting to Exact Online, all administrations you have access to become available automatically.</p>
+      <ul>
+        <li><strong>Free plan:</strong> 1 active administration</li>
+        <li><strong>Pro plan:</strong> Up to 5 administrations</li>
+        <li><strong>Enterprise:</strong> Unlimited</li>
+      </ul>
+      <p>You can ask Claude: <em>"Show my administrations"</em> to see which ones are available.</p>
+    `,
+  },
+  {
+    category: 'setup',
+    question: 'How do I set a default administration?',
+    answer: `
+      <p>You can set a default administration so your AI assistant uses it automatically:</p>
+      <ol>
+        <li>Go to your <a href="/en/dashboard" class="text-exact-blue hover:underline">Dashboard</a></li>
+        <li>Scroll to the "Administrations" section</li>
+        <li>Click on the administration you want to set as default</li>
+        <li>The chosen administration will be marked and automatically used for queries</li>
+      </ol>
+      <p>You can always specify a different administration in your question.</p>
+    `,
+  },
+
+  // USAGE
+  {
+    category: 'usage',
+    question: 'What are "commands" (API calls)?',
+    answer: `
+      <p id="commands"><strong>Commands are tool calls to the MCP server.</strong> Each time your AI assistant fetches data from Exact Online, it counts as 1 command.</p>
+      <p><strong>Important:</strong> One question can use multiple commands. For example:</p>
+      <ul>
+        <li><em>"What is my revenue this month?"</em> → 1-2 commands (fetch revenue)</li>
+        <li><em>"Compare revenue from January and February"</em> → 2-3 commands (fetch two periods)</li>
+        <li><em>"Give me a financial overview"</em> → 3-5 commands (fetch multiple datasets)</li>
+      </ul>
+      <p>In your <a href="/en/dashboard" class="text-exact-blue hover:underline">Dashboard</a> you can see how many commands you've used. The number of commands per question depends on the complexity of your question.</p>
+    `,
+  },
+  {
+    category: 'usage',
+    question: 'What questions can I ask?',
+    answer: `
+      <p>You can ask questions about:</p>
+      <ul>
+        <li>Invoices (sales and purchase)</li>
+        <li>Outstanding items and debtors</li>
+        <li>Relations (customers and suppliers)</li>
+        <li>Bank transactions</li>
+        <li>General ledger accounts and trial balance</li>
+        <li>VAT returns</li>
+      </ul>
+      <p>See the <a href="/en/docs" class="text-exact-blue hover:underline">documentation</a> for example questions.</p>
+    `,
+  },
+  {
+    category: 'usage',
+    question: 'Can the AI make changes to my accounting?',
+    answer: `
+      <p><strong>No.</strong> All tools are read-only. No invoices, relations or other data can be created, modified or deleted.</p>
+      <p>This is a deliberate choice for security. The AI can only <em>read</em> and <em>analyze</em> data.</p>
+    `,
+  },
+  {
+    category: 'usage',
+    question: 'How do I know if the AI output is correct?',
+    answer: `
+      <p><strong>Always verify!</strong> AI can make mistakes. Tips:</p>
+      <ul>
+        <li>Ask for invoice numbers and references</li>
+        <li>Spot-check in Exact Online</li>
+        <li>For financial decisions: always verify</li>
+        <li>Ask for the source: <em>"Which invoices does this total come from?"</em></li>
+      </ul>
+    `,
+  },
+  {
+    category: 'usage',
+    question: 'Why am I not getting results?',
+    answer: `
+      <p>Possible causes:</p>
+      <ul>
+        <li><strong>No data:</strong> The requested period contains no invoices/transactions</li>
+        <li><strong>Wrong administration:</strong> Specify which administration you mean</li>
+        <li><strong>Too broad:</strong> Ask more specifically, e.g., "invoices from January" instead of "all invoices"</li>
+        <li><strong>Permissions:</strong> Your Exact Online user may not have access to certain data</li>
+      </ul>
+    `,
+  },
+
+  // BILLING
+  {
+    category: 'billing',
+    question: 'How many commands do I have left?',
+    answer: `
+      <p>Check your <a href="/en/dashboard" class="text-exact-blue hover:underline">Dashboard</a> for your current usage.</p>
+      <ul>
+        <li><strong>Free:</strong> 200 commands (~60 questions) per month</li>
+        <li><strong>Starter:</strong> 750 commands (~250 questions) per month</li>
+        <li><strong>Pro:</strong> 2,500 commands (~800 questions) per month</li>
+      </ul>
+      <p>Your limit resets automatically on the 1st of each month. See also: <a href="#commands" class="text-exact-blue hover:underline">What are commands?</a></p>
+    `,
+  },
+  {
+    category: 'billing',
+    question: 'How do I upgrade to Pro?',
+    answer: `
+      <p>Go to <a href="/en/pricing" class="text-exact-blue hover:underline">Pricing</a> and click "Start Pro". You will be redirected to a secure payment page.</p>
+      <p>After payment, your upgrade is immediately active.</p>
+    `,
+  },
+  {
+    category: 'billing',
+    question: 'How do I cancel my subscription?',
+    answer: `
+      <p>Go to your <a href="/en/dashboard" class="text-exact-blue hover:underline">Dashboard</a> and click "Manage subscription". There you can:</p>
+      <ul>
+        <li>Cancel your subscription</li>
+        <li>Change your payment method</li>
+        <li>Download invoices</li>
+      </ul>
+      <p>After cancellation, you keep Pro access until the end of your billing period.</p>
+    `,
+  },
+  {
+    category: 'billing',
+    question: 'Do I get an invoice?',
+    answer: `
+      <p>Yes, after each payment you automatically receive an invoice by email. You can also download all invoices via "Manage subscription" in your dashboard.</p>
+    `,
+  },
+
+  // SECURITY
+  {
+    category: 'security',
+    question: 'Is my data secure?',
+    answer: `
+      <p>Yes, we take security very seriously:</p>
+      <ul>
+        <li><strong>OAuth 2.0:</strong> We never see your Exact Online password</li>
+        <li><strong>Encryption:</strong> Tokens are stored encrypted</li>
+        <li><strong>EU hosting:</strong> All data stays within the EU (Cloudflare EU)</li>
+        <li><strong>Read-only:</strong> No write access to your accounting</li>
+        <li><strong>No storage:</strong> Query results are not stored</li>
+      </ul>
+    `,
+  },
+  {
+    category: 'security',
+    question: 'Who can see my data?',
+    answer: `
+      <p>Only you (via your API key). We have no access to your accounting data. The MCP server fetches data on your behalf and sends it directly to your AI assistant.</p>
+      <p>Note: The AI assistant you use (Claude, ChatGPT) processes your data according to their own privacy policy.</p>
+    `,
+  },
+  {
+    category: 'security',
+    question: 'How do I revoke access?',
+    answer: `
+      <p>Two options:</p>
+      <ol>
+        <li><strong>Revoke API key:</strong> In your <a href="/en/dashboard" class="text-exact-blue hover:underline">Dashboard</a>, click "Revoke Key"</li>
+        <li><strong>Full disconnection:</strong> In Exact Online, go to Settings → Apps → Revoke access for "Chat with your Books"</li>
+      </ol>
+    `,
+  },
+
+  // ERRORS
+  {
+    category: 'errors',
+    question: 'Error: "Token expired"',
+    answer: `
+      <p>Your Exact Online connection has expired. This can happen with:</p>
+      <ul>
+        <li>Password change in Exact Online</li>
+        <li>Manually revoking app access</li>
+        <li>Technical problems with token refresh</li>
+      </ul>
+      <p><strong>Solution:</strong> <a href="/en/connect" class="text-exact-blue hover:underline">Reconnect</a></p>
+    `,
+  },
+  {
+    category: 'errors',
+    question: 'Error: "Rate limit exceeded"',
+    answer: `
+      <p>You have reached your monthly command limit. Options:</p>
+      <ul>
+        <li><strong>Wait:</strong> Limit resets on the 1st of the month</li>
+        <li><strong>Upgrade:</strong> Starter (€9) gives you 750 commands, Pro (€25) gives you 2,500 commands</li>
+      </ul>
+      <p>See also: <a href="#commands" class="text-exact-blue hover:underline">What are commands?</a></p>
+    `,
+  },
+  {
+    category: 'errors',
+    question: 'Error: "Division not found"',
+    answer: `
+      <p>The requested administration does not exist or you do not have access to it.</p>
+      <ul>
+        <li>First ask: <em>"Which administrations do I have?"</em></li>
+        <li>Check that you are using the correct name/code</li>
+        <li>Check your permissions in Exact Online</li>
+      </ul>
+    `,
+  },
+  {
+    category: 'errors',
+    question: 'Claude does not respond to my questions',
+    answer: `
+      <p>Check:</p>
+      <ol>
+        <li>Is the MCP server configured? Check Claude's settings</li>
+        <li>Did you restart Claude Desktop after changing the config?</li>
+        <li>Is your API key correct? Test with a simple question: <em>"Test the Exact Online connection"</em></li>
+        <li>Check the <a href="https://www.cloudflarestatus.com" class="text-exact-blue hover:underline" target="_blank">Cloudflare status</a> for outages</li>
+      </ol>
+    `,
+  },
+];
+
+const categories = {
+  setup: { label: 'Installation & Setup', icon: '🔧' },
+  usage: { label: 'Usage', icon: '💡' },
+  billing: { label: 'Subscription & Payment', icon: '💳' },
+  security: { label: 'Security & Privacy', icon: '🔒' },
+  errors: { label: 'Error Messages', icon: '⚠️' },
+};
+
+// FAQPage JSON-LD for rich snippets
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": stripHtml(faq.answer)
+    }
+  }))
+};
+---
+
+<Layout title="Frequently Asked Questions" description="Answers to frequently asked questions about Chat with your Books" lang="en" jsonLd={faqJsonLd}>
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h1>
+    <p class="text-gray-600 mb-8">
+      Find answers to your questions quickly. Can't find your question?
+      <a href="mailto:support@praatmetjeboekhouding.nl" class="text-exact-blue hover:underline">Contact us</a>.
+    </p>
+
+    <!-- Quick Jump -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-4">Categories</h2>
+      <div class="flex flex-wrap gap-2">
+        {Object.entries(categories).map(([key, { label, icon }]) => (
+          <a
+            href={`#${key}`}
+            class="px-4 py-2 bg-gray-100 hover:bg-exact-light rounded-lg text-sm font-medium text-gray-700 hover:text-exact-blue transition-colors"
+          >
+            {icon} {label}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- FAQ Sections -->
+    {Object.entries(categories).map(([categoryKey, { label, icon }]) => (
+      <section id={categoryKey} class="mb-12">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+          <span class="mr-2">{icon}</span>
+          {label}
+        </h2>
+        <div class="space-y-4">
+          {faqs
+            .filter((faq) => faq.category === categoryKey)
+            .map((faq, index) => (
+              <details class="bg-white rounded-xl shadow-sm border border-gray-100 group">
+                <summary class="px-6 py-4 cursor-pointer list-none flex justify-between items-center hover:bg-gray-50 rounded-xl">
+                  <span class="font-medium text-gray-900 pr-4">{faq.question}</span>
+                  <svg
+                    class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div class="px-6 pb-4 text-gray-600 prose prose-sm max-w-none" set:html={faq.answer} />
+              </details>
+            ))}
+        </div>
+      </section>
+    ))}
+
+    <!-- Still need help -->
+    <section class="bg-exact-light rounded-xl p-8 text-center">
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">Question not found?</h2>
+      <p class="text-gray-600 mb-6">
+        Our team is happy to help.
+      </p>
+      <div class="flex justify-center gap-4">
+        <a
+          href="mailto:support@praatmetjeboekhouding.nl"
+          class="px-6 py-3 bg-exact-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+        >
+          Email Support
+        </a>
+        <a
+          href="/en/docs"
+          class="px-6 py-3 bg-white text-gray-700 rounded-lg font-medium border border-gray-200 hover:border-gray-300 transition-colors"
+        >
+          View Documentation
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    .prose code {
+      background: #f3f4f6;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      font-size: 0.875em;
+    }
+    .prose ul, .prose ol {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .prose li {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+  </style>
+</Layout>

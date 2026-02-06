@@ -1,0 +1,313 @@
+---
+/**
+ * Outreach Campaign Management
+ *
+ * Admin page to view and manage proactive outreach campaigns.
+ *
+ * @author Sophie (Customer Success)
+ */
+import Layout from '../../../layouts/Layout.astro';
+// AdminAppLauncher now in Layout.astro header
+import { Database } from '../../../lib/database';
+import { createOutreachEngine, type OutreachCampaign } from '../../../lib/outreach';
+
+const env = Astro.locals.runtime?.env;
+const db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+// Check admin access
+const adminEmails = (env.ADMIN_EMAILS || '')
+  .split(',')
+  .map((e: string) => e.trim().toLowerCase())
+  .filter((e: string) => e.length > 0);
+
+const sessionId = Astro.cookies.get('session_id')?.value;
+let isAdmin = false;
+let error: string | null = null;
+let success: string | null = null;
+
+if (sessionId) {
+  const sessionResult = await db.validateSession(sessionId);
+  if (sessionResult) {
+    isAdmin = adminEmails.length > 0 && adminEmails.includes(sessionResult.user.email.toLowerCase());
+    if (!isAdmin) {
+      error = 'Je hebt geen toegang tot deze pagina.';
+    }
+  } else {
+    error = 'Niet ingelogd.';
+  }
+} else {
+  error = 'Niet ingelogd.';
+}
+
+// Handle POST actions
+if (isAdmin && Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  const action = formData.get('action') as string;
+  const campaignId = formData.get('campaignId') as string;
+
+  const engine = createOutreachEngine(env.DB, env);
+
+  try {
+    switch (action) {
+      case 'toggle': {
+        const campaign = await engine.getCampaign(campaignId);
+        if (campaign) {
+          await engine.toggleCampaign(campaignId, !campaign.is_active);
+          success = `Campaign "${campaign.name}" is nu ${campaign.is_active ? 'uitgeschakeld' : 'ingeschakeld'}`;
+        }
+        break;
+      }
+      case 'run_all': {
+        const results = await engine.runAllCampaigns();
+        success = `Outreach uitgevoerd: ${results.sent} emails verzonden, ${results.errors} fouten`;
+        break;
+      }
+    }
+  } catch (e) {
+    error = 'Actie mislukt: ' + (e instanceof Error ? e.message : 'Onbekende fout');
+  }
+}
+
+// Load data
+let campaigns: OutreachCampaign[] = [];
+let stats = {
+  activeCampaigns: 0,
+  emailsSentToday: 0,
+  emailsSentWeek: 0,
+  openRate: 0,
+  clickRate: 0,
+  conversionRate: 0,
+};
+
+if (isAdmin) {
+  try {
+    const engine = createOutreachEngine(env.DB, env);
+    campaigns = await engine.getAllCampaigns();
+    stats = await engine.getStats();
+  } catch (e) {
+    error = 'Fout bij laden van data.';
+    console.error('Outreach load error:', e);
+  }
+}
+
+// Trigger type display names
+const triggerTypeNames: Record<string, string> = {
+  limit_80: 'Limiet 80%',
+  limit_100: 'Limiet 100%',
+  inactive_14d: 'Inactief 14d',
+  nps_high: 'Hoge NPS',
+  milestone: 'Milestone',
+  error_pattern: 'Error Patroon',
+};
+---
+
+<Layout title="Outreach Campaigns">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    {!isAdmin ? (
+      <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+        <h1 class="text-2xl font-bold text-red-900 mb-4">Toegang Geweigerd</h1>
+        <p class="text-red-700">{error}</p>
+        <a href="/dashboard" class="inline-block mt-4 text-red-600 hover:underline">
+          ← Terug naar Dashboard
+        </a>
+      </div>
+    ) : (
+      <>
+        {/* Header with App Launcher */}
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Proactive Outreach</h1>
+            <p class="text-gray-600">Automatische klantbetrokkenheid op basis van gedrag</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <form method="POST">
+              <input type="hidden" name="action" value="run_all" />
+              <button
+                type="submit"
+                onclick="return confirm('Weet je zeker dat je alle campaigns nu wilt uitvoeren?')"
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Nu Uitvoeren
+              </button>
+            </form>
+            <a href="/admin" class="text-gray-600 hover:text-gray-900 px-4 py-2">
+              &larr; Terug
+            </a>
+          </div>
+        </div>
+
+        {/* Notifications */}
+        {success && (
+          <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <p class="text-green-700">{success}</p>
+          </div>
+        )}
+        {error && (
+          <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <p class="text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* Stats Overview */}
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Actieve Campaigns</h3>
+            <p class="text-2xl font-bold text-gray-900 mt-1">{stats.activeCampaigns}</p>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Emails Vandaag</h3>
+            <p class="text-2xl font-bold text-gray-900 mt-1">{stats.emailsSentToday}</p>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Emails Week</h3>
+            <p class="text-2xl font-bold text-gray-900 mt-1">{stats.emailsSentWeek}</p>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Open Rate</h3>
+            <p class="text-2xl font-bold text-gray-900 mt-1">{stats.openRate.toFixed(1)}%</p>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Click Rate</h3>
+            <p class="text-2xl font-bold text-gray-900 mt-1">{stats.clickRate.toFixed(1)}%</p>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Conversie Rate</h3>
+            <p class="text-2xl font-bold text-gray-900 mt-1">{stats.conversionRate.toFixed(1)}%</p>
+          </div>
+        </div>
+
+        {/* Campaigns Table */}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-900">Campaigns</h2>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="text-left py-3 px-4 font-medium text-gray-500">Campaign</th>
+                  <th class="text-left py-3 px-4 font-medium text-gray-500">Trigger</th>
+                  <th class="text-center py-3 px-4 font-medium text-gray-500">Status</th>
+                  <th class="text-right py-3 px-4 font-medium text-gray-500">Verzonden</th>
+                  <th class="text-right py-3 px-4 font-medium text-gray-500">Geopend</th>
+                  <th class="text-right py-3 px-4 font-medium text-gray-500">Geklikt</th>
+                  <th class="text-right py-3 px-4 font-medium text-gray-500">Conversies</th>
+                  <th class="text-right py-3 px-4 font-medium text-gray-500">Acties</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {campaigns.map((campaign) => {
+                  const openRate = campaign.emails_sent > 0
+                    ? ((campaign.emails_opened / campaign.emails_sent) * 100).toFixed(1)
+                    : '0';
+                  const clickRate = campaign.emails_sent > 0
+                    ? ((campaign.emails_clicked / campaign.emails_sent) * 100).toFixed(1)
+                    : '0';
+
+                  return (
+                    <tr class="hover:bg-gray-50">
+                      <td class="py-3 px-4">
+                        <div class="font-medium text-gray-900">{campaign.name}</div>
+                        {campaign.description && (
+                          <div class="text-gray-500 text-xs mt-0.5">{campaign.description}</div>
+                        )}
+                      </td>
+                      <td class="py-3 px-4">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {triggerTypeNames[campaign.trigger_type] || campaign.trigger_type}
+                        </span>
+                      </td>
+                      <td class="py-3 px-4 text-center">
+                        <form method="POST" class="inline">
+                          <input type="hidden" name="action" value="toggle" />
+                          <input type="hidden" name="campaignId" value={campaign.id} />
+                          <button
+                            type="submit"
+                            class={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                              campaign.is_active ? 'bg-green-600' : 'bg-gray-200'
+                            }`}
+                            role="switch"
+                            aria-checked={campaign.is_active ? 'true' : 'false'}
+                          >
+                            <span
+                              class={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                campaign.is_active ? 'translate-x-5' : 'translate-x-0'
+                              }`}
+                            ></span>
+                          </button>
+                        </form>
+                      </td>
+                      <td class="py-3 px-4 text-right font-mono text-gray-900">
+                        {campaign.emails_sent.toLocaleString()}
+                      </td>
+                      <td class="py-3 px-4 text-right">
+                        <span class="font-mono text-gray-900">{campaign.emails_opened.toLocaleString()}</span>
+                        <span class="text-gray-500 text-xs ml-1">({openRate}%)</span>
+                      </td>
+                      <td class="py-3 px-4 text-right">
+                        <span class="font-mono text-gray-900">{campaign.emails_clicked.toLocaleString()}</span>
+                        <span class="text-gray-500 text-xs ml-1">({clickRate}%)</span>
+                      </td>
+                      <td class="py-3 px-4 text-right font-mono text-gray-900">
+                        {campaign.conversions.toLocaleString()}
+                      </td>
+                      <td class="py-3 px-4 text-right">
+                        <a
+                          href={`/admin/outreach/${campaign.id}`}
+                          class="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                        >
+                          Details →
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Info Box */}
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <h3 class="font-semibold text-blue-900 mb-2">Over Proactive Outreach</h3>
+          <p class="text-blue-800 text-sm mb-3">
+            Dit systeem stuurt automatisch emails naar gebruikers op basis van hun gedrag.
+            Anti-spam is ingebouwd via cooldowns per campaign type.
+          </p>
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <h4 class="font-medium text-blue-900 mb-1">Triggers:</h4>
+              <ul class="text-blue-800 space-y-1">
+                <li><strong>Limiet 80%/100%:</strong> Upgrade nudges bij hoog gebruik</li>
+                <li><strong>Inactief 14d:</strong> Re-engagement voor inactieve gebruikers</li>
+                <li><strong>Hoge NPS:</strong> Vraag om testimonial bij tevreden klanten</li>
+                <li><strong>Error Patroon:</strong> Hulp aanbieden bij herhaalde fouten</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-medium text-blue-900 mb-1">Cron Configuratie:</h4>
+              <code class="block bg-blue-100 rounded px-2 py-1 text-blue-900 text-xs">
+                POST /api/cron/outreach<br/>
+                Header: X-Cron-Secret: [CRON_SECRET]
+              </code>
+              <p class="text-blue-800 mt-2">
+                Stel in via Cloudflare Cron Triggers (dagelijks om 09:00).
+              </p>
+            </div>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+</Layout>

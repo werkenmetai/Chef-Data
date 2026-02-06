@@ -1,0 +1,458 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// New OAuth flow - single URL for everyone
+const mcpUrl = "https://api.praatmetjeboekhouding.nl/mcp";
+
+// Code examples for new OAuth flow
+const macConfigCode = `# Schrijf de config
+cat > ~/Library/Application\\ Support/Claude/claude_desktop_config.json << 'EOF'
+{
+  "mcpServers": {
+    "exact-online": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "${mcpUrl}"]
+    }
+  }
+}
+EOF`;
+
+const macAllInOne = `# Alles-in-een: stop Claude, maak config, start Claude
+pkill -9 "Claude" 2>/dev/null || true
+mkdir -p ~/Library/Application\\ Support/Claude
+cat > ~/Library/Application\\ Support/Claude/claude_desktop_config.json << 'EOF'
+{
+  "mcpServers": {
+    "exact-online": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "${mcpUrl}"]
+    }
+  }
+}
+EOF
+echo "Config aangemaakt:"
+cat ~/Library/Application\\ Support/Claude/claude_desktop_config.json
+sleep 2
+open -a "Claude"
+echo "Claude Desktop wordt gestart..."`;
+
+const windowsConfigCode = `# Maak directory aan indien nodig
+New-Item -ItemType Directory -Force -Path "$env:APPDATA\\Claude" | Out-Null
+
+# Schrijf config (UTF8 zonder BOM!)
+$json = @'
+{
+  "mcpServers": {
+    "exact-online": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "${mcpUrl}"]
+    }
+  }
+}
+'@
+$utf8 = New-Object System.Text.UTF8Encoding $false
+[IO.File]::WriteAllText("$env:APPDATA\\Claude\\claude_desktop_config.json", $json, $utf8)`;
+
+const windowsAllInOne = `# Alles-in-een script
+Stop-Process -Name "Claude" -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force -Path "$env:APPDATA\\Claude" | Out-Null
+$json = '{"mcpServers":{"exact-online":{"command":"npx","args":["-y","mcp-remote","${mcpUrl}"]}}}'
+$utf8 = New-Object System.Text.UTF8Encoding $false
+[IO.File]::WriteAllText("$env:APPDATA\\Claude\\claude_desktop_config.json", $json, $utf8)
+Write-Host "Config aangemaakt:"
+Get-Content "$env:APPDATA\\Claude\\claude_desktop_config.json"
+Start-Sleep -Seconds 2
+Start-Process "$env:LOCALAPPDATA\\Programs\\Claude\\Claude.exe"`;
+
+const linuxConfigCode = `# Schrijf config
+mkdir -p ~/.config/Claude
+cat > ~/.config/Claude/claude_desktop_config.json << 'EOF'
+{
+  "mcpServers": {
+    "exact-online": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "${mcpUrl}"]
+    }
+  }
+}
+EOF`;
+
+const claudeCodeSetup = `# Voeg MCP server toe
+claude mcp add exact-online ${mcpUrl}
+
+# Start Claude Code
+claude`;
+---
+
+<Layout title="Claude Desktop Setup - Praat met je Boekhouding" description="Stap-voor-stap handleiding om Claude Desktop te verbinden met Exact Online via MCP en OAuth">
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Claude Desktop Setup</h1>
+    <p class="text-gray-500 mb-8">Verbind Claude Desktop met je Exact Online boekhouding</p>
+
+    <!-- New OAuth Flow Banner -->
+    <div class="mb-8 p-4 bg-green-50 border border-green-200 rounded-xl">
+      <div class="flex items-center gap-3">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <p class="text-green-800 font-medium">Nieuwe simpelere setup!</p>
+          <p class="text-green-700 text-sm">Geen API keys meer nodig. Log in via je browser wanneer Claude daarom vraagt.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick navigation -->
+    <nav class="bg-gray-50 rounded-xl p-6 mb-10">
+      <h2 class="font-semibold text-gray-900 mb-3">Kies je besturingssysteem</h2>
+      <div class="flex gap-4 flex-wrap">
+        <a href="#mac" class="px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-exact-blue hover:text-exact-blue transition-colors">
+          macOS
+        </a>
+        <a href="#windows" class="px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-exact-blue hover:text-exact-blue transition-colors">
+          Windows
+        </a>
+        <a href="#linux" class="px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-exact-blue hover:text-exact-blue transition-colors">
+          Linux
+        </a>
+      </div>
+    </nav>
+
+    <!-- Demo option -->
+    <section class="mb-12">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+        <div class="flex items-start gap-4">
+          <svg class="w-8 h-8 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          <div>
+            <h3 class="font-semibold text-amber-900 mb-2">Eerst uitproberen? Gebruik de demo!</h3>
+            <p class="text-amber-800 text-sm mb-3">
+              Test de koppeling met ons demo bedrijf "Bakkerij De Gouden Croissant B.V." zonder eigen Exact Online account.
+            </p>
+            <details class="text-sm">
+              <summary class="cursor-pointer text-amber-700 hover:text-amber-900 font-medium">Toon demo configuratie</summary>
+              <div class="mt-3 bg-gray-900 rounded-lg p-4 font-mono text-xs text-gray-100 overflow-x-auto">
+                <pre><code>{`{
+  "mcpServers": {
+    "exact-online-demo": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://api.praatmetjeboekhouding.nl/mcp/exa_demo"]
+    }
+  }
+}`}</code></pre>
+              </div>
+              <p class="text-amber-700 text-xs mt-2">Vervang de hele config of voeg toe naast je eigen "exact-online" entry.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How OAuth works -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Hoe werkt het?</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <ol class="space-y-4">
+          <li class="flex items-start gap-4">
+            <span class="flex-shrink-0 w-8 h-8 bg-exact-light text-exact-blue rounded-full flex items-center justify-center font-bold">1</span>
+            <div>
+              <strong class="text-gray-900">Configureer Claude</strong>
+              <p class="text-gray-600 text-sm">Voeg de MCP server URL toe aan Claude Desktop of Claude Code</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-4">
+            <span class="flex-shrink-0 w-8 h-8 bg-exact-light text-exact-blue rounded-full flex items-center justify-center font-bold">2</span>
+            <div>
+              <strong class="text-gray-900">Stel je eerste vraag</strong>
+              <p class="text-gray-600 text-sm">Vraag iets over je boekhouding, bijv. "Wat is mijn omzet deze maand?"</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-4">
+            <span class="flex-shrink-0 w-8 h-8 bg-exact-light text-exact-blue rounded-full flex items-center justify-center font-bold">3</span>
+            <div>
+              <strong class="text-gray-900">Log in via je browser</strong>
+              <p class="text-gray-600 text-sm">Je browser opent automatisch. Log in met je Exact Online account.</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-4">
+            <span class="flex-shrink-0 w-8 h-8 bg-exact-light text-exact-blue rounded-full flex items-center justify-center font-bold">4</span>
+            <div>
+              <strong class="text-gray-900">Klaar!</strong>
+              <p class="text-gray-600 text-sm">Claude heeft nu toegang tot je boekhouding. Het token wordt automatisch ververst.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Prerequisites -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Voordat je begint</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 bg-exact-light text-exact-blue rounded-full flex items-center justify-center text-sm font-medium">1</span>
+            <div>
+              <strong>Claude Desktop geinstalleerd</strong>
+              <p class="text-gray-600 text-sm">Download van <a href="https://claude.ai/download" target="_blank" class="text-exact-blue hover:underline">claude.ai/download</a></p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 bg-exact-light text-exact-blue rounded-full flex items-center justify-center text-sm font-medium">2</span>
+            <div>
+              <strong>Node.js geinstalleerd</strong>
+              <p class="text-gray-600 text-sm">Check met <code class="bg-gray-100 px-1 rounded">node --version</code> of download van <a href="https://nodejs.org" target="_blank" class="text-exact-blue hover:underline">nodejs.org</a></p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 bg-exact-light text-exact-blue rounded-full flex items-center justify-center text-sm font-medium">3</span>
+            <div>
+              <strong>Exact Online account</strong>
+              <p class="text-gray-600 text-sm">Je logt straks in via je browser met je bestaande Exact Online credentials</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- macOS -->
+    <section id="mac" class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">macOS Setup</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 1: Sluit Claude Desktop volledig af</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto">
+            <pre><code># Forceer afsluiten van Claude Desktop
+pkill -9 "Claude" 2>/dev/null || true</code></pre>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 2: Maak config directory aan (indien nodig)</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto">
+            <pre><code># Maak directory aan
+mkdir -p ~/Library/Application\ Support/Claude</code></pre>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 3: Maak de config</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto relative">
+            <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600">Kopieer</button>
+            <pre><code set:html={macConfigCode} /></pre>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 4: Start Claude Desktop</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto">
+            <pre><code># Open Claude Desktop
+open -a "Claude"</code></pre>
+          </div>
+        </div>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h4 class="font-medium text-green-900 mb-2">Alles-in-een commando</h4>
+          <p class="text-green-800 text-sm mb-3">Kopieer dit hele blok en plak in Terminal:</p>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-xs text-gray-100 overflow-x-auto relative">
+            <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600">Kopieer</button>
+            <pre><code set:html={macAllInOne} /></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Windows -->
+    <section id="windows" class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Windows Setup</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p class="text-blue-800 text-sm">Open <strong>PowerShell</strong> (zoek naar "PowerShell" in het startmenu)</p>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 1: Sluit Claude Desktop</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto">
+            <pre><code># Stop Claude Desktop proces
+Stop-Process -Name "Claude" -Force -ErrorAction SilentlyContinue</code></pre>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 2: Maak de config</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto relative">
+            <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600">Kopieer</button>
+            <pre><code set:html={windowsConfigCode} /></pre>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 3: Start Claude Desktop</h3>
+          <p class="text-gray-600 text-sm mb-2">Start Claude Desktop via het startmenu of:</p>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto">
+            <pre><code># Start Claude Desktop
+Start-Process "$env:LOCALAPPDATA\Programs\Claude\Claude.exe"</code></pre>
+          </div>
+        </div>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h4 class="font-medium text-green-900 mb-2">Alles-in-een script</h4>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-xs text-gray-100 overflow-x-auto relative">
+            <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600">Kopieer</button>
+            <pre><code set:html={windowsAllInOne} /></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Linux -->
+    <section id="linux" class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Linux Setup</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 1: Sluit Claude Desktop</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto">
+            <pre><code># Stop Claude
+pkill -9 claude 2>/dev/null || true</code></pre>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 2: Maak de config</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto relative">
+            <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600">Kopieer</button>
+            <pre><code set:html={linuxConfigCode} /></pre>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-900 mb-3">Stap 3: Start Claude Desktop</h3>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto">
+            <pre><code># Start Claude Desktop (afhankelijk van installatie)
+claude-desktop &</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- First login -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Eerste keer inloggen</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <p class="text-gray-600 mb-4">Na het starten van Claude Desktop, stel een vraag over je boekhouding:</p>
+        <div class="bg-gray-100 rounded-lg p-4 text-gray-800 italic mb-4">
+          "Welke administraties heb ik in Exact Online?"
+        </div>
+        <p class="text-gray-600 mb-4">Claude zal je vragen om in te loggen. Er opent een browser venster waar je:</p>
+        <ol class="list-decimal list-inside text-gray-600 space-y-2 mb-4">
+          <li>Inlogt met je Exact Online account</li>
+          <li>De toegang goedkeurt</li>
+          <li>Terugkeert naar Claude</li>
+        </ol>
+        <p class="text-gray-500 text-sm">Na de eerste keer onthouden we je login. Je hoeft niet elke keer opnieuw in te loggen.</p>
+      </div>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Problemen oplossen</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
+
+        <div>
+          <h3 class="font-semibold text-gray-900 mb-2">MCP server verschijnt niet</h3>
+          <ul class="text-gray-600 text-sm space-y-1 list-disc list-inside">
+            <li>Zorg dat Claude Desktop <strong>volledig</strong> is afgesloten (niet geminimaliseerd)</li>
+            <li>Check via Taakbeheer/Activity Monitor dat geen Claude processen draaien</li>
+            <li>Controleer of de config JSON geldig is (geen komma's of quotes fout)</li>
+          </ul>
+        </div>
+
+        <div class="border-t border-gray-100 pt-6">
+          <h3 class="font-semibold text-gray-900 mb-2">Browser opent niet voor login</h3>
+          <ul class="text-gray-600 text-sm space-y-1 list-disc list-inside">
+            <li>Controleer of je standaard browser correct is ingesteld</li>
+            <li>Probeer de MCP server te verwijderen en opnieuw toe te voegen</li>
+            <li>Herstart Claude Desktop volledig</li>
+          </ul>
+        </div>
+
+        <div class="border-t border-gray-100 pt-6">
+          <h3 class="font-semibold text-gray-900 mb-2">npx command not found</h3>
+          <p class="text-gray-600 text-sm mb-2">Node.js is niet geinstalleerd. Installeer via:</p>
+          <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto">
+            <pre><code># macOS (met Homebrew)
+brew install node
+
+# Windows: download installer van https://nodejs.org
+
+# Linux (Ubuntu/Debian)
+sudo apt install nodejs npm</code></pre>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-100 pt-6">
+          <h3 class="font-semibold text-gray-900 mb-2">Login lukt niet</h3>
+          <ul class="text-gray-600 text-sm space-y-1 list-disc list-inside">
+            <li>Controleer of je Exact Online account actief is</li>
+            <li>Probeer in een incognito/private venster in te loggen</li>
+            <li>Clear je browser cookies voor Exact Online</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Alternative: Claude Code -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Alternatief: Claude Code (CLI)</h2>
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+        <p class="text-blue-800 mb-4">Claude Code is de command-line versie en werkt vaak betrouwbaarder met MCP servers:</p>
+        <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-100 overflow-x-auto relative">
+          <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600">Kopieer</button>
+          <pre><code set:html={claudeCodeSetup} /></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Verify it works -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Testen of het werkt</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <p class="text-gray-600 mb-4">Na het inloggen, vraag:</p>
+        <div class="bg-gray-100 rounded-lg p-4 text-gray-800 italic mb-4">
+          "Wat is mijn omzet van afgelopen maand?"
+        </div>
+        <p class="text-gray-600 mb-4">Of:</p>
+        <div class="bg-gray-100 rounded-lg p-4 text-gray-800 italic">
+          "Welke facturen staan nog open?"
+        </div>
+        <p class="text-gray-500 text-sm mt-4">Als je een antwoord krijgt met data uit je boekhouding, werkt de koppeling!</p>
+      </div>
+    </section>
+
+    <!-- Back -->
+    <div class="mt-12 pt-8 border-t border-gray-200 flex justify-between">
+      <a href="/dashboard" class="text-exact-blue hover:underline">Terug naar dashboard</a>
+      <a href="/docs" class="text-exact-blue hover:underline">Alle documentatie</a>
+    </div>
+  </div>
+
+  <script>
+    // Copy buttons
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const button = btn as HTMLElement;
+        const code = button.parentElement?.querySelector('code')?.textContent;
+        if (code) {
+          navigator.clipboard.writeText(code);
+          button.textContent = 'Gekopieerd!';
+          setTimeout(() => button.textContent = 'Kopieer', 2000);
+        }
+      });
+    });
+  </script>
+</Layout>

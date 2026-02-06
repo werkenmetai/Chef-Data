@@ -1,0 +1,169 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { Database, type SupportConversation } from '../../../lib/database';
+
+const env = Astro.locals.runtime?.env;
+let db: Database | null = null;
+let isAuthenticated = false;
+let conversations: SupportConversation[] = [];
+
+try {
+  if (env?.DB) {
+    db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+    const sessionId = Astro.cookies.get('session_id')?.value;
+    if (sessionId) {
+      const session = await db.validateSession(sessionId);
+      if (session) {
+        isAuthenticated = true;
+        conversations = await db.getUserConversations(session.user.id);
+      }
+    }
+  }
+} catch (e) {
+  console.error('Conversations page error:', e);
+}
+
+const statusColors: Record<string, { bg: string; text: string; label: string }> = {
+  open: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Open' },
+  waiting_user: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Wacht op jou' },
+  waiting_support: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Wacht op support' },
+  resolved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Opgelost' },
+  closed: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Gesloten' },
+};
+
+const openConversations = conversations.filter(c => !['resolved', 'closed'].includes(c.status));
+const closedConversations = conversations.filter(c => ['resolved', 'closed'].includes(c.status));
+---
+
+<Layout title="Mijn Gesprekken">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Mijn Gesprekken</h1>
+        <p class="text-gray-600">Bekijk en beheer je support gesprekken</p>
+      </div>
+      <a
+        href="/support/new"
+        class="px-4 py-2 bg-exact-blue text-white font-medium rounded-lg hover:bg-exact-dark transition-colors flex items-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nieuw gesprek
+      </a>
+    </div>
+
+    {!isAuthenticated ? (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Inloggen Vereist</h2>
+        <p class="text-gray-600 mb-6">Log in om je gesprekken te bekijken.</p>
+        <a
+          href="/connect"
+          class="inline-block px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors"
+        >
+          Inloggen
+        </a>
+      </div>
+    ) : (
+      <div class="space-y-8">
+        <!-- Open Conversations -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            Open gesprekken
+            {openConversations.length > 0 && (
+              <span class="ml-2 px-2 py-0.5 text-sm bg-blue-100 text-blue-800 rounded-full">
+                {openConversations.length}
+              </span>
+            )}
+          </h2>
+
+          {openConversations.length > 0 ? (
+            <div class="space-y-3">
+              {openConversations.map(conv => {
+                const status = statusColors[conv.status] || statusColors.open;
+                return (
+                  <a
+                    href={`/support/conversations/${conv.id}`}
+                    class="block p-4 rounded-lg border border-gray-100 hover:border-exact-blue hover:bg-exact-light transition-colors group"
+                  >
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <span class={`px-2 py-0.5 text-xs font-medium rounded ${status.bg} ${status.text}`}>
+                          {status.label}
+                        </span>
+                        {conv.category && (
+                          <span class="text-xs text-gray-500">{conv.category}</span>
+                        )}
+                      </div>
+                      <span class="text-xs text-gray-400">
+                        {new Date(conv.updated_at).toLocaleDateString('nl-NL', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    <h3 class="font-medium text-gray-900 group-hover:text-exact-blue">
+                      {conv.subject}
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">
+                      ID: {conv.id.slice(0, 8)}...
+                    </p>
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <p class="text-gray-500">Geen open gesprekken</p>
+          )}
+        </div>
+
+        <!-- Closed Conversations -->
+        {closedConversations.length > 0 && (
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">
+              Afgeronde gesprekken
+            </h2>
+            <div class="space-y-3">
+              {closedConversations.slice(0, 10).map(conv => {
+                const status = statusColors[conv.status] || statusColors.closed;
+                return (
+                  <a
+                    href={`/support/conversations/${conv.id}`}
+                    class="block p-4 rounded-lg border border-gray-100 hover:border-gray-300 transition-colors"
+                  >
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <span class={`px-2 py-0.5 text-xs font-medium rounded ${status.bg} ${status.text}`}>
+                          {status.label}
+                        </span>
+                        {conv.satisfaction_rating && (
+                          <span class="text-xs text-gray-500">
+                            {'★'.repeat(conv.satisfaction_rating)}{'☆'.repeat(5 - conv.satisfaction_rating)}
+                          </span>
+                        )}
+                      </div>
+                      <span class="text-xs text-gray-400">
+                        {new Date(conv.resolved_at || conv.updated_at).toLocaleDateString('nl-NL')}
+                      </span>
+                    </div>
+                    <h3 class="font-medium text-gray-700">{conv.subject}</h3>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <!-- Back to support -->
+        <div class="text-center">
+          <a href="/support" class="text-exact-blue hover:underline">
+            ← Terug naar Support
+          </a>
+        </div>
+      </div>
+    )}
+  </div>
+</Layout>

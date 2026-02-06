@@ -1,0 +1,336 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Database, type Connection } from '../../lib/database';
+
+const env = Astro.locals.runtime.env;
+const db = new Database(env.DB, env.TOKEN_ENCRYPTION_KEY);
+
+// Check if user is logged in
+const sessionId = Astro.cookies.get('session_id')?.value;
+let user = null;
+let connections: Connection[] = [];
+let message = '';
+let error = '';
+let success = false;
+
+if (sessionId) {
+  const sessionResult = await db.validateSession(sessionId);
+  if (sessionResult) {
+    user = sessionResult.user;
+    connections = await db.getConnectionsByUser(user.id);
+  }
+}
+
+// Handle form submission
+if (Astro.request.method === 'POST' && user) {
+  const formData = await Astro.request.formData();
+  const action = formData.get('action');
+  const connectionId = formData.get('connection_id') as string;
+  const confirmText = formData.get('confirm_text') as string;
+
+  if (action === 'disconnect' && connectionId) {
+    // Verify confirmation
+    if (confirmText !== 'VERWIJDEREN') {
+      error = 'Type "VERWIJDEREN" om te bevestigen.';
+    } else {
+      const deleted = await db.deleteConnection(connectionId, user.id);
+      if (deleted) {
+        success = true;
+        message = 'Je Exact Online koppeling is succesvol verwijderd.';
+        // Refresh connections
+        connections = await db.getConnectionsByUser(user.id);
+      } else {
+        error = 'Kon de koppeling niet verwijderen. Probeer het opnieuw.';
+      }
+    }
+  } else if (action === 'disconnect_all') {
+    // Verify confirmation
+    if (confirmText !== 'ALLES VERWIJDEREN') {
+      error = 'Type "ALLES VERWIJDEREN" om te bevestigen.';
+    } else {
+      const deleted = await db.deleteAllUserConnections(user.id);
+      if (deleted) {
+        success = true;
+        message = 'Alle Exact Online koppelingen zijn verwijderd.';
+        connections = [];
+      } else {
+        error = 'Kon de koppelingen niet verwijderen. Probeer het opnieuw.';
+      }
+    }
+  }
+}
+
+const regionNames: Record<string, string> = {
+  NL: 'Nederland',
+  BE: 'België',
+  DE: 'Duitsland',
+  UK: 'Verenigd Koninkrijk',
+  FR: 'Frankrijk',
+  ES: 'Spanje',
+  US: 'Verenigde Staten',
+};
+---
+
+<Layout title="Koppeling beëindigen" lang="nl">
+  <div class="max-w-2xl mx-auto px-4 py-16">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <span class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium mb-4">
+        Exact Online App Center
+      </span>
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">
+        Koppeling beëindigen
+      </h1>
+      <p class="text-gray-600">
+        Verwijder de verbinding tussen Praat met je Boekhouding en je Exact Online account.
+      </p>
+    </div>
+
+    {success && (
+      <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <p class="text-green-700">{message}</p>
+        </div>
+        <div class="mt-4 text-center">
+          <p class="text-sm text-gray-600 mb-3">
+            Je kunt altijd opnieuw verbinden via de Exact Online App Center.
+          </p>
+          <a
+            href="https://apps.exactonline.com"
+            class="inline-block px-4 py-2 bg-exact-blue text-white rounded-lg hover:bg-exact-dark transition-colors text-sm"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Terug naar Exact Online App Center
+          </a>
+        </div>
+      </div>
+    )}
+
+    {error && (
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-red-700">{error}</p>
+        </div>
+      </div>
+    )}
+
+    {!user && !success && (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">
+          Log eerst in
+        </h2>
+        <p class="text-gray-600 mb-6">
+          Om je koppeling te beëindigen moet je eerst inloggen met je account.
+        </p>
+        <a
+          href="/dashboard"
+          class="inline-block px-6 py-3 bg-exact-blue text-white rounded-lg hover:bg-exact-dark transition-colors"
+        >
+          Ga naar Dashboard
+        </a>
+      </div>
+    )}
+
+    {user && !success && connections.length === 0 && (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+        </svg>
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">
+          Geen actieve koppelingen
+        </h2>
+        <p class="text-gray-600 mb-6">
+          Je hebt nog geen Exact Online account gekoppeld.
+        </p>
+        <a
+          href="/exact/start"
+          class="inline-block px-6 py-3 bg-exact-blue text-white rounded-lg hover:bg-exact-dark transition-colors"
+        >
+          Verbinden met Exact Online
+        </a>
+      </div>
+    )}
+
+    {user && !success && connections.length > 0 && (
+      <div class="space-y-6">
+        <!-- Single Connection -->
+        {connections.length === 1 && (
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-semibold text-gray-900">
+                  Exact Online ({regionNames[connections[0].region] || connections[0].region})
+                </h3>
+                <p class="text-sm text-gray-500">
+                  Verbonden op: {new Date(connections[0].created_at).toLocaleDateString('nl-NL')}
+                </p>
+              </div>
+              <span class={`px-2 py-1 text-xs font-medium rounded-full ${
+                new Date(connections[0].token_expires_at) > new Date()
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {new Date(connections[0].token_expires_at) > new Date() ? 'Actief' : 'Vernieuwen nodig'}
+              </span>
+            </div>
+
+            <div class="bg-red-50 rounded-lg p-4 mb-4">
+              <h4 class="font-medium text-red-900 mb-2">Let op</h4>
+              <ul class="text-sm text-red-700 space-y-1">
+                <li>• Je API key wordt ongeldig en je AI assistent kan geen data meer ophalen</li>
+                <li>• Alle gekoppelde administraties worden verwijderd</li>
+                <li>• Je kunt later opnieuw verbinden via de Exact Online App Center</li>
+              </ul>
+            </div>
+
+            <form method="POST" class="space-y-4">
+              <input type="hidden" name="action" value="disconnect" />
+              <input type="hidden" name="connection_id" value={connections[0].id} />
+
+              <div>
+                <label for="confirm_text" class="block text-sm font-medium text-gray-700 mb-1">
+                  Type <strong>VERWIJDEREN</strong> om te bevestigen
+                </label>
+                <input
+                  type="text"
+                  id="confirm_text"
+                  name="confirm_text"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="VERWIJDEREN"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                class="w-full px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Koppeling definitief beëindigen
+              </button>
+            </form>
+          </div>
+        )}
+
+        <!-- Multiple Connections -->
+        {connections.length > 1 && (
+          <>
+            <p class="text-gray-600 mb-4">
+              Je hebt {connections.length} Exact Online koppelingen. Kies welke je wilt verwijderen:
+            </p>
+
+            {connections.map((conn) => (
+              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 class="font-semibold text-gray-900">
+                      Exact Online ({regionNames[conn.region] || conn.region})
+                    </h3>
+                    <p class="text-sm text-gray-500">
+                      Verbonden op: {new Date(conn.created_at).toLocaleDateString('nl-NL')}
+                    </p>
+                  </div>
+                  <span class={`px-2 py-1 text-xs font-medium rounded-full ${
+                    new Date(conn.token_expires_at) > new Date()
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {new Date(conn.token_expires_at) > new Date() ? 'Actief' : 'Vernieuwen nodig'}
+                  </span>
+                </div>
+
+                <form method="POST" class="flex items-center gap-3">
+                  <input type="hidden" name="action" value="disconnect" />
+                  <input type="hidden" name="connection_id" value={conn.id} />
+                  <input
+                    type="text"
+                    name="confirm_text"
+                    class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder='Type "VERWIJDEREN"'
+                    required
+                  />
+                  <button
+                    type="submit"
+                    class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Verwijderen
+                  </button>
+                </form>
+              </div>
+            ))}
+
+            <!-- Remove all option -->
+            <div class="bg-white rounded-xl shadow-sm border border-red-200 p-6 mt-8">
+              <h3 class="font-semibold text-red-900 mb-2">
+                Alle koppelingen verwijderen
+              </h3>
+              <p class="text-sm text-gray-600 mb-4">
+                Verwijder alle {connections.length} koppelingen in één keer.
+              </p>
+              <form method="POST" class="flex items-center gap-3">
+                <input type="hidden" name="action" value="disconnect_all" />
+                <input
+                  type="text"
+                  name="confirm_text"
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder='Type "ALLES VERWIJDEREN"'
+                  required
+                />
+                <button
+                  type="submit"
+                  class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Alles verwijderen
+                </button>
+              </form>
+            </div>
+          </>
+        )}
+
+        <!-- Cancel link -->
+        <div class="text-center mt-6">
+          <a href="/dashboard" class="text-gray-600 hover:text-gray-800 hover:underline">
+            Annuleren en terug naar dashboard
+          </a>
+        </div>
+      </div>
+    )}
+
+    <!-- Help section -->
+    <div class="mt-12 bg-gray-50 rounded-xl p-6">
+      <h3 class="font-semibold text-gray-900 mb-3">Hulp nodig?</h3>
+      <p class="text-sm text-gray-600 mb-4">
+        Als je problemen hebt met je koppeling of vragen hebt over het verwijderen ervan, neem dan contact met ons op.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a
+          href="mailto:support@praatmetjeboekhouding.nl"
+          class="inline-flex items-center text-sm text-exact-blue hover:underline"
+        >
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          support@praatmetjeboekhouding.nl
+        </a>
+        <a
+          href="/faq"
+          class="inline-flex items-center text-sm text-exact-blue hover:underline"
+        >
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Veelgestelde vragen
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

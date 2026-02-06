@@ -1,0 +1,217 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Get category filter from URL
+const url = new URL(Astro.request.url);
+const selectedCategory = url.searchParams.get('category')?.toLowerCase() || null;
+
+// Blog posts data - in production this could come from a CMS or markdown files
+const allBlogPosts = [
+  {
+    slug: 'vijf-nieuwe-features-exact-online',
+    title: 'Nieuw in Exact Online: AI-facturen, multi-administratie en meer',
+    excerpt: 'Download facturen via AI, beheer meerdere administraties, en ontdek 47 tools. Plus: een gratis plan dat permanent gratis blijft.',
+    date: '2026-02-01',
+    category: 'Product',
+    readTime: '3 min',
+  },
+  {
+    slug: 'nog-makkelijker-inloggen',
+    title: 'Nog Makkelijker Inloggen: OAuth voor Claude Desktop',
+    excerpt: 'Geen API keys meer kopiëren! Met de nieuwe OAuth-flow log je in via je browser en ben je direct klaar. Zo simpel kan het zijn.',
+    date: '2026-01-30',
+    category: 'Product',
+    readTime: '3 min',
+  },
+  {
+    slug: '17-nieuwe-mcp-tools-exact-online',
+    title: '17 Nieuwe MCP Tools: Van Projecten tot Prijslijsten',
+    excerpt: 'Grote update: projectfacturatie, kostenplaatsen, vaste activa, verkoopkansen, contracten en meer. Nu 44 tools voor complete Exact Online integratie.',
+    date: '2026-01-29',
+    category: 'Product',
+    readTime: '6 min',
+  },
+  {
+    slug: 'mcp-claude-documenten-berekeningen',
+    title: 'Documenten en Berekeningen Maken met Claude en Exact Online via MCP',
+    excerpt: 'Ontdek hoe je via de MCP-koppeling met Claude rapporten, analyses en berekeningen maakt vanuit je Exact Online data. Met praktische voorbeelden.',
+    date: '2026-01-28',
+    category: 'Product',
+    readTime: '8 min',
+  },
+  {
+    slug: 'exact-online-chatgpt-koppelen',
+    title: 'Exact Online koppelen met ChatGPT: Complete handleiding 2026',
+    excerpt: 'Leer stap voor stap hoe je Exact Online verbindt met ChatGPT om vragen te stellen aan je boekhouding in natuurlijke taal.',
+    date: '2026-01-27',
+    category: 'Tutorial',
+    readTime: '8 min',
+  },
+  {
+    slug: 'ai-boekhouding-zzp',
+    title: 'AI Boekhouding voor ZZP\'ers: Tijd en geld besparen',
+    excerpt: 'Ontdek hoe kunstmatige intelligentie je boekhouding kan automatiseren en waarom dit perfect is voor zelfstandigen.',
+    date: '2026-01-26',
+    category: 'Gids',
+    readTime: '6 min',
+  },
+  {
+    slug: 'openstaande-facturen-ai',
+    title: 'Openstaande facturen automatisch controleren met AI',
+    excerpt: 'Nooit meer handmatig je debiteuren nalopen. Laat AI je vertellen welke facturen openstaan en actie nodig hebben.',
+    date: '2026-01-25',
+    category: 'Productiviteit',
+    readTime: '5 min',
+  },
+  {
+    slug: 'claude-voor-accountants',
+    title: 'Claude AI voor Accountants: De complete gids',
+    excerpt: 'Hoe accountantskantoren Claude kunnen inzetten voor efficiëntere klantenservice en snellere analyses.',
+    date: '2026-01-24',
+    category: 'Professional',
+    readTime: '10 min',
+  },
+  {
+    slug: 'wat-is-mcp-protocol',
+    title: 'Wat is MCP (Model Context Protocol)? Uitleg voor niet-techneuten',
+    excerpt: 'Een simpele uitleg van het protocol dat AI assistenten verbindt met je bedrijfssoftware.',
+    date: '2026-01-23',
+    category: 'Technologie',
+    readTime: '4 min',
+  },
+  {
+    slug: 'omzet-analyseren-ai',
+    title: 'Je omzet analyseren met AI: Inzichten in seconden',
+    excerpt: 'Vraag je AI assistent om omzettrends, vergelijkingen en prognoses. Geen Excel expertise nodig.',
+    date: '2026-01-22',
+    category: 'Analyse',
+    readTime: '6 min',
+  },
+  {
+    slug: 'exact-online-api-tools',
+    title: 'Exact Online API tools vergeleken: Welke past bij jou?',
+    excerpt: 'Een vergelijking van de verschillende manieren om Exact Online te koppelen met andere software.',
+    date: '2026-01-21',
+    category: 'Vergelijking',
+    readTime: '7 min',
+  },
+  {
+    slug: 'boekhouding-automatiseren-2026',
+    title: 'Boekhouding automatiseren in 2026: De complete gids',
+    excerpt: 'Alles wat je moet weten over het automatiseren van je administratie met moderne tools en AI.',
+    date: '2026-01-20',
+    category: 'Gids',
+    readTime: '12 min',
+  },
+  {
+    slug: 'copilot-financiele-data',
+    title: 'GitHub Copilot voor financiële data: Praktische tips',
+    excerpt: 'Hoe developers en financial controllers Copilot kunnen gebruiken voor boekhouddata.',
+    date: '2026-01-19',
+    category: 'Tips',
+    readTime: '5 min',
+  },
+  {
+    slug: 'btw-aangifte-ai-voorbereiding',
+    title: 'BTW aangifte voorbereiden met AI: Sneller en foutloos',
+    excerpt: 'Laat AI je helpen bij het verzamelen en controleren van gegevens voor je BTW aangifte.',
+    date: '2026-01-18',
+    category: 'Belasting',
+    readTime: '6 min',
+  },
+];
+
+const categories = [...new Set(allBlogPosts.map(p => p.category))];
+
+// Filter posts based on selected category
+const blogPosts = selectedCategory
+  ? allBlogPosts.filter(p => p.category.toLowerCase() === selectedCategory)
+  : allBlogPosts;
+---
+
+<Layout
+  title="Blog - AI & Boekhouding Tips"
+  description="Artikelen over AI boekhouding, Exact Online automatisering, ChatGPT integraties en meer. Praktische tips voor ondernemers en accountants."
+>
+  <div class="max-w-6xl mx-auto px-4 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Blog</h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Praktische tips en inzichten over AI, boekhouding en Exact Online automatisering
+      </p>
+    </div>
+
+    <!-- Categories -->
+    <div class="flex flex-wrap justify-center gap-2 mb-12">
+      <a
+        href="/blog"
+        class:list={[
+          "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+          !selectedCategory
+            ? "bg-exact-blue text-white"
+            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+        ]}
+      >
+        Alles
+      </a>
+      {categories.map(cat => (
+        <a
+          href={`/blog?category=${cat.toLowerCase()}`}
+          class:list={[
+            "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+            selectedCategory === cat.toLowerCase()
+              ? "bg-exact-blue text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          ]}
+        >
+          {cat}
+        </a>
+      ))}
+    </div>
+
+    <!-- Blog Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {blogPosts.map(post => (
+        <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+          <a href={`/blog/${post.slug}`} class="block p-6">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="px-2 py-1 bg-exact-light text-exact-blue text-xs font-medium rounded">
+                {post.category}
+              </span>
+              <span class="text-gray-400 text-sm">{post.readTime} leestijd</span>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 mb-2 hover:text-exact-blue transition-colors">
+              {post.title}
+            </h2>
+            <p class="text-gray-600 text-sm mb-4">
+              {post.excerpt}
+            </p>
+            <time class="text-gray-400 text-sm">
+              {new Date(post.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </time>
+          </a>
+        </article>
+      ))}
+    </div>
+
+    <!-- Newsletter CTA -->
+    <div class="mt-16 bg-exact-light rounded-2xl p-8 text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Blijf op de hoogte</h2>
+      <p class="text-gray-600 mb-6">Ontvang nieuwe artikelen en tips direct in je inbox</p>
+      <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <input
+          type="email"
+          placeholder="Je email adres"
+          class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-exact-blue focus:border-transparent"
+        />
+        <button
+          type="submit"
+          class="px-6 py-3 bg-exact-blue text-white font-semibold rounded-lg hover:bg-exact-dark transition-colors"
+        >
+          Aanmelden
+        </button>
+      </form>
+    </div>
+  </div>
+</Layout>
