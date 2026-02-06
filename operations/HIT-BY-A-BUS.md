@@ -85,7 +85,7 @@ Als alles 200 teruggeeft: het systeem draait. Je hebt tijd.
 │  │  Pages            │    │  Worker               │        │
 │  │  (Auth Portal)    │    │  (MCP Server)         │        │
 │  │                    │    │                        │        │
-│  │  praatmetje...nl  │    │  api.praatmetje...nl  │        │
+│  │  [PROJECT_DOMEIN] │    │  [API_DOMEIN]         │        │
 │  │                    │    │                        │        │
 │  │  - Login/Register │    │  - 47 MCP tools        │        │
 │  │  - Dashboard      │    │  - OAuth server        │        │
