@@ -69,9 +69,12 @@
 | Rol | Agent | Rapporteert aan | Team |
 |-----|-------|-----------------|------|
 | **Engineering Manager** | Wim | CTO Kees | Development |
+| **Product Owner** | Sander | CTO Kees | Product |
 | **Security Lead** | Bas | CTO Kees | Security |
 | **DevOps Lead** | Dirk | COO Henk | Infrastructure |
+| **HR Manager** | Marieke | COO Henk | People Ops |
 | **Growth Lead** | Tom | CMO Lisa | Marketing |
+| **Sales Lead** | Victor | CMO Lisa | Sales |
 | **Community Lead** | Marie | CMO Lisa | Engagement |
 | **CS Manager** | Petra | CCO Sophie | Support |
 | **Finance Ops** | Jan | CFO Frans | Finance |
@@ -83,6 +86,9 @@
 | **QA Engineer** | Roos | Wim | Testing |
 | **Frontend Dev** | Daan | Wim | UI/UX |
 | **Backend Dev** | Lars | Wim | API/Server |
+| **UX/UI Designer** | Nienke | Wim | Design |
+| **Data Engineer** | Wouter | Wim | Data Pipelines |
+| **Technical Writer** | Iris | Wim | Documentatie |
 | **Content Creator** | Anna | Tom | Blog/Social |
 | **SEO Specialist** | Bram | Tom | Organic |
 | **Support Agent** | Emma | Petra | Tickets |
@@ -110,13 +116,13 @@
                │               │         │        │         │
          ┌─────┤          ┌────┤    ┌────┤        │    ┌────┤
          │     │          │    │    │    │        │    │    │
-       Dirk   ...       Wim   Bas  Tom  Marie   Petra  Jan  ...
-     (DevOps)           │          │              │
-         │          ┌───┼───┐  ┌───┤          ┌───┤
-         │          │   │   │  │   │          │   │
-        ...       Roos Daan Lars Anna Bram  Emma ...
-                               │
-                              Tim
+       Dirk  Marieke    Wim  Sander Tom Victor  Petra  Jan  ...
+     (DevOps) (HR)       │    Bas   │   Marie     │
+         │          ┌────┼────┐ ┌───┤          ┌───┤
+         │          │    │    │ │   │          │   │
+        ...       Roos  Daan Lars Anna Bram  Emma ...
+                  Nienke Wouter │
+                  Iris         Tim
 ```
 
 ---
@@ -173,34 +179,46 @@
 
 ## Implementatie Prioriteit
 
-### Fase 1: Core (Nu - Week 5-6)
+### Fase 1: Core (Week 5-6) - Afgerond
 Must-have voor operatie:
 
-| Agent | Rol | Laag |
-|-------|-----|------|
-| Frans | CFO | Board |
-| Tom | Growth Lead | Management |
-| Jan | Finance Ops | Management |
+| Agent | Rol | Laag | Status |
+|-------|-----|------|--------|
+| Frans | CFO | Board | Actief |
+| Tom | Growth Lead | Management | Actief |
+| Jan | Finance Ops | Management | Actief |
 
-### Fase 2: Scale (Week 7-8)
+### Fase 2: Scale (Week 7-8) - Afgerond
 Voor groei:
 
-| Agent | Rol | Laag |
-|-------|-----|------|
-| Dirk | DevOps Lead | Management |
-| Petra | CS Manager | Management |
-| Roos | QA Engineer | Operationeel |
+| Agent | Rol | Laag | Status |
+|-------|-----|------|--------|
+| Dirk | DevOps Lead | Management | Actief |
+| Petra | CS Manager | Management | Actief |
+| Roos | QA Engineer | Operationeel | Actief |
 
-### Fase 3: Optimalisatie (Week 9+)
+### Fase 3: Optimalisatie (Week 9+) - Afgerond
 Voor efficiency:
 
-| Agent | Rol | Laag |
-|-------|-----|------|
-| Marie | Community Lead | Management |
-| Anna | Content Creator | Operationeel |
-| Tim | Data Analyst | Operationeel |
+| Agent | Rol | Laag | Status |
+|-------|-----|------|--------|
+| Marie | Community Lead | Management | Actief |
+| Anna | Content Creator | Operationeel | Actief |
+| Tim | Data Analyst | Operationeel | Actief |
+
+### Fase 4: Team Completering (Week 6, 2026)
+Blinde vlekken dichten:
+
+| Agent | Rol | Laag | Rapporteert aan |
+|-------|-----|------|-----------------|
+| Sander | Product Owner | Management | Kees (CTO) |
+| Victor | Sales Lead | Management | Lisa (CMO) |
+| Marieke | HR Manager | Management | Henk (COO) |
+| Nienke | UX/UI Designer | Operationeel | Wim |
+| Wouter | Data Engineer | Operationeel | Wim |
+| Iris | Technical Writer | Operationeel | Wim |
 
 ---
 
 *Document gegenereerd: 2026-01-27*
-*Versie: 1.0*
+*Versie: 2.0 - Bijgewerkt 2026-02-06 met Fase 4 team completering*

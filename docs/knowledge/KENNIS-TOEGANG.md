@@ -26,16 +26,21 @@ Lees meer: `operations/PRINCIPLES.md`
 
 ```bash
 # TECH DOMEINEN
-cat docs/knowledge/mcp/LESSONS-LEARNED.md      # MCP Protocol (Ruben)
-cat docs/knowledge/exact/LESSONS-LEARNED.md    # Exact API (Joost)
-cat docs/knowledge/backend/LESSONS-LEARNED.md  # Backend/Infra (Daan)
-cat docs/knowledge/backend/DATABASE.md         # Database schema
+cat docs/knowledge/mcp/LESSONS-LEARNED.md             # MCP Protocol (Ruben)
+cat docs/knowledge/exact/LESSONS-LEARNED.md           # Exact API (Joost)
+cat docs/knowledge/backend/LESSONS-LEARNED.md         # Backend/Infra (Daan)
+cat docs/knowledge/backend/DATABASE.md                # Database schema
+cat docs/knowledge/data-engineering/LESSONS-LEARNED.md # Data Pipelines (Wouter)
+cat docs/knowledge/design/LESSONS-LEARNED.md          # UX/UI Design (Nienke)
 
 # BUSINESS DOMEINEN
 cat docs/knowledge/marketing/LESSONS-LEARNED.md  # Marketing (Tom)
+cat docs/knowledge/sales/LESSONS-LEARNED.md      # Sales (Victor)
 cat docs/knowledge/support/LESSONS-LEARNED.md    # Support (Petra)
 cat docs/knowledge/finance/LESSONS-LEARNED.md    # Finance (Jan)
 cat docs/knowledge/legal/LESSONS-LEARNED.md      # Legal (Eva)
+cat docs/knowledge/product/LESSONS-LEARNED.md    # Product (Sander)
+cat docs/knowledge/hr/LESSONS-LEARNED.md         # HR/People (Marieke)
 ```
 
 ## Volledige Kennisstructuur
@@ -73,9 +78,29 @@ docs/knowledge/
 │   ├── LESSONS-LEARNED.md          # Billing, subscription issues
 │   └── VERSION.md                  # Stripe config, pricing
 │
-└── legal/                          # Legal (Specialist: Eva)
-    ├── LESSONS-LEARNED.md          # Compliance learnings
-    └── VERSION.md                  # Legal docs versies
+├── legal/                          # Legal (Specialist: Eva)
+│   ├── LESSONS-LEARNED.md          # Compliance learnings
+│   └── VERSION.md                  # Legal docs versies
+│
+├── product/                        # Product (Specialist: Sander)
+│   ├── LESSONS-LEARNED.md          # Product decisions & learnings
+│   └── VERSION.md                  # Product versies
+│
+├── design/                         # UX/UI Design (Specialist: Nienke)
+│   ├── LESSONS-LEARNED.md          # Design learnings
+│   └── VERSION.md                  # Design system versies
+│
+├── sales/                          # Sales (Specialist: Victor)
+│   ├── LESSONS-LEARNED.md          # Sales learnings
+│   └── VERSION.md                  # Pricing & tooling
+│
+├── hr/                             # HR/People (Specialist: Marieke)
+│   ├── LESSONS-LEARNED.md          # HR learnings
+│   └── VERSION.md                  # HR processen & tools
+│
+└── data-engineering/               # Data Engineering (Specialist: Wouter)
+    ├── LESSONS-LEARNED.md          # Pipeline learnings
+    └── VERSION.md                  # Data stack versies
 ```
 
 ## Alle Specialisten
@@ -85,9 +110,15 @@ docs/knowledge/
 | MCP Protocol | **Ruben** | `mcp/` | Kees (CTO) |
 | Exact API | **Joost** | `exact/` | Kees (CTO) |
 | Backend/Infra | **Daan** | `backend/` | Kees (CTO) |
+| Product | **Sander** | `product/` | Kees (CTO) |
+| UX/UI Design | **Nienke** | `design/` | Wim |
+| Data Engineering | **Wouter** | `data-engineering/` | Wim |
+| Documentation | **Iris** | *alle docs* | Wim |
 | Marketing/Content | **Tom** | `marketing/` | Lisa (CMO) |
+| Sales | **Victor** | `sales/` | Lisa (CMO) |
 | Support/CS | **Petra** | `support/` | Sophie (CCO) |
 | Finance/Billing | **Jan** | `finance/` | Frans (CFO) |
+| HR/People | **Marieke** | `hr/` | Henk (COO) |
 | Legal/Compliance | **Eva** | `legal/` | Direct |
 
 ## Wanneer Welke Kennis?
@@ -102,14 +133,27 @@ docs/knowledge/
 | Worker/D1/KV issue | `backend/LESSONS-LEARNED.md` | Daan |
 | OAuth/Token probleem | Alle 3 tech LESSONS | Daan + Joost |
 
+### Product & Design Vragen
+
+| Vraag/Taak | Lees Eerst | Specialist |
+|------------|------------|------------|
+| Feature prioritering | `product/LESSONS-LEARNED.md` | Sander |
+| User story schrijven | `product/VERSION.md` | Sander |
+| UI/UX design | `design/LESSONS-LEARNED.md` | Nienke |
+| Design system | `design/VERSION.md` | Nienke |
+| Data pipeline issue | `data-engineering/LESSONS-LEARNED.md` | Wouter |
+| Documentatie update | *relevante docs* | Iris |
+
 ### Business Vragen
 
 | Vraag/Taak | Lees Eerst | Specialist |
 |------------|------------|------------|
 | Content/Blog/Social | `marketing/LESSONS-LEARNED.md` | Tom |
 | SEO strategie | `marketing/VERSION.md` | Tom |
+| Lead/Sales vraag | `sales/LESSONS-LEARNED.md` | Victor |
 | Klant probleem | `support/LESSONS-LEARNED.md` | Petra |
 | Billing/Subscription | `finance/LESSONS-LEARNED.md` | Jan |
+| Onboarding/HR | `hr/LESSONS-LEARNED.md` | Marieke |
 | Privacy/GDPR | `legal/LESSONS-LEARNED.md` | Eva |
 
 ## Lesson Learned Melden
@@ -134,9 +178,15 @@ docs/knowledge/
 | MCP/Protocol | Ruben |
 | Exact API | Joost |
 | Backend/Infra/DB | Daan |
+| Product/Features | Sander |
+| UX/UI/Design | Nienke |
+| Data Pipelines/Quality | Wouter |
+| Documentatie | Iris |
 | Content/SEO/Social | Tom |
-| Tickets/Onboarding | Petra |
+| Sales/Leads/Deals | Victor |
+| Tickets/Onboarding klant | Petra |
 | Billing/Metrics | Jan |
+| HR/Team/Performance | Marieke |
 | Privacy/Compliance | Eva |
 
 ## Verplichte Kennis per Team
@@ -162,11 +212,40 @@ cat docs/knowledge/backend/LESSONS-LEARNED.md  # Voor troubleshooting
 cat docs/knowledge/exact/LESSONS-LEARNED.md    # Voor API issues
 ```
 
+### Product & Design Team
+```bash
+cat docs/knowledge/product/LESSONS-LEARNED.md
+cat docs/knowledge/design/LESSONS-LEARNED.md
+cat operations/ROADMAP.md
+```
+
+### Sales Team
+```bash
+cat docs/knowledge/sales/LESSONS-LEARNED.md
+cat docs/knowledge/product/LESSONS-LEARNED.md  # Productkennis voor demos
+cat operations/COMPETITIVE-INTELLIGENCE.md
+```
+
 ### Finance Team
 ```bash
 cat docs/knowledge/finance/LESSONS-LEARNED.md
 cat docs/knowledge/finance/VERSION.md
 cat docs/knowledge/backend/DATABASE.md  # Voor subscription data
+```
+
+### HR Team
+```bash
+cat docs/knowledge/hr/LESSONS-LEARNED.md
+cat operations/ONBOARDING.md
+cat operations/KENNISTOETSEN.md
+cat operations/training/README.md
+```
+
+### Data Engineering Team
+```bash
+cat docs/knowledge/data-engineering/LESSONS-LEARNED.md
+cat docs/knowledge/backend/LESSONS-LEARNED.md
+cat docs/knowledge/exact/LESSONS-LEARNED.md  # API als databron
 ```
 
 ## Kennis Synchronisatie
@@ -214,6 +293,12 @@ Sommige issues raken meerdere domeinen:
 | Billing klachten | Jan + Petra |
 | Data privacy | Eva + Daan |
 | API errors in support | Petra → escalatie naar Joost/Daan |
+| Feature prioritering | Sander + Tom + Tim |
+| Design naar code | Nienke + Daan |
+| Sales → Support handover | Victor + Petra |
+| Data pipeline issues | Wouter + Daan + Joost |
+| Kennisbank updates | Iris + domein specialist |
+| Team performance | Marieke + direct manager |
 
 ---
 

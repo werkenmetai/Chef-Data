@@ -106,6 +106,60 @@ Believability geldt per onderwerp, niet per persoon.
 
 **Raadpleeg Eva bij:** GDPR, privacy, terms of service, contracten
 
+#### Product Management
+| Persoon | Believability | Basis |
+|---------|---------------|-------|
+| **Sander** | ★★★★★ Expert | Product Owner, backlog management, RICE prioritering |
+| Kees | ★★★★☆ Gevorderd | CTO, product-tech alignment |
+| Tom | ★★★☆☆ Gevorderd | Growth perspectief op product |
+
+**Raadpleeg Sander bij:** Feature prioritering, user stories, release planning, product strategy
+
+#### UX/UI Design
+| Persoon | Believability | Basis |
+|---------|---------------|-------|
+| **Nienke** | ★★★★★ Expert | UX/UI Designer, design system, usability testing |
+| Daan | ★★★☆☆ Gevorderd | Frontend implementatie van designs |
+| Anna | ★★☆☆☆ Basis | Content/copy voor interfaces |
+
+**Raadpleeg Nienke bij:** Design system, wireframes, usability tests, accessibility
+
+#### Sales & Business Development
+| Persoon | Believability | Basis |
+|---------|---------------|-------|
+| **Victor** | ★★★★★ Expert | Sales Lead, pipeline management, deal closing |
+| Tom | ★★★☆☆ Gevorderd | Growth/lead generation |
+| Petra | ★★★☆☆ Gevorderd | Customer handover, churn prevention |
+
+**Raadpleeg Victor bij:** Lead kwalificatie, demos, proposals, partnerships, competitive positioning
+
+#### HR & People Operations
+| Persoon | Believability | Basis |
+|---------|---------------|-------|
+| **Marieke** | ★★★★★ Expert | HR Manager, onboarding, performance management |
+| Henk | ★★★★☆ Gevorderd | COO, organisatie structuur |
+| Piet | ★★★☆☆ Gevorderd | CEO, team cultuur |
+
+**Raadpleeg Marieke bij:** Onboarding, performance reviews, team health, believability evaluaties
+
+#### Data Engineering
+| Persoon | Believability | Basis |
+|---------|---------------|-------|
+| **Wouter** | ★★★★★ Expert | Data Engineer, pipelines, data quality |
+| Daan | ★★★☆☆ Gevorderd | Backend/database |
+| Tim | ★★★☆☆ Gevorderd | Data analyse, downstream verbruiker |
+
+**Raadpleeg Wouter bij:** Data pipelines, ETL/ELT, data quality, schema design, data architecture
+
+#### Technical Writing & Documentation
+| Persoon | Believability | Basis |
+|---------|---------------|-------|
+| **Iris** | ★★★★★ Expert | Technical Writer, kennisbank beheer, stijlgids |
+| Anna | ★★★☆☆ Gevorderd | Content writing, copywriting |
+| Marieke | ★★☆☆☆ Basis | Onboarding documentatie |
+
+**Raadpleeg Iris bij:** API docs, user guides, kennisbank structuur, schrijfrichtlijnen
+
 ---
 
 ## Cross-Domain Expertise
@@ -120,6 +174,12 @@ Sommige vragen vereisen meerdere experts:
 | Tech content voor marketing | Tom + (Ruben/Joost/Daan) | Marketing + Tech expertise |
 | API errors in support | Petra → Joost/Daan | Support escalatie naar tech |
 | Performance problemen | Daan + Dirk | Backend + DevOps |
+| Feature prioritering | Sander + Tom + Tim | Product + Growth + Data |
+| Design naar code | Nienke + Daan | Design + Frontend |
+| Sales → Support handover | Victor + Petra | Sales + CS |
+| Data pipeline issues | Wouter + Daan + Joost | Data + Backend + API |
+| Documentatie review | Iris + domain expert | Writing + Domeinkennis |
+| Team performance | Marieke + manager | HR + Direct manager |
 
 ---
 
@@ -242,5 +302,5 @@ Maand 6+:   ★★★★☆ Expert - Track record bewezen, raadpleegbaar
 
 *Dit document wordt per kwartaal gereviewed en bijgewerkt.*
 
-**Laatst bijgewerkt:** 2026-01-28
+**Laatst bijgewerkt:** 2026-02-06
 **Eigenaar:** Matthijs (CSO) + Piet (CEO)
