@@ -1,4 +1,4 @@
-# Bedrijfsprincipes - Praat met je Boekhouding
+# Bedrijfsprincipes - [PROJECT_NAAM]
 
 > **"Pijn + Reflectie = Vooruitgang"** - Ray Dalio
 

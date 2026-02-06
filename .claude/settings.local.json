@@ -1,41 +1,21 @@
 {
   "permissions": {
     "allow": [
-      "Bash(claude mcp add:*)",
-      "Bash(curl:*)",
-      "Bash(claude mcp:*)",
       "Bash(git checkout:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: add 24 agent slash commands for Claude Code\n\nAdd complete agent structure as Claude Code custom slash commands:\n\nC-Suite:\n- /matthijs \\(CSO\\) - Strategic planning, OKRs, vision\n- /piet \\(CEO\\) - Orchestration, delegation, execution\n- /henk \\(COO\\) - IT Architecture, specs\n- /frans \\(CFO\\) - Finance, cash, pricing\n- /kees \\(CTO\\) - Development, implementation\n- /lisa \\(CMO\\) - Content, marketing\n- /sophie \\(CCO\\) - Customer support system\n- /eva \\(CLO\\) - Legal, compliance, GDPR\n\nManagement:\n- /wim - Code auditor\n- /bas - Security expert\n- /ruben - MCP protocol specialist\n- /joost - Exact API specialist\n- /dirk - DevOps lead\n- /tom - Growth lead\n- /marie - Community lead\n- /petra - CS manager\n- /jan - Finance ops\n\nOperational:\n- /roos - QA engineer\n- /daan - Backend specialist\n- /lars - Backend developer\n- /anna - Content creator\n- /bram - SEO specialist\n- /emma - Support agent\n- /tim - Data analyst\n\nEach agent includes:\n- Role-specific context checks\n- Knowledge base references\n- Output protocols\n- Specialist collaboration guidelines\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(npx wrangler d1 execute:*)",
-      "Bash(npx wrangler whoami)",
-      "Bash(npx wrangler login)",
-      "Bash(timeout 10 npx wrangler tail:*)",
-      "Bash(timeout 10 npx wrangler pages deployment tail:*)",
       "Bash(git commit:*)",
       "Bash(git reset:*)",
       "Bash(git stash:*)",
-      "Bash(npx wrangler deploy)",
-      "Bash(npm install)",
       "Bash(git push:*)",
-      "Bash(gh pr create --title \"feat: add ChatGPT OAuth support\" --body \"$\\(cat <<''EOF''\n## Summary\n- Adds `chatgpt.com` and `chat.openai.com` to CORS whitelist for OAuth token exchange\n- Enables ChatGPT Apps \\(MCP\\) to complete OAuth flow with our server\n\n## Context\nChatGPT OAuth flow was failing because:\n1. ✅ Client registration works\n2. ✅ Auth codes are generated\n3. ✅ 302 redirect to chatgpt.com works\n4. ❌ Token exchange was potentially blocked by CORS\n\n## Test plan\n- [ ] Create ChatGPT App with OAuth pointing to our MCP server\n- [ ] Complete OAuth authorization flow\n- [ ] Verify ChatGPT can exchange code for token\n\n🤖 Generated with [Claude Code]\\(https://claude.ai/claude-code\\)\nEOF\n\\)\")",
       "Bash(git fetch:*)",
       "Bash(git merge:*)",
-      "Bash(timeout 30 npx wrangler tail:*)",
-      "Bash(timeout 20 npx wrangler tail:*)",
-      "WebSearch",
-      "WebFetch(domain:medium.com)",
-      "WebFetch(domain:auth0.com)",
-      "WebFetch(domain:platform.openai.com)",
-      "WebFetch(domain:dev.to)",
-      "WebFetch(domain:developers.openai.com)",
-      "Bash(gh pr merge:*)",
       "Bash(git pull:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr merge:*)",
       "Bash(gh run list:*)",
-      "Bash(timeout 15 npx wrangler:*)",
-      "WebFetch(domain:errors.pydantic.dev)",
-      "WebFetch(domain:docs.pydantic.dev)",
-      "Bash(timeout 45 npx wrangler tail:*)"
+      "Bash(curl:*)",
+      "Bash(npm install)",
+      "WebSearch"
     ]
   }
 }

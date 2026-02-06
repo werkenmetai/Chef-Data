@@ -5,7 +5,7 @@
 
 ## Mission
 
-Bouw een compleet klantenservice systeem voor "Praat met je Boekhouding" dat:
+Bouw een compleet klantenservice systeem voor "[PROJECT_NAAM]" dat:
 1. Automatisch klantvragen beantwoordt via AI
 2. Leert van elke interactie
 3. Kennisbank en FAQ bijhoudt
@@ -210,7 +210,7 @@ CREATE INDEX IF NOT EXISTS idx_errors_code ON error_log(error_code);
 
 ```typescript
 const SUPPORT_AI_SYSTEM_PROMPT = `
-Je bent de klantenservice AI voor "Praat met je Boekhouding".
+Je bent de klantenservice AI voor "[PROJECT_NAAM]".
 
 ## Je Taken
 1. Beantwoord klantvragen vriendelijk en behulpzaam

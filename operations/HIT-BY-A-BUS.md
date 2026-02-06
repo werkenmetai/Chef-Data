@@ -11,7 +11,7 @@
 
 ## Stap 0: Wat is dit product?
 
-"Praat met je Boekhouding" is een MCP server die AI-assistenten (Claude, ChatGPT) verbindt met Exact Online boekhoudsoftware. Gebruikers kunnen in natuurlijke taal vragen stellen over hun administratie.
+"[PROJECT_NAAM]" is een MCP server die AI-assistenten (Claude, ChatGPT) verbindt met Exact Online boekhoudsoftware. Gebruikers kunnen in natuurlijke taal vragen stellen over hun administratie.
 
 **Hoe het werkt:**
 ```
@@ -30,9 +30,9 @@ Gebruiker → Claude/ChatGPT → MCP Protocol → Onze server → Exact Online A
 | # | Account | URL | Eigenaar | Waarvoor |
 |---|---------|-----|----------|----------|
 | 1 | **Cloudflare** | dash.cloudflare.com | matthijs@chefdata.nl | ALLES draait hier: hosting, database, DNS, workers |
-| 2 | **GitHub** | github.com/werkenmetai | matthijs@chefdata.nl | Alle broncode, CI/CD, PR workflow |
+| 2 | **GitHub** | github.com/[GITHUB_ORG] | matthijs@chefdata.nl | Alle broncode, CI/CD, PR workflow |
 | 3 | **Exact Online App Center** | apps.exactonline.com | matthijs@chefdata.nl | App Store listing, OAuth credentials |
-| 4 | **Resend** | resend.com | matthijs@chefdata.nl | Email verzending (support@praatmetjeboekhouding.nl) |
+| 4 | **Resend** | resend.com | matthijs@chefdata.nl | Email verzending ([SUPPORT_EMAIL]) |
 | 5 | **OpenAI Platform** | platform.openai.com | matthijs@chefdata.nl | ChatGPT Apps submission |
 | 6 | **Anthropic** | console.anthropic.com | matthijs@chefdata.nl | Claude Connector Directory |
 
@@ -40,8 +40,8 @@ Gebruiker → Claude/ChatGPT → MCP Protocol → Onze server → Exact Online A
 
 | Domein | Registrar | DNS | Verloopdatum |
 |--------|-----------|-----|--------------|
-| praatmetjeboekhouding.nl | Cloudflare | Cloudflare | Check dashboard |
-| exactmcp.com | Cloudflare | Cloudflare | Check dashboard |
+| [PROJECT_DOMEIN] | Cloudflare | Cloudflare | Check dashboard |
+| [DOMEIN_ALIAS] | Cloudflare | Cloudflare | Check dashboard |
 | chefdata.nl | Cloudflare | Cloudflare | Check dashboard |
 
 ### Wachtwoorden & 2FA
@@ -56,13 +56,13 @@ Gebruiker → Claude/ChatGPT → MCP Protocol → Onze server → Exact Online A
 
 ```bash
 # 1. Is de API server online?
-curl https://api.praatmetjeboekhouding.nl/health
+curl https://[API_DOMEIN]/health
 
 # 2. Is de website bereikbaar?
-curl -I https://praatmetjeboekhouding.nl
+curl -I https://[PROJECT_DOMEIN]
 
 # 3. Is de demo werkend?
-curl https://api.praatmetjeboekhouding.nl/mcp/exa_demo
+curl https://[API_DOMEIN]/mcp/exa_demo
 ```
 
 Als alles 200 teruggeeft: het systeem draait. Je hebt tijd.
@@ -70,7 +70,7 @@ Als alles 200 teruggeeft: het systeem draait. Je hebt tijd.
 ### Cloudflare Dashboard checks
 
 1. **Workers** → `exact-mcp-api` → Kijk of er errors zijn in de logs
-2. **Pages** → `exact-online-mcp` → Kijk of laatste deployment gelukt is
+2. **Pages** → `[PROJECT_SLUG]` → Kijk of laatste deployment gelukt is
 3. **D1** → `exact-mcp-db` → Kijk of database bereikbaar is
 
 ---
@@ -114,8 +114,8 @@ Als alles 200 teruggeeft: het systeem draait. Je hebt tijd.
 
 | App | Type | Domein | Code |
 |-----|------|--------|------|
-| **Auth Portal** | Cloudflare Pages (Astro) | praatmetjeboekhouding.nl | `apps/auth-portal/` |
-| **MCP Server** | Cloudflare Worker | api.praatmetjeboekhouding.nl | `apps/mcp-server/` |
+| **Auth Portal** | Cloudflare Pages (Astro) | [PROJECT_DOMEIN] | `apps/auth-portal/` |
+| **MCP Server** | Cloudflare Worker | [API_DOMEIN] | `apps/mcp-server/` |
 
 Beide apps delen dezelfde D1 database (`exact-mcp-db`).
 
@@ -162,8 +162,8 @@ Push naar `main` branch triggert automatische deployment via GitHub Actions.
 
 ```bash
 # Clone de repo
-git clone https://github.com/werkenmetai/Exact-online-MCP.git
-cd Exact-online-MCP
+git clone https://[GITHUB_REPO_URL].git
+cd [REPO_NAAM]
 
 # Installeer dependencies
 pnpm install
@@ -276,19 +276,19 @@ Dit draait automatisch in Cloudflare. Je hoeft hier niets voor te doen zolang de
 ### "De website is offline"
 
 1. Check Cloudflare status: cloudflarestatus.com
-2. Check Pages deployment: Cloudflare Dashboard → Pages → exact-online-mcp
-3. Check DNS: `dig praatmetjeboekhouding.nl`
+2. Check Pages deployment: Cloudflare Dashboard → Pages → [PROJECT_SLUG]
+3. Check DNS: `dig [PROJECT_DOMEIN]`
 
 ### "Gebruikers kunnen niet inloggen"
 
 1. Check of de OAuth redirect URL klopt in Exact App Center
-2. Redirect URL moet zijn: `https://praatmetjeboekhouding.nl/callback`
+2. Redirect URL moet zijn: `https://[PROJECT_DOMEIN]/callback`
 3. Check of `EXACT_CLIENT_ID` en `EXACT_CLIENT_SECRET` nog geldig zijn
 
 ### "Email werkt niet"
 
 1. Check Resend dashboard voor delivery status
-2. Check of MX record klopt: `dig MX praatmetjeboekhouding.nl` → moet `inbound.resend.com` zijn
+2. Check of MX record klopt: `dig MX [PROJECT_DOMEIN]` → moet `inbound.resend.com` zijn
 3. Check of `RESEND_API_KEY` nog geldig is
 
 ---
@@ -333,7 +333,7 @@ Alles draait binnen free tiers:
 ## Stap 11: Repo structuur (waar vind je wat)
 
 ```
-Exact-online-MCP/
+[REPO_NAAM]/
 ├── apps/
 │   ├── auth-portal/          # Website + OAuth + Dashboard
 │   │   ├── src/pages/        # Routes (astro bestanden)

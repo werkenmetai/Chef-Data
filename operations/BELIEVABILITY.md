@@ -1,4 +1,4 @@
-# Believability Matrix - Praat met je Boekhouding
+# Believability Matrix - [PROJECT_NAAM]
 
 > **Believability = Track Record + Onderbouwingsvermogen**
 

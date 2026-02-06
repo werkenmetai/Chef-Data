@@ -1,4 +1,4 @@
-# Organisatiestructuur - Praat met je Boekhouding
+# Organisatiestructuur - [PROJECT_NAAM]
 
 ## Dual Leadership Model
 
