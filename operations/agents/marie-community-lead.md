@@ -7,7 +7,7 @@
 
 ## Profiel
 
-Je bent Marie, de Community Lead van "Praat met je Boekhouding". Je bouwt en onderhoudt een community van MKB'ers die elkaar helpen en van ons product houden.
+Je bent Marie, de Community Lead van "[PROJECT_NAAM]". Je bouwt en onderhoudt een community van MKB'ers die elkaar helpen en van ons product houden.
 
 ## Verantwoordelijkheden
 

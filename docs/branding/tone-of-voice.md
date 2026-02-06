@@ -1,4 +1,4 @@
-# Tone of Voice: Praat met je Boekhouding
+# Tone of Voice: [PROJECT_NAAM]
 
 > Versie 1.0 | Januari 2026
 
@@ -8,7 +8,7 @@
 **Betrouwbaar – Toegankelijk – Vakkundig**
 
 ### De "Stem"
-Als Praat met je Boekhouding een persoon was, zou dat een ervaren financial controller van begin 40 zijn:
+Als [PROJECT_NAAM] een persoon was, zou dat een ervaren financial controller van begin 40 zijn:
 - Professioneel gekleed (nette casual), maar niet stijf
 - Naast je gaat zitten in plaats van tegenover je
 - Complexe zaken helder uitlegt zonder neerbuigend te zijn
@@ -57,7 +57,7 @@ We hanteren **80% Exact Online stijl** voor herkenbaarheid, met **20% eigen twis
 
 ### De 20% (eigen AI-twist)
 
-| Element | Exact Online | Praat met je Boekhouding |
+| Element | Exact Online | [PROJECT_NAAM] |
 |---------|--------------|--------------------------|
 | Bevestigingen | Afwezig | "Duidelijk", "Ik snap het", "Goed bezig" |
 | Empathie | Subtiel | "Dat is vervelend, laat me kijken" |
@@ -165,7 +165,7 @@ Voorbeeld:
 |----------|----------|
 | Vraag beantwoord | "Je hebt 12 openstaande facturen, totaal €8.450. De oudste is 45 dagen oud. Wil je een overzicht per klant?" |
 | Beperking | "Ik kan alleen data lezen, niet aanpassen. Voor het versturen van herinneringen kun je dit overzicht gebruiken in je eigen mailprogramma." |
-| Fout | "Ik kan je Exact Online nu niet bereiken. Check of je verbinding nog actief is op praatmetjeboekhouding.nl/dashboard." |
+| Fout | "Ik kan je Exact Online nu niet bereiken. Check of je verbinding nog actief is op [PROJECT_DOMEIN]/dashboard." |
 | Onduidelijke vraag | "Bedoel je de omzet van deze maand of dit kwartaal? Dan kan ik je preciezer helpen." |
 
 ### E-mail Communicatie
@@ -181,11 +181,11 @@ Voorbeeld:
 **Voorbeelden:**
 
 ```
-Onderwerp: Je eerste 7 dagen met Praat met je Boekhouding
+Onderwerp: Je eerste 7 dagen met [PROJECT_NAAM]
 
 Hoi Thomas,
 
-Je gebruikt Praat met je Boekhouding nu een week. Hoe bevalt het?
+Je gebruikt [PROJECT_NAAM] nu een week. Hoe bevalt het?
 
 Drie tips om meer uit je AI-assistent te halen:
 • Vraag om vergelijkingen: "Vergelijk Q1 met vorig jaar"
@@ -195,7 +195,7 @@ Drie tips om meer uit je AI-assistent te halen:
 Vragen of feedback? Reply gewoon op deze mail.
 
 Groet,
-Team Praat met je Boekhouding
+Team [PROJECT_NAAM]
 ```
 
 ### Foutmeldingen
@@ -298,7 +298,7 @@ Voordat je publiceert, check:
 Vragen over tone of voice of branding?
 
 - **Intern:** Overleg met product/marketing team
-- **Extern:** hello@praatmetjeboekhouding.nl
+- **Extern:** [CONTACT_EMAIL]
 
 ---
 

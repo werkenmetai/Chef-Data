@@ -1,4 +1,4 @@
-# Visual Identity: Praat met je Boekhouding
+# Visual Identity: [PROJECT_NAAM]
 
 > Versie 1.0 | Januari 2026
 
@@ -232,7 +232,7 @@ Voor hoge-resolutie versies of specifieke formaten, neem contact op met het prod
 
 Vragen over visual identity of brand assets?
 - **Intern:** Product/marketing team
-- **Extern:** hello@praatmetjeboekhouding.nl
+- **Extern:** [CONTACT_EMAIL]
 
 ---
 

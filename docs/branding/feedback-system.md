@@ -45,11 +45,11 @@ Een gestructureerd systeem om feedback te verzamelen en testimonials te generere
 ### Template 1: Check-in (Dag 7)
 
 ```
-Onderwerp: Hoe bevalt Praat met je Boekhouding?
+Onderwerp: Hoe bevalt [PROJECT_NAAM]?
 
 Hoi {{voornaam}},
 
-Je gebruikt Praat met je Boekhouding nu een week. We zijn benieuwd hoe het gaat!
+Je gebruikt [PROJECT_NAAM] nu een week. We zijn benieuwd hoe het gaat!
 
 **Eén snelle vraag:** Hoe waarschijnlijk is het dat je ons aanraadt aan een collega?
 
@@ -62,7 +62,7 @@ Heb je tips of loopt je ergens tegenaan? Reply gewoon op deze mail - we lezen al
 
 Groet,
 Matthijs
-Praat met je Boekhouding
+[PROJECT_NAAM]
 
 P.S. Je hebt tot nu toe {{query_count}} vragen gesteld. {{top_query_type}} was je meest gestelde vraag.
 ```
@@ -74,7 +74,7 @@ Onderwerp: Mogen we je ervaring delen?
 
 Hoi {{voornaam}},
 
-Fijn om te horen dat je positief bent over Praat met je Boekhouding!
+Fijn om te horen dat je positief bent over [PROJECT_NAAM]!
 
 We zijn een jong product en jouw ervaring kan andere ondernemers helpen om de stap te zetten. Mogen we een korte quote van je delen op onze website?
 
@@ -151,7 +151,7 @@ Matthijs
 
 ```
 ┌────────────────────────────────────────────┐
-│  Hoe vind je Praat met je Boekhouding?     │
+│  Hoe vind je [PROJECT_NAAM]?     │
 │                                            │
 │     👎          😐          👍              │
 │   Niet zo     Neutraal    Geweldig!        │

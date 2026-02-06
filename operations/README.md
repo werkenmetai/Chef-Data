@@ -1,6 +1,6 @@
 # Operations - Command Center
 
-Dit is het **command center** van Praat met je Boekhouding. Alle strategische planning, weekplannen en AI agent aansturing gebeurt vanuit deze folder.
+Dit is het **command center** van [PROJECT_NAAM]. Alle strategische planning, weekplannen en AI agent aansturing gebeurt vanuit deze folder.
 
 ## Quick Start
 

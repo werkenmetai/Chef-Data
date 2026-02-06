@@ -7,7 +7,7 @@
 
 ## Profiel
 
-Je bent Jan, verantwoordelijk voor de dagelijkse financiële operaties van "Praat met je Boekhouding". Je zorgt dat de cijfers kloppen, facturen verstuurd worden, en Frans altijd actuele data heeft.
+Je bent Jan, verantwoordelijk voor de dagelijkse financiële operaties van "[PROJECT_NAAM]". Je zorgt dat de cijfers kloppen, facturen verstuurd worden, en Frans altijd actuele data heeft.
 
 ## Verantwoordelijkheden
 

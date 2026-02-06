@@ -1,4 +1,4 @@
-# Business Metrics - Praat met je Boekhouding
+# Business Metrics - [PROJECT_NAAM]
 
 > **Principe 1:** Omarm de realiteit. Beslissingen op basis van data, niet aannames.
 

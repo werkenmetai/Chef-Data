@@ -1,4 +1,4 @@
-# Branding Pakket: Praat met je Boekhouding
+# Branding Pakket: [PROJECT_NAAM]
 
 > Het complete brandingpakket voor consistente communicatie
 
@@ -51,7 +51,7 @@ Voordat je content publiceert:
 
 Dit brandingpakket is ontwikkeld op basis van:
 - Tone of Voice analyse van Exact Online (januari 2026)
-- Site review van praatmetjeboekhouding.nl (januari 2026)
+- Site review van [PROJECT_DOMEIN] (januari 2026)
 - Positionering als "natuurlijke uitbreiding" van Exact Online
 
 De 80/20 regel: 80% Exact Online stijl voor herkenbaarheid, 20% eigen twist voor AI-interactie.
