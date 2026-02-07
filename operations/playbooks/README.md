@@ -302,8 +302,69 @@ Niveau 3: C-Level
 └── Escaleer naar Matthijs (CSO) bij strategische impact
 ```
 
+### PB-CROSS-002: Website Migratie (Klant Overname)
+
+**Trigger:** Klant wil website vernieuwen, wij nemen de bestaande site over
+**Owner:** Piet (CEO) coördineert, Sander (Product) leidt
+
+```
+FASE 1: CRAWLEN & EXTRAHEREN (Dag 1)
+├── Dirk/Daan draait: tools/website-migration/migrate.js
+├── Output: screenshots, assets, content, schrijfstijl data
+├── Commit alles naar git
+└── Deliverable: MIGRATION-REPORT.md + STYLE-GUIDE.md
+
+FASE 2: KLANT PROFIEL (Dag 1-2)
+├── Sander vult CLIENT-PROFILE-TEMPLATE.md in
+│   ├── Klantgesprek: doelgroep, merk, positionering
+│   ├── Visuele identiteit: kleuren, fonts, logo
+│   └── Scope: welke pagina's, functionaliteiten
+├── Nienke inventariseert brand assets (BRAND-ASSETS.md)
+└── Deliverable: Compleet CLIENT-PROFILE.md
+
+FASE 3: SCHRIJFSTIJL (Dag 2-3)
+├── Iris + Anna reviewen auto-gegenereerde STYLE-GUIDE.md
+├── Vullen handmatig aan: toon, sfeer, do's & don'ts
+├── Schrijven 5 voorbeeldteksten in klant-stijl
+├── Sturen naar klant voor goedkeuring
+└── Deliverable: Goedgekeurde WRITING-STYLE.md
+
+FASE 4: TEAM AANPASSEN (Dag 3)
+├── Piet distribueert klant-context naar alle agents
+│   ├── Content agents: Anna, Tom, Bram, Emma
+│   ├── Design agents: Nienke, Daan
+│   ├── Docs agents: Iris
+│   └── Business agents: Victor, Sander
+├── Marieke faciliteert klant-specifieke onboarding
+└── Deliverable: Alle agents werken in klant-stijl
+
+FASE 5: BOUWEN (Week 1+)
+├── Nienke ontwerpt nieuwe site in klant-branding
+├── Daan bouwt frontend met klant-assets
+├── Anna/Tom schrijven content in klant-stijl
+├── Bram optimaliseert SEO (behoud bestaande rankings!)
+└── Lars/Daan bouwen backend/functionaliteiten
+
+FASE 6: QA & OPLEVERING
+├── Roos test functionaliteit
+├── Iris doet content/stijl audit
+├── Bas doet security check
+├── Klant reviewt en keurt goed
+└── Dirk deployt naar productie
+```
+
+**Belangrijk:**
+- SEO: Behoud bestaande URL structuur of maak redirects (Bram!)
+- Assets: Check font licenties voordat we ze gebruiken (Nienke/Eva)
+- Content: NOOIT onze eigen toon/stijl gebruiken, ALTIJD klant-stijl
+
+**Referentie documenten:**
+- `operations/client-onboarding/README.md` - Volledig protocol
+- `operations/client-onboarding/AGENT-ADAPTATION.md` - Hoe agents aanpassen
+- `tools/website-migration/README.md` - Migratie tool documentatie
+
 ---
 
 *Eigenaar: Piet (CEO)*
-*Laatst bijgewerkt: 2026-02-06*
+*Laatst bijgewerkt: 2026-02-07*
 *Review cyclus: Maandelijks*
