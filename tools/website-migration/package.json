@@ -1,0 +1,23 @@
+{
+  "name": "website-migration-tool",
+  "version": "1.0.0",
+  "description": "Playwright-based website migration tool - crawl, screenshot, download assets, extract content",
+  "scripts": {
+    "migrate": "node migrate.js",
+    "crawl": "node migrate.js --crawl-only",
+    "screenshots": "node migrate.js --screenshots-only",
+    "assets": "node migrate.js --assets-only",
+    "content": "node migrate.js --content-only"
+  },
+  "dependencies": {
+    "playwright": "^1.50.0",
+    "axios": "^1.7.0",
+    "cheerio": "^1.0.0",
+    "mime-types": "^2.1.35",
+    "sanitize-filename": "^1.6.3",
+    "yargs": "^17.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
