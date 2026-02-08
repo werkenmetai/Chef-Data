@@ -193,6 +193,8 @@ Als meerdere processen dezelfde tokens kunnen refreshen → synchronizatie nodig
 | 2026-02-01 | 7 | Documenteer als reminder | Piet |
 | 2026-02-06 | 8 | Documenteer + mitigatie plan | Matthijs |
 | 2026-02-06 | 9 | Ja - regel in CLAUDE.md | Piet |
+| 2026-02-06 | 10 | Documenteer + actie items | Piet/Matthijs |
+| 2026-02-07 | 11 | Ja - SEO fixes in PR | Piet/Bram |
 
 ---
 
@@ -315,6 +317,88 @@ De snelheid waarmee AI agents produceren (254 PRs in 3 weken) creëert de illusi
 Elke week de vraag: "Kan iemand anders dit overnemen met alleen wat in git staat?" Zo nee → documenteer tot het antwoord ja is.
 
 **Bron artikel:** Karim Khan, Zinzo.com, 17 jan 2026 - "Riding the Waves of AI Without Drowning: Why Vibe Coding Is Not a Business Strategy"
+
+---
+
+### 10. mcp-remote OAuth is Ongeschikt voor Eindgebruikers
+
+**Datum:** 2026-02-06
+**Bron:** Productie MCP server "Server disconnected" in Claude.ai
+**Categorie:** Product / UX / Klantimpact
+
+**Issue:**
+De productie `exact-online` MCP server in Claude.ai viel uit met "Server disconnected". Na analyse bleek een cascade van problemen:
+1. OAuth token van `mcp-remote` verlopen na ~24u inactiviteit
+2. `mcp-remote` upgradede zichzelf (0.1.36 → 0.1.37), nieuwe versie kon oude tokens niet vinden
+3. Re-authenticatie vereist browser OAuth flow, maar Claude.ai geeft slechts 60 seconden timeout
+4. Meerdere zombie-processen vochten om dezelfde callback port (EADDRINUSE op :4089)
+5. Corrupte npm cache door race conditions tussen parallelle npx processen
+
+**Root Cause:**
+`mcp-remote` is een developer tool, geen eindgebruiker tool. Het vertrouwt op:
+- Lokale bestandssysteem state (`~/.mcp-auth/`) die breekt bij versie-updates
+- `npx -y` dat automatisch nieuwe versies installeert (breaking changes)
+- Lokale callback server op vaste port (port conflicts)
+- Handmatige browser flow voor re-authenticatie (niet automatiseerbaar)
+
+**Impact voor klanten:**
+Als dit een klant was geweest in plaats van ons:
+- Ze zien "Server disconnected" → paniek, geen idee wat te doen
+- Support kan niet remote debuggen (lokaal proces op hun machine)
+- Oplossing vereist terminal kennis (kill process, rm cache, npx commando)
+- Een boekhouder of ondernemer kan dit NIET zelf oplossen
+
+**Oplossing - 3 niveaus:**
+
+1. **Korte termijn (nu):**
+   - Demo MCP (`exact-online-demo`) is bewust token-loos → geen OAuth issues
+   - Dit valideert onze keuze voor de Exact partner demo
+   - Documenteer reconnect procedure voor support team
+
+2. **Middellange termijn (voor eerste klanten):**
+   - Server-side token refresh moet 100% automatisch werken
+   - Langere token lifetime overwegen (7 dagen refresh ipv 24u)
+   - "Verbinding herstellen" self-service knop op praatmetjeboekhouding.nl
+   - Monitoring/alerting op token expiry VOORDAT klant het merkt
+
+3. **Lange termijn (schaal):**
+   - Evalueer alternatieven voor `mcp-remote` (eigen thin client?)
+   - Of: wacht tot Claude.ai native remote MCP OAuth ondersteunt
+   - Token management volledig server-side, geen lokale state
+
+**Detectie:**
+- Monitor `Server disconnected` errors in Claude.ai MCP logs
+- Alert op token expiry >12u voor geplande verloop
+- Test maandelijks: "wat gebeurt er als token verloopt?"
+
+**Kernles:**
+Wat voor developers een kleine inconvenience is (terminal commando), is voor eindgebruikers een showstopper. Elke stap tussen "het werkt niet" en "het werkt weer" die handmatige actie vereist, is een stap te veel.
+
+---
+
+### 11. SEO: Title Tag ≠ Vindbaarheid - Zichtbare Tekst Telt
+
+**Datum:** 2026-02-07
+**Bron:** ChatGPT-verslag "Waarom ik de tool niet kon vinden"
+**Categorie:** Marketing / SEO
+
+**Issue:**
+ChatGPT kon "Praat met je Boekhouding" niet vinden op generieke zoektermen als "Exact Online koppelen aan ChatGPT" of "Exact Online connector". De pagina werd pas gevonden bij merknaam-zoekopdrachten.
+
+**Root Cause:**
+De title tag was goed ("Exact Online koppelen met ChatGPT, Claude & AI"), maar de **zichtbare tekst** op de pagina bevatte deze zoektermen niet. H1 zei "Praat met je Exact Online boekhouding" zonder "ChatGPT", "koppelen" of "MCP connector". Google en AI-zoektools vertrouwen op zichtbare content, niet alleen op meta tags.
+
+**Oplossing:**
+- Hero sectie uitgebreid met zichtbare tekst die doelwoorden bevat
+- FAQPage schema uitgebreid van 4→7 vragen met ChatGPT/MCP-specifieke content
+- HowTo schema toegevoegd
+- Keywords meta tag uitgebreid
+- Sitemap gesynchroniseerd (10→22 blog posts)
+
+**Detectie:**
+Kwartaal-check: zoek op je doelwoorden in Google EN in ChatGPT/Claude. Vind je jezelf? Zo nee → zichtbare tekst aanpassen.
+
+**Kernles:** Een goede `<title>` tag is noodzakelijk maar onvoldoende. Zoekmachines (en AI-tools) gebruiken voornamelijk zichtbare paginatekst om relevantie te bepalen.
 
 ---
 
