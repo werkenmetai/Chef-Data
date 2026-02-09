@@ -195,6 +195,8 @@ Als meerdere processen dezelfde tokens kunnen refreshen → synchronizatie nodig
 | 2026-02-06 | 9 | Ja - regel in CLAUDE.md | Piet |
 | 2026-02-06 | 10 | Documenteer + actie items | Piet/Matthijs |
 | 2026-02-07 | 11 | Ja - SEO fixes in PR | Piet/Bram |
+| 2026-02-09 | 12 | Ja - build-essays.js cleanup pipeline | Daan |
+| 2026-02-09 | 13 | Ja - evenementen vereenvoudigd | Piet/Daan |
 
 ---
 
@@ -399,6 +401,51 @@ De title tag was goed ("Exact Online koppelen met ChatGPT, Claude & AI"), maar d
 Kwartaal-check: zoek op je doelwoorden in Google EN in ChatGPT/Claude. Vind je jezelf? Zo nee → zichtbare tekst aanpassen.
 
 **Kernles:** Een goede `<title>` tag is noodzakelijk maar onvoldoende. Zoekmachines (en AI-tools) gebruiken voornamelijk zichtbare paginatekst om relevantie te bepalen.
+
+---
+
+### 12. WordPress Migratie: Scrape Content ≠ Content Klaar
+
+**Datum:** 2026-02-09
+**Bron:** Stefan Zweig Genootschap website-migratie
+**Categorie:** Content / Technisch
+
+**Issue:**
+Bij het scrapen van 9 essays van stefanzweig.nl (WordPress) leken de teksten compleet. Maar na renderen bleken meerdere problemen: onzichtbare tekst door onafgesloten `<strong>` tags, dubbele afbeeldingen, externe image-URLs die 404'd, en WordPress-specifieke HTML-rommel.
+
+**Root Cause:**
+WordPress genereert HTML die er in de browser goed uitziet door browser error-correction, maar die als ruwe HTML vol problemen zit. Copy-paste of scraping neemt deze problemen mee.
+
+**Oplossing:**
+Bij elke WordPress content-migratie altijd een cleanup pipeline bouwen:
+1. Scrape ruwe HTML
+2. Clean met regex (lege paragrafen, meta-divs, nav, social tagging)
+3. Fix structurele HTML-fouten (onafgesloten tags)
+4. Lokaliseer externe assets (download images)
+5. Visueel verifiëren in browser
+
+**Detectie:**
+Na scraping altijd: open de pagina, scroll door de hele tekst, check of alle content zichtbaar is.
+
+---
+
+### 13. Klantfeedback Meteen Verwerken, Niet Bufferen
+
+**Datum:** 2026-02-09
+**Bron:** Stefan Zweig - "ze doen alleen lezingen"
+**Categorie:** Klantcommunicatie
+
+**Issue:**
+Evenementenpagina toonde Lezingen, Leeskringen en Excursies. Klant zei: "ze doen alleen lezingen". Simpele feedback, maar als dit pas na go-live was ontdekt had het er onprofessioneel uitgezien.
+
+**Root Cause:**
+Aannames over scope zonder klantvalidatie. De referentie-site toonde meer activiteiten, maar het Genootschap doet er maar één.
+
+**Oplossing:**
+Na elke pagina-oplevering: toon aan klant, vraag "klopt dit?" voordat je doorgaat. Liever 5 minuten feedback-loop dan 2 uur rework.
+
+**Detectie:**
+Bij elk project met externe klant: review-moment inplannen per opgeleverde pagina, niet pas aan het eind.
 
 ---
 
