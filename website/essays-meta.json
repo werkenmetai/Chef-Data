@@ -1,0 +1,87 @@
+[
+  {
+    "slug": "joseph-roth-en-stefan-zweig",
+    "title": "Joseph Roth en Stefan Zweig",
+    "subtitle": "Een heilige drinker in de wereld van gisteren",
+    "author": "Piet Wackie Eysten",
+    "date": "13 oktober 2020",
+    "category": "Joseph Roth",
+    "image": "images/zweig-roth-ostend-1936.jpg",
+    "imageAlt": "Stefan Zweig en Joseph Roth in Oostende, 1936",
+    "excerpt": "De vriendschap tussen Joseph Roth en Stefan Zweig was een van de meest bijzondere literaire relaties van de twintigste eeuw."
+  },
+  {
+    "slug": "rilke-en-zweig",
+    "title": "Rilke en Zweig (deel 1)",
+    "subtitle": "De relatie tussen Rainer Maria Rilke en Stefan Zweig",
+    "author": "Piet Wackie Eysten",
+    "date": "9 juli 2020",
+    "category": "Rilke",
+    "excerpt": "Zweig beschouwde Rilke als de grootste dichter van zijn generatie en schreef na diens dood een ontroerend herdenkingsessay."
+  },
+  {
+    "slug": "rilke-en-zweig-2",
+    "title": "Rilke en Zweig (deel 2)",
+    "subtitle": "De relatie tussen Rainer Maria Rilke en Stefan Zweig",
+    "author": "Piet Wackie Eysten",
+    "date": "9 juli 2020",
+    "category": "Rilke",
+    "excerpt": "Het vervolg van het essay over de relatie tussen Rilke en Zweig."
+  },
+  {
+    "slug": "zweig-en-beethoven",
+    "title": "Stefan Zweig over Beethoven (deel 1)",
+    "subtitle": "Zweig als verzamelaar van manuscripten",
+    "author": "Piet Wackie Eysten",
+    "date": "2020",
+    "category": "Beethoven",
+    "image": "images/beethoven.jpg",
+    "imageAlt": "Portret Ludwig van Beethoven",
+    "excerpt": "Zweig was een hartstochtelijk verzamelaar van manuscripten en autografen. Zijn collectie bevatte originele handschriften van Beethoven."
+  },
+  {
+    "slug": "tweede-deel-zweig-en-beethoven",
+    "title": "Stefan Zweig over Beethoven (deel 2)",
+    "subtitle": "Zweig als verzamelaar van manuscripten",
+    "author": "Piet Wackie Eysten",
+    "date": "2020",
+    "category": "Beethoven",
+    "excerpt": "Het vervolg van het essay over Zweig en Beethoven."
+  },
+  {
+    "slug": "stefan-zweig-en-frans-masereel",
+    "title": "Stefan Zweig en Frans Masereel",
+    "subtitle": "Twee pacifisten, twee kunstenaars",
+    "author": "Piet Wackie Eysten",
+    "date": "2020",
+    "category": "Masereel",
+    "excerpt": "De Belgische houtsnijder Frans Masereel en Stefan Zweig deelden een pacifistisch ideaal."
+  },
+  {
+    "slug": "emile-verhaeren",
+    "title": "Stefan Zweig en Emile Verhaeren",
+    "subtitle": "Een bijzondere vriendschap",
+    "author": "Piet Wackie Eysten",
+    "date": "22 mei 2020",
+    "category": "Verhaeren",
+    "excerpt": "De vriendschap met Verhaeren was bijzonder: jarenlang onderbroken door een heftige ruzie over de Eerste Wereldoorlog."
+  },
+  {
+    "slug": "9-mei-stefan-zweiglezing",
+    "title": "9 mei: Stefan Zweig-lezing!",
+    "subtitle": "Caroline de Gruyter over Zweig en Europa",
+    "author": "Erwin Van den Brink",
+    "date": "21 april 2025",
+    "category": "Europa",
+    "excerpt": "Op 9 mei, Europadag, houdt Caroline de Gruyter de Stefan Zweig-lezing over het gedachtegoed van Zweig en de relevantie voor het huidige Europa."
+  },
+  {
+    "slug": "europas-culturele-eenheid",
+    "title": "Europa's culturele eenheid",
+    "subtitle": "De onzichtbare band die Europa verbindt",
+    "author": "",
+    "date": "2020",
+    "category": "Europa",
+    "excerpt": "Zweigs visie op Europa's culturele eenheid en de onzichtbare banden die het continent verbinden."
+  }
+]

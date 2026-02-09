@@ -1444,6 +1444,58 @@ blockquote cite {
   transform: translateX(4px);
 }
 
+/* Article Content (full essay pages) */
+.article-content {
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: var(--text);
+}
+
+.article-content p {
+  margin-bottom: var(--space-md);
+}
+
+.article-content strong {
+  font-weight: 600;
+}
+
+.article-content em {
+  font-style: italic;
+}
+
+.article-content h2,
+.article-content h3 {
+  font-family: var(--font-heading);
+  color: var(--burgundy);
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+.article-content h3 {
+  font-size: 1.375rem;
+}
+
+.article-content h6 {
+  font-size: 0.8125rem;
+  color: var(--text-light);
+  font-style: italic;
+  margin-bottom: var(--space-md);
+}
+
+.article-content blockquote {
+  border-left: 3px solid var(--gold);
+  padding-left: var(--space-lg);
+  margin: var(--space-lg) 0;
+  font-style: italic;
+  color: var(--text-light);
+}
+
+.article-content sup a {
+  color: var(--burgundy);
+  text-decoration: none;
+  font-size: 0.75rem;
+}
+
 /* Video Embed */
 .video-embed {
   position: relative;
