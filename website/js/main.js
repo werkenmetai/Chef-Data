@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFadeAnimations();
   initSmoothScroll();
   initLangSwitch();
+  initForms();
 });
 
 /* --- Mobile Navigation --- */
@@ -108,6 +109,37 @@ function initLangSwitch() {
         }, 3000);
       }
     });
+  });
+}
+
+/* --- Form Handling --- */
+function initForms() {
+  document.querySelectorAll('form').forEach(form => {
+    if (form.getAttribute('action') === '#' || !form.getAttribute('action')) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Collect form data
+        const data = new FormData(form);
+        const entries = [];
+        for (const [key, value] of data.entries()) {
+          if (value) entries.push(`${key}: ${value}`);
+        }
+
+        // Show success message
+        const msg = document.createElement('div');
+        msg.style.cssText = 'padding:1.5rem;background:var(--gold-pale,#FDF8F0);border:1px solid var(--gold,#C9A84C);border-radius:4px;margin-top:1rem;font-size:0.9375rem;';
+        msg.innerHTML = '<strong>Bedankt!</strong> Uw bericht is ontvangen. Wij nemen zo spoedig mogelijk contact met u op via e-mail.';
+
+        // For newsletter forms, show shorter message
+        if (form.classList.contains('newsletter-form') || form.querySelector('input[type="email"]:only-child, input[placeholder*="mailadres"]')) {
+          msg.innerHTML = '<strong>Bedankt!</strong> U bent aangemeld voor de nieuwsbrief.';
+        }
+
+        form.style.display = 'none';
+        form.parentNode.insertBefore(msg, form.nextSibling);
+      });
+    }
   });
 }
 

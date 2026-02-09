@@ -12,6 +12,7 @@ De volgende afbeeldingen zijn vrij van auteursrecht (public domain):
 | zweig-friderike-kapuzinerberg-1922.jpg | Zweig met Friderike, Kapuzinerberg 1922 | Foto: Ludwig Boedecker, via Wikimedia Commons | Public domain (PD-old-75) |
 | zweig-living-room-1922.jpg | Werkkamer Zweig, Kapuzinerberg 1922 | Foto: Ludwig Boedecker, via Wikimedia Commons | Public domain (PD-old-75) |
 | zweig-farewell-letter-1942.jpg | Afscheidsbrief, Petropolis 1942 | Casa Stefan Zweig, via Wikimedia Commons | Public domain (PD-old-70) |
+| beethoven.jpg | Portret Ludwig van Beethoven, 1820 | Schilderij: Joseph Karl Stieler, via Wikimedia Commons | Public domain (PD-Art) |
 
 ## Creative Commons
 
